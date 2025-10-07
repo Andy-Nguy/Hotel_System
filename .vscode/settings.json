@@ -1,0 +1,12 @@
+{
+  // Cài đặt này sẽ ngăn Live Server tự động reload toàn bộ trang.
+  // Nó sẽ cố gắng "hot reload" (chèn thay đổi) thay vì tải lại từ đầu.
+  "liveServer.settings.fullReload": false,
+
+  // Thêm một khoảng trễ 2 giây (2000ms) trước khi reload,
+  // có thể cho phép yêu cầu API của bạn hoàn thành trước khi trang bị làm mới.
+  "liveServer.settings.wait": 2000,
+
+  // Tắt các thông báo của Live Server để đỡ phiền.
+  "liveServer.settings.donotShowInfoMsg": true
+}
