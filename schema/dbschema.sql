@@ -25,7 +25,7 @@ CREATE TABLE TaiKhoanNguoiDung (
 -- 3. Loại Phòng, Phòng
 -- =========================================
 CREATE TABLE LoaiPhong (
-    IDLoaiPhong INT AUTO_INCREMENT PRIMARY KEY,
+    IDLoaiPhong CHAR(10) PRIMARY KEY,
     TenLoaiPhong VARCHAR(100) NOT NULL,
     MoTa TEXT,
     SoNguoiToiDa INT,
@@ -34,9 +34,24 @@ CREATE TABLE LoaiPhong (
     UuTienChinh BOOLEAN DEFAULT 0
 );
 
+DELIMITER $$
+CREATE TRIGGER trg_LoaiPhong_BeforeInsert
+BEFORE INSERT ON LoaiPhong
+FOR EACH ROW
+BEGIN
+    DECLARE new_id INT;
+    DECLARE prefix VARCHAR(3) DEFAULT 'LP';
+    SELECT IFNULL(MAX(CAST(SUBSTRING(IDLoaiPhong, 3) AS UNSIGNED)), 0) + 1 INTO new_id FROM LoaiPhong;
+    SET NEW.IDLoaiPhong = CONCAT(prefix, LPAD(new_id, 3, '0'));
+END$$
+DELIMITER ;
+
+-- =========================================
+-- 2. Bảng Phong
+-- =========================================
 CREATE TABLE Phong (
-    IDPhong INT AUTO_INCREMENT PRIMARY KEY,
-    IDLoaiPhong INT NOT NULL,
+    IDPhong CHAR(10) PRIMARY KEY,
+    IDLoaiPhong CHAR(10) NOT NULL,
     SoPhong VARCHAR(20) NOT NULL,
     MoTa TEXT,
     UuTienChinh BOOLEAN DEFAULT 0,
@@ -46,21 +61,61 @@ CREATE TABLE Phong (
     FOREIGN KEY (IDLoaiPhong) REFERENCES LoaiPhong(IDLoaiPhong)
 );
 
+DELIMITER $$
+CREATE TRIGGER trg_Phong_BeforeInsert
+BEFORE INSERT ON Phong
+FOR EACH ROW
+BEGIN
+    DECLARE new_id INT;
+    DECLARE prefix VARCHAR(2) DEFAULT 'P';
+    SELECT IFNULL(MAX(CAST(SUBSTRING(IDPhong, 2) AS UNSIGNED)), 0) + 1 INTO new_id FROM Phong;
+    SET NEW.IDPhong = CONCAT(prefix, LPAD(new_id, 3, '0'));
+END$$
+DELIMITER ;
+
 -- =========================================
--- 4. Tiện Nghi
+-- 3. Tiện Nghi
 -- =========================================
 CREATE TABLE TienNghi (
-    IDTienNghi INT AUTO_INCREMENT PRIMARY KEY,
+    IDTienNghi CHAR(10) PRIMARY KEY,
     TenTienNghi VARCHAR(100) NOT NULL
 );
 
+DELIMITER $$
+CREATE TRIGGER trg_TienNghi_BeforeInsert
+BEFORE INSERT ON TienNghi
+FOR EACH ROW
+BEGIN
+    DECLARE new_id INT;
+    DECLARE prefix VARCHAR(2) DEFAULT 'TN';
+    SELECT IFNULL(MAX(CAST(SUBSTRING(IDTienNghi, 3) AS UNSIGNED)), 0) + 1 INTO new_id FROM TienNghi;
+    SET NEW.IDTienNghi = CONCAT(prefix, LPAD(new_id, 3, '0'));
+END$$
+DELIMITER ;
+
+-- =========================================
+-- 4. Tiện Nghi Phòng (Liên kết)
+-- =========================================
 CREATE TABLE TienNghiPhong (
-    IDTienNghiPhong INT AUTO_INCREMENT PRIMARY KEY,
-    IDPhong INT NOT NULL,
-    IDTienNghi INT NOT NULL,
+    IDTienNghiPhong CHAR(10) PRIMARY KEY,
+    IDPhong CHAR(10) NOT NULL,
+    IDTienNghi CHAR(10) NOT NULL,
     FOREIGN KEY (IDPhong) REFERENCES Phong(IDPhong),
     FOREIGN KEY (IDTienNghi) REFERENCES TienNghi(IDTienNghi)
 );
+
+DELIMITER $$
+CREATE TRIGGER trg_TienNghiPhong_BeforeInsert
+BEFORE INSERT ON TienNghiPhong
+FOR EACH ROW
+BEGIN
+    DECLARE new_id INT;
+    DECLARE prefix VARCHAR(3) DEFAULT 'TNP';
+    SELECT IFNULL(MAX(CAST(SUBSTRING(IDTienNghiPhong, 4) AS UNSIGNED)), 0) + 1 INTO new_id FROM TienNghiPhong;
+    SET NEW.IDTienNghiPhong = CONCAT(prefix, LPAD(new_id, 3, '0'));
+END$$
+DELIMITER ;
+
 
 -- =========================================
 -- 5. Đặt Phòng
