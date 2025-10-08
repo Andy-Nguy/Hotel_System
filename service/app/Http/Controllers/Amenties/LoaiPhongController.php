@@ -31,7 +31,14 @@ class LoaiPhongController extends Controller
             'data' => $data
         ]);
     }
+    public function index1()
+    {
+        // Lấy toàn bộ loại phòng từ DB
+        $loaiPhongs = LoaiPhong::all();
 
+        // Trả về JSON cho client (status 200)
+        return response()->json($loaiPhongs);
+    }
     /**
      * Lấy thông tin chi tiết 1 loại phòng
      * GET /api/loai-phong/{id}
@@ -77,4 +84,5 @@ class LoaiPhongController extends Controller
             'data' => $loaiPhong
         ], 201);
     }
+
 }

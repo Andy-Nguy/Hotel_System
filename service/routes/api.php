@@ -46,3 +46,12 @@ Route::delete('/phong/{phong}', [PhongController::class, 'destroy']);
 
 Route::get('/phong/{phong}/tien-nghi', [PhongController::class, 'tienNghiIds']);
 Route::put('/phong/{phong}/tien-nghi', [PhongController::class, 'syncTienNghi']);
+
+
+
+Route::get('/phongs', [PhongController::class, 'index1']);
+Route::apiResource('phongs', PhongController::class)->except(['index']);
+Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
+Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
+Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
+// Explicit route: use index1 for listing phongs
