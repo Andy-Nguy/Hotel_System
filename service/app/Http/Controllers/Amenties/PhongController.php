@@ -7,16 +7,15 @@ use App\Models\Amenties\Phong;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class PhongController extends Controller
 {
     // GET /api/phong
-    // - Mặc định trả ít trường (dùng cho dropdown)
-    // - Nếu ?with=tiennghi => trả kèm danh sách tiện nghi để render bảng
     public function index(Request $request)
     {
         $with = $request->query('with', '');
-        $idLoai = $request->query('IDLoaiPhong'); // nhận filter
+        $idLoai = $request->query('IDLoaiPhong');
 
         if (str_contains($with, 'tiennghi')) {
             $query = Phong::query()
@@ -32,16 +31,16 @@ class PhongController extends Controller
 
             $data = $query->get()->map(function ($p) {
                 return [
-                    'IDPhong'       => (int) $p->IDPhong,
-                    'SoPhong'       => $p->SoPhong,
-                    'IDLoaiPhong'   => (int) $p->IDLoaiPhong,
-                    'TenLoaiPhong'  => optional($p->loaiPhong)->TenLoaiPhong,
-                    'XepHangSao'    => $p->XepHangSao,
-                    'TrangThai'     => $p->TrangThai,
-                    'MoTa'          => $p->MoTa,
-                    'tien_nghi'     => $p->tienNghis->map(fn ($tn) => [
-                        'IDTienNghi'   => (int) $tn->IDTienNghi,
-                        'TenTienNghi'  => $tn->TenTienNghi,
+                    'IDPhong'      => $p->IDPhong,
+                    'SoPhong'      => $p->SoPhong,
+                    'IDLoaiPhong'  => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'XepHangSao'   => $p->XepHangSao,
+                    'TrangThai'    => $p->TrangThai,
+                    'MoTa'         => $p->MoTa,
+                    'tien_nghi'    => $p->tienNghis->map(fn ($tn) => [
+                        'IDTienNghi'  => $tn->IDTienNghi,
+                        'TenTienNghi' => $tn->TenTienNghi,
                     ])->values(),
                 ];
             })->values();
@@ -65,23 +64,34 @@ class PhongController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'IDLoaiPhong'  => ['required', 'integer', 'exists:LoaiPhong,IDLoaiPhong'],
-            'SoPhong'      => ['required', 'string', 'max:20', 'unique:Phong,SoPhong'],
-            'MoTa'         => ['nullable', 'string'],
-            'UuTienChinh'  => ['nullable', 'boolean'],
-            'XepHangSao'   => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'    => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
-            'UrlAnhPhong'  => ['nullable', 'string', 'max:255'],
+            'IDLoaiPhong' => ['required', 'string', 'exists:LoaiPhong,IDLoaiPhong'],
+            'SoPhong'     => ['required', 'string', 'max:20', 'unique:Phong,SoPhong'],
+            'MoTa'        => ['nullable', 'string'],
+            'UuTienChinh' => ['nullable', 'boolean'],
+            'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false, 'message' => $validator->errors()->first(),
+                'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors'  => $validator->errors(),
             ], 422);
         }
 
-        $phong = Phong::create($validator->validated());
+        // 🔹 Tự động sinh ID kiểu P001, P002, ...
+        $last = Phong::orderBy('IDPhong', 'desc')->first();
+        $nextId = $last
+            ? 'P' . str_pad((int) substr($last->IDPhong, 1) + 1, 3, '0', STR_PAD_LEFT)
+            : 'P001';
+
+        $phong = Phong::create(array_merge(
+            ['IDPhong' => $nextId],
+            $validator->validated()
+        ));
+
         return response()->json(['success' => true, 'data' => $phong], 201);
     }
 
@@ -89,18 +99,19 @@ class PhongController extends Controller
     public function update(Request $request, Phong $phong)
     {
         $validator = Validator::make($request->all(), [
-            'IDLoaiPhong'  => ['sometimes', 'required', 'integer', 'exists:LoaiPhong,IDLoaiPhong'],
-            'SoPhong'      => ['sometimes', 'required', 'string', 'max:20', Rule::unique('Phong', 'SoPhong')->ignore($phong->IDPhong, 'IDPhong')],
-            'MoTa'         => ['nullable', 'string'],
-            'UuTienChinh'  => ['nullable', 'boolean'],
-            'XepHangSao'   => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'    => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
-            'UrlAnhPhong'  => ['nullable', 'string', 'max:255'],
+            'IDLoaiPhong' => ['sometimes', 'required', 'string', 'exists:LoaiPhong,IDLoaiPhong'],
+            'SoPhong'     => ['sometimes', 'required', 'string', 'max:20', Rule::unique('Phong', 'SoPhong')->ignore($phong->IDPhong, 'IDPhong')],
+            'MoTa'        => ['nullable', 'string'],
+            'UuTienChinh' => ['nullable', 'boolean'],
+            'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false, 'message' => $validator->errors()->first(),
+                'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors'  => $validator->errors(),
             ], 422);
         }
@@ -112,7 +123,7 @@ class PhongController extends Controller
     // DELETE /api/phong/{phong}
     public function destroy(Phong $phong)
     {
-        $phong->tienNghis()->detach(); // gỡ pivot trước để an toàn
+        $phong->tienNghis()->detach();
         $phong->delete();
         return response()->json(['success' => true]);
     }
@@ -122,7 +133,6 @@ class PhongController extends Controller
     {
         $ids = $phong->tienNghis()
             ->pluck('TienNghi.IDTienNghi')
-            ->map(fn ($id) => (int) $id)
             ->values();
 
         return response()->json(['success' => true, 'data' => $ids]);
@@ -133,12 +143,13 @@ class PhongController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'tien_nghi_ids'   => ['array'],
-            'tien_nghi_ids.*' => ['integer', 'exists:TienNghi,IDTienNghi'],
+            'tien_nghi_ids.*' => ['string', 'exists:TienNghi,IDTienNghi'],
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false, 'message' => $validator->errors()->first(),
+                'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors'  => $validator->errors(),
             ], 422);
         }

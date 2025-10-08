@@ -8,11 +8,19 @@ class Phong extends Model
 {
     protected $table = 'Phong';
     protected $primaryKey = 'IDPhong';
+    public $incrementing = false; // ⚠️ vì ID là CHAR, không tự tăng
+    protected $keyType = 'string'; // ⚠️ ID dạng P001, không phải số
     public $timestamps = false;
 
     protected $fillable = [
-        'IDLoaiPhong', 'SoPhong', 'MoTa', 'UuTienChinh',
-        'XepHangSao', 'TrangThai', 'UrlAnhPhong'
+        'IDPhong',
+        'IDLoaiPhong',
+        'SoPhong',
+        'MoTa',
+        'UuTienChinh',
+        'XepHangSao',
+        'TrangThai',
+        'UrlAnhPhong'
     ];
 
     public function loaiPhong()
@@ -27,6 +35,6 @@ class Phong extends Model
 
     public function getRouteKeyName()
     {
-        return $this->getKeyName(); // IDPhong
+        return 'IDPhong';
     }
 }

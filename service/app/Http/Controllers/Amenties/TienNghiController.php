@@ -13,10 +13,7 @@ class TienNghiController extends Controller
     // GET /api/tien-nghi
     public function index()
     {
-        $data = TienNghi::query()
-            ->orderBy('IDTienNghi')
-            ->get(['IDTienNghi', 'TenTienNghi']);
-
+        $data = TienNghi::orderBy('IDTienNghi')->get(['IDTienNghi', 'TenTienNghi']);
         return response()->json(['success' => true, 'data' => $data]);
     }
 
@@ -24,47 +21,46 @@ class TienNghiController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'TenTienNghi' => ['required', 'string', 'max:100', 'unique:TienNghi,TenTienNghi'],
+            'TenTienNghi' => 'required|string|max:100|unique:TienNghi,TenTienNghi',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false, 'message' => $validator->errors()->first(),
+                'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors' => $validator->errors(),
             ], 422);
         }
 
-        $tn = TienNghi::create($validator->validated());
-
-        return response()->json(['success' => true, 'data' => $tn]);
+        $tienNghi = TienNghi::create($validator->validated());
+        return response()->json(['success' => true, 'data' => $tienNghi]);
     }
 
-    // PUT /api/tien-nghi/{tienNghi}
+    // PUT /api/tien-nghi/{id}
     public function update(Request $request, TienNghi $tienNghi)
     {
         $validator = Validator::make($request->all(), [
             'TenTienNghi' => [
                 'required', 'string', 'max:100',
-                Rule::unique('TienNghi', 'TenTienNghi')->ignore($tienNghi->getKey(), $tienNghi->getKeyName()),
+                Rule::unique('TienNghi', 'TenTienNghi')->ignore($tienNghi->IDTienNghi, 'IDTienNghi'),
             ],
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'success' => false, 'message' => $validator->errors()->first(),
+                'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors' => $validator->errors(),
             ], 422);
         }
 
         $tienNghi->update($validator->validated());
-
         return response()->json(['success' => true, 'data' => $tienNghi]);
     }
 
-    // DELETE /api/tien-nghi/{tienNghi}
+    // DELETE /api/tien-nghi/{id}
     public function destroy(TienNghi $tienNghi)
     {
-        // Gỡ liên kết trước khi xóa (phòng tránh lỗi FK nếu DB chưa bật ON DELETE CASCADE)
         $tienNghi->phongs()->detach();
         $tienNghi->delete();
 
