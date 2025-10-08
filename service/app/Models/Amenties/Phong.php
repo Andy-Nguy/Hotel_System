@@ -8,13 +8,14 @@ class Phong extends Model
 {
     protected $table = 'Phong';
     protected $primaryKey = 'IDPhong';
-    public $incrementing = false; // ⚠️ vì ID là CHAR, không tự tăng
-    protected $keyType = 'string'; // ⚠️ ID dạng P001, không phải số
+    public $incrementing = false; 
+    protected $keyType = 'string'; 
     public $timestamps = false;
 
     protected $fillable = [
         'IDPhong',
         'IDLoaiPhong',
+        'TenPhong',
         'SoPhong',
         'MoTa',
         'UuTienChinh',
