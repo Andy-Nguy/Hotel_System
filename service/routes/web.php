@@ -167,6 +167,18 @@ Route::get('/login', function () {
 require __DIR__.'/auth.php';
 
 
-Route::get('/tiennghi', function () {
-    return view('amenties.tiennghi');
+
+Route::get('/tiennghi', function (Request $req) {
+    // If AJAX/partial requested, return the pure content partial to avoid any layout
+    if ($req->ajax() || $req->query('partial')) {
+        return view('amenties._tiennghi_content')->render();
+    }
+    return view('amenties.tiennghi'); // full page that extends layout
 })->name('tiennghi.index');
+
+Route::get('/phong', function (Request $req) {
+    if ($req->ajax() || $req->query('partial')) {
+        return view('amenties._phong_content')->render();
+    }
+    return view('amenties.phong_v2');
+})->name('phong.index');
