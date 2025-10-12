@@ -52,14 +52,14 @@
       <button type="button" onclick="login()">Đăng nhập</button>
       <p style="text-align: center; margin-top: 10px">
         Chưa có tài khoản?
-        <a href="./register">Đăng ký ngay</a>
+        <a href="{{ url('/register') }}">Đăng ký ngay</a>
       </p>
 
       <p id="message"></p>
     </div>
 
     <script>
-      const API_URL = "http://127.0.0.1:8000/api"; // Laravel backend
+      const API_URL = "{{ env('API_URL', 'http://127.0.0.1:8000/api') }}";
 
       async function login() {
         const Email = document.getElementById("email").value.trim();
@@ -79,25 +79,30 @@
           });
 
           const data = await res.json();
+          console.log("API Response:", data); // Debug: Kiểm tra response
           msg.innerText = data.message || "";
 
           if (res.ok) {
-            // Lưu thông tin người dùng vào localStorage
             localStorage.setItem("userName", data.hoTen);
             localStorage.setItem("role", data.role);
+            localStorage.setItem("email", Email);
 
-            // Điều hướng theo vai trò
+            console.log("Role:", data.role); // Debug: Kiểm tra role
             if (data.role === 2) {
-              window.location.href = "{{ url('/tiennghi') }}";
-// Nhân viên
+              console.log("Redirecting to /tiennghi");
+              window.location.href = "{{ url('/tiennghi') }}"; // Nhân viên
+            } else if (data.role === 1) {
+              console.log("Redirecting to /taikhoan");
+              window.location.href = "{{ route('taikhoan') }}?email=" + encodeURIComponent(Email); // Khách hàng
             } else {
-              window.location.href = "index.html"; // Khách hàng
+              msg.innerText = "Vai trò không hợp lệ!";
+              console.log("Invalid role:", data.role);
             }
           } else {
             msg.innerText = data.message || "Sai thông tin đăng nhập!";
           }
         } catch (err) {
-          console.error(err);
+          console.error("Error:", err);
           msg.innerText = "Không thể kết nối tới máy chủ!";
         }
       }

@@ -173,5 +173,29 @@ class AuthController extends Controller
                 'debug' => config('app.debug') ? $e->getTraceAsString() : null
             ], 500);
         }
+        
+    }
+    // --- [4] Trang tài khoản (khách hàng) ---
+    public function taikhoan(Request $request)
+    {
+        // Kiểm tra xem người dùng đã đăng nhập chưa
+        $email = session('email') ?? $request->input('email'); // Lấy email từ session hoặc request
+        if (!$email) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để truy cập trang tài khoản.');
+        }
+
+        // Lấy thông tin khách hàng từ database
+        $user = DB::table('KhachHang')
+            ->join('TaiKhoanNguoiDung', 'KhachHang.IDKhachHang', '=', 'TaiKhoanNguoiDung.IDKhachHang')
+            ->where('KhachHang.Email', $email)
+            ->select('KhachHang.HoTen', 'KhachHang.Email', 'KhachHang.SoDienThoai', 'KhachHang.NgaySinh', 'TaiKhoanNguoiDung.VaiTro')
+            ->first();
+
+        if (!$user || $user->VaiTro != 1) {
+            return redirect()->route('login')->with('error', 'Bạn không có quyền truy cập trang này.');
+        }
+
+        // Trả về view taikhoan với thông tin người dùng
+        return view('taikhoan', ['user' => $user]);
     }
 }

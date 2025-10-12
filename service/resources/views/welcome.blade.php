@@ -66,24 +66,8 @@
         <div class="cappa-wrap-inner">
             <nav class="cappa-menu">
                 <ul>
-                    <li class='cappa-menu-sub'><a class="active" href='#'>Home <i class="ti-angle-down"></i></a>
-                        <ul>
-                            <li class="active"><a href="index.html">Home Layout 1</a></li>
-                            <li><a href="index.html">Home Layout 2</a></li>
-                            <li><a href="index.html">Home Layout 3</a></li>
-                            <li><a href="index.html">Home Layout 4</a></li>
-                            <li><a href="index.html">Video 1</a></li>
-                            <li><a href="index.html">Video 2</a></li>
-                            <li><a href="index.html">Video 3</a></li>
-                            <li><a href="index.html">Slideshow 1</a></li>
-                            <li><a href="index.html">Slideshow 2</a></li>
-                            <li><a href="index.html">Slideshow 3</a></li>
-                            <li><a href="index.html">Parallax Image 1</a></li>
-                            <li><a href="index.html">Parallax Image 2</a></li>
-                            <li><a href="index.html">Parallax Image 3</a></li>
-                            <li><a href="index.html">Grid Background 1</a></li>
-                            <li><a href="index.html">Grid Background 2</a></li>
-                        </ul>
+                   <li>
+                    <a href="#" onclick="goToHome(event)">Home</a>
                     </li>
                     <li><a href="about.html">About</a></li>
                     <li class='cappa-menu-sub'><a href='#'>Rooms &amp; Suites <i class="ti-angle-down"></i></a>
@@ -113,13 +97,9 @@
                             </li>
                         </ul>
                     </li>
-                    <li class='cappa-menu-sub'><a href='#'>News <i class="ti-angle-down"></i></a>
-                        <ul>
-                            <li><a href='news.html'>News 1</a></li>
-                            <li><a href='news2.html'>News 2</a></li>
-                            <li><a href='post.html'>Single Post</a></li>
-                        </ul>
-                    </li>
+                   <li id="profile-link">
+            <a href="#" onclick="goToProfile(event)">Tài khoản</a>
+        </li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
@@ -135,6 +115,7 @@
             </div>
         </div>
     </div>
+
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -992,9 +973,98 @@
     <script src="HomePage/js/select2.js"></script>
     <script src="HomePage/js/datepicker.js"></script>
     <script src="HomePage/js/smooth-scroll.min.js"></script>
-    <script src="HomePage/js/custom.js"></script>
+    <script src="HomePage/js/custom.js"></script><script>
+    // Blade render URL thực tế trước khi JS chạy
+
+    // Sử dụng URL TƯƠNG ĐỐI để tránh lặp host – Browser tự giữ origin (127.0.0.1:8000)
+    const PROFILE_PATH = '{!! route('taikhoan', [], false) !!}';  // Render /taikhoan (không absolute, tham số false để tắt absolute URL)
+    const LOGIN_PATH = '{!! route('login', [], false) !!}';      // /login
+    const HOME_PATH = '{!! url('/', [], false) !!}';             // /
+
+    function goToProfile(event) {
+        event.preventDefault();
+        
+        const role = localStorage.getItem('role');
+        const email = localStorage.getItem('email');
+        
+        if (role && email && parseInt(role) === 1) {
+            // Ghép query email vào path tương đối
+            const profileUrl = PROFILE_PATH + '?email=' + encodeURIComponent(email);
+            window.location.href = profileUrl;  // Browser giữ host:port → http://127.0.0.1:8000/taikhoan?email=...
+        } else {
+            localStorage.setItem('redirect_after_login', PROFILE_PATH);
+            alert('Vui lòng đăng nhập để xem thông tin tài khoản.');
+            window.location.href = LOGIN_PATH;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const role = localStorage.getItem('role');
+        const email = localStorage.getItem('email');
+        const profileItem = document.getElementById('profile-menu-item');
+        const loginItem = document.getElementById('login-menu-item');
+        
+        if (role && email && parseInt(role) === 1) {
+            if (profileItem) profileItem.style.display = 'list-item';
+            if (loginItem) loginItem.style.display = 'none';
+        } else {
+            if (profileItem) profileItem.style.display = 'none';
+            if (loginItem) loginItem.style.display = 'list-item';
+        }
+    });
+</script>
+<script>
+    function goToHome(event) {
+        event.preventDefault();
+        window.location.href = '/';
+    }
+</script>
 </body>
 
 <!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:06 GMT -->
 
 </html>
+<script>
+console.log("📂 [AuthCheck] Script bắt đầu chạy...");
+
+const token = localStorage.getItem("token");
+const user = localStorage.getItem("userName");
+
+console.log("🔍 Token:", token ? "Đã có" : "Không có");
+console.log("👤 User name:", user || "(chưa có)");
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("🌐 DOM đã load hoàn tất...");
+
+  const display = document.querySelector("#userDisplay");
+  const logoutBtn = document.querySelector("#logoutBtn");
+
+  if (token) {
+    // ✅ Nếu đã login
+    if (display) {
+      display.textContent = user || "Người dùng";
+      console.log("👋 Đã hiển thị tên:", user);
+    }
+    if (logoutBtn) {
+      logoutBtn.style.display = "inline-block";
+    }
+  } else {
+    // ❌ Nếu chưa login
+    if (display) {
+      display.textContent = "Khách vãng lai";
+      console.log("👤 Người dùng chưa đăng nhập → hiển thị Khách vãng lai");
+    }
+    if (logoutBtn) {
+      logoutBtn.style.display = "none";
+    }
+  }
+});
+
+function logout() {
+  console.log("🚪 Đăng xuất: xóa localStorage và chuyển về trang chủ");
+  localStorage.clear(); // Xóa token, userName, role, email, v.v.
+  
+  // Chuyển về trang chủ (sử dụng URL tương đối để giữ host:port)
+  window.location.href = '{!! url('/', [], false) !!}';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
+}
+</script>

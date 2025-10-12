@@ -170,3 +170,4 @@ require __DIR__.'/auth.php';
 Route::get('/tiennghi', function () {
     return view('amenties.tiennghi');
 })->name('tiennghi.index');
+Route::get('/taikhoan', [AuthController::class, 'taikhoan'])->name('taikhoan');

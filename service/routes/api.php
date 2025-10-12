@@ -26,7 +26,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::middleware('session')->get('/auth/check-role', [AuthController::class, 'checkRole']);
 
 
 // CRUD Tiện nghi
