@@ -1,954 +1,969 @@
-<!DOCTYPE html>
-<html lang="vi">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Quản lý Tiện nghi - Adminlite</title>
-
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/fonts/bootstrap/bootstrap-icons.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/main.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/overlay-scroll/OverlayScrollbars.min.css') }}" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
-        .cursor-pointer {
-            cursor: pointer
-        }
-
-        .form-check-box-list {
-            max-height: 360px;
-            overflow: auto;
-        }
-
-        .table td,
-        .table th {
-            vertical-align: middle;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="page-wrapper">
-        <div class="main-container">
-
-            <!-- Sidebar -->
-            <nav id="sidebar" class="sidebar-wrapper">
-                <div class="app-brand p-3 mb-3">
-                    <a href="{{ route('tiennghi.index') }}">
-                        <img src="{{ asset('assets/images/logo.svg') }}" class="logo" alt="AdminLite" />
-                    </a>
-                </div>
-                <div class="sidebarMenuScroll">
-                    <ul class="sidebar-menu">
-                        <li class="active current-page">
-                            <a href="{{ route('tiennghi.index') }}">
-                                <i class="bi bi-box"></i>
-                                <span class="menu-text">Tiện nghi</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="sidebar-settings gap-1 d-lg-flex d-none">
-                    <a href="#" class="settings-icon" data-bs-toggle="tooltip" title="Profile">
-                        <i class="bi bi-person"></i>
-                    </a>
-                </div>
-            </nav>
-            <!-- Sidebar ends -->
-
-            <!-- App container -->
-            <div class="app-container">
-                <!-- Header -->
-                <div class="app-header d-flex align-items-center">
-                    <div class="d-flex">
-                        <button class="pin-sidebar">
-                            <i class="bi bi-list lh-1"></i>
-                        </button>
-                    </div>
-                    <div class="d-flex align-items-center ms-3">
-                        <h5 class="m-0">Quản lý Tiện nghi</h5>
-                    </div>
-                    <div class="app-brand-sm d-lg-none d-flex ms-auto">
-                        <a href="{{ route('tiennghi.index') }}">
-                            <img src="{{ asset('assets/images/logo-sm.svg') }}" class="logo" alt="AdminLite" />
-                        </a>
-                    </div>
-                    <div class="header-actions">
-                        <div class="d-flex">
-                            <button class="toggle-sidebar">
-                                <i class="bi bi-list lh-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Header ends -->
-
-                <!-- Body -->
-                <div class="app-body">
-                    <div class="container-fluid">
-                        <!-- Alerts -->
-                        <div id="alertArea"></div>
-
-                        <div class="row g-4">
-                            <!-- CRUD Tiện nghi -->
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h6 class="m-0">Danh sách Tiện nghi</h6>
-                                        <button class="btn btn-primary btn-sm" id="btnOpenCreate">
-                                            <i class="bi bi-plus-lg me-1"></i> Thêm tiện nghi
-                                        </button>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="input-group mb-3">
-                                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                            <input type="text" id="searchTienNghi" class="form-control" placeholder="Tìm theo tên...">
-                                        </div>
-
-                                        <div class="table-responsive">
-                                            <table class="table table-hover align-middle" id="tableTienNghi">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="width: 80px;">ID</th>
-                                                        <th>Tên tiện nghi</th>
-                                                        <th style="width: 140px;" class="text-end">Thao tác</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Gán tiện nghi cho Phòng -->
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6 class="m-0">Gán tiện nghi cho Phòng</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row g-3 align-items-end mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <label class="form-label">Chọn loại phòng</label>
-                                                <select id="selectLoaiPhongAssign" class="form-select">
-                                                    <option value="">-- Chọn loại phòng --</option>
-                                                </select>
-                                            </div>
-                                            <div class="col-12 col-md-6">
-                                                <label class="form-label">Chọn phòng</label>
-                                                <select id="selectPhong" class="form-select" disabled>
-                                                    <option value="">-- Chọn phòng --</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div class="row g-3 mb-3">
-                                            <div class="col-12 col-md-6">
-                                                <label class="form-label">Lọc tiện nghi</label>
-                                                <input type="text" id="filterCheckbox" class="form-control" placeholder="Nhập để lọc...">
-                                            </div>
-                                        </div>
-                                        <div class="form-check-box-list border rounded p-3" id="checkboxTienNghiList"></div>
-
-                                        <div class="text-end mt-3">
-                                            <button class="btn btn-success" id="btnSaveAssign">
-                                                <i class="bi bi-save me-1"></i> Lưu gán tiện nghi
-                                            </button>
-                                        </div>
-
-                                        <hr>
-                                        <div>
-                                            <h6 class="mb-2">Tiện nghi đang gán:</h6>
-                                            <div id="currentAssigned" class="small text-muted"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Danh sách Phòng (kèm tiện nghi) -->
-                        <div class="row g-4 mt-1">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h6 class="m-0">Danh sách Phòng</h6>
-                                        <!-- <button class="btn btn-primary btn-sm" id="btnOpenCreatePhong">
-                        <i class="bi bi-plus-lg me-1"></i> Thêm phòng
-                      </button> -->
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="input-group mb-3">
-                                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                            <input type="text" id="searchPhong" class="form-control" placeholder="Tìm phòng theo số, loại, trạng thái...">
-                                        </div>
-
-                                        <div class="table-responsive">
-                                            <table class="table table-hover align-middle" id="tablePhong">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="width: 80px;">ID</th>
-                                                        <th>Số phòng</th>
-                                                        <th>Loại phòng</th>
-                                                        <th>Hạng sao</th>
-                                                        <th>Trạng thái</th>
-                                                        <th>Tiện nghi</th>
-                                                        <th style="width: 160px;" class="text-end">Thao tác</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody></tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Create/Edit Tiện nghi -->
-                        <!-- Modal Create/Edit Tiện nghi -->
-                        <div class="modal fade" id="modalCreateEdit" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="modalTitle">Thêm tiện nghi</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <input type="hidden" id="tnId" />
-                                        <div class="mb-3">
-                                            <label class="form-label">Tên tiện nghi</label>
-                                            <input type="text" id="TenTienNghi" class="form-control" placeholder="VD: Điều hòa, Ấm đun nước..." />
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="button" class="btn btn-primary" id="btnSubmitCreateEdit">Lưu</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Confirm Delete Tiện nghi -->
-                        <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Xóa tiện nghi</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Bạn chắc chắn muốn xóa tiện nghi: <strong id="deleteName"></strong>?</p>
-                                        <input type="hidden" id="deleteId" />
-                                        <div class="small text-muted">Lưu ý: Các gán tiện nghi của phòng sẽ được gỡ tự động.</div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Create/Edit Phòng (chỉ giữ 1 bản duy nhất có phần tiện nghi bên trong) -->
-                        <div class="modal fade" id="modalCreateEditPhong" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="modalTitlePhong">Thêm phòng</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="formCreateEditPhong">
-                                            <input type="hidden" id="pId" />
-                                            <div class="mb-3">
-                                                <label class="form-label">Số phòng</label>
-                                                <input type="text" id="pSoPhong" class="form-control" placeholder="Ví dụ: 101" maxlength="20" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Loại phòng</label>
-                                                <select id="pIDLoaiPhong" class="form-select" required></select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Hạng sao (1-5)</label>
-                                                <input type="number" id="pXepHangSao" class="form-control" min="1" max="5" placeholder="VD: 4">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Trạng thái</label>
-                                                <select id="pTrangThai" class="form-select">
-                                                    <option value="Trống">Trống</option>
-                                                    <option value="Đang sử dụng">Đang sử dụng</option>
-                                                    <option value="Bảo trì">Bảo trì</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Mô tả</label>
-                                                <textarea id="pMoTa" class="form-control" rows="3" placeholder="Mô tả phòng..."></textarea>
-                                            </div>
-
-                                            <!-- Tiện nghi trong modal phòng -->
-                                            <div class="mb-3">
-                                                <label class="form-label">Tiện nghi</label>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                                    <input type="text" id="pFilterTienNghi" class="form-control" placeholder="Lọc tiện nghi...">
-                                                </div>
-                                                <div id="pTienNghiList" class="border rounded p-2" style="max-height: 260px; overflow:auto;">
-                                                    <!-- checkboxes render bằng JS -->
-                                                </div>
-                                            </div>
-                                            <!-- End Tiện nghi -->
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                                        <button type="button" class="btn btn-primary" id="btnSubmitCreateEditPhong">Lưu</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Confirm Delete Phòng -->
-                        <div class="modal fade" id="modalDeletePhong" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Xóa phòng</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Bạn chắc chắn muốn xóa phòng: <strong id="deletePhongName"></strong>?</p>
-                                        <input type="hidden" id="deletePhongId" />
-                                        <div class="small text-muted">Các gán tiện nghi sẽ được gỡ tự động.</div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="button" class="btn btn-danger" id="btnConfirmDeletePhong">Xóa</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Modals -->
-                        <!-- End Modals -->
-
-                    </div>
-                </div>
-                <!-- Body ends -->
-
-            </div>
-            <!-- App container ends -->
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/moment.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/overlay-scroll/jquery.overlayScrollbars.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/overlay-scroll/custom-scrollbar.js') }}"></script>
-    <script src="{{ asset('assets/js/custom.js') }}"></script>
-
-    <script>
-        // API_BASE ổn định theo domain hiện tại (tránh sai port/host)
-        const API_BASE = `${window.location.origin}/api`;
-        const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-
-        // Helper gọi API
-        async function apiFetch(url, options = {}) {
-            const headers = Object.assign({
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': CSRF_TOKEN
-                },
-                options.headers || {}
-            );
-
-            const opts = Object.assign({
-                    credentials: 'same-origin'
-                },
-                options, {
-                    headers
-                }
-            );
-
-            if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
-                opts.headers['Content-Type'] = opts.headers['Content-Type'] || 'application/json; charset=utf-8';
-                opts.body = JSON.stringify(opts.body);
-            }
-
-            let res;
-            try {
-                res = await fetch(url, opts);
-            } catch (e) {
-                throw new Error('Không thể kết nối máy chủ API.');
-            }
-
-            let data = null;
-            try {
-                data = await res.json();
-            } catch (e) {}
-
-            if (!res.ok) {
-                const msg = (data && (data.message || data.error)) || `HTTP ${res.status} - ${res.statusText}`;
-                throw new Error(msg);
-            }
-
-            return data;
-        }
-
-        // Helpers UI
-        function showAlert(type, message) {
-            const html = `
-      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>`;
-            $('#alertArea').html(html);
-            setTimeout(() => {
-                $('.alert').alert('close');
-            }, 5000);
-        }
-
-        function renderTienNghiTable(items) {
-            const tbody = $('#tableTienNghi tbody');
-            const keyword = ($('#searchTienNghi').val() || '').toLowerCase();
-            tbody.empty();
-
-            items
-                .filter(x => (x.TenTienNghi || '').toLowerCase().includes(keyword))
-                .forEach(item => {
-                    const tr = $(`
-          <tr>
-            <td>${item.IDTienNghi}</td>
-            <td>${item.TenTienNghi}</td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-primary me-2 btn-edit" data-id="${item.IDTienNghi}" data-name="${item.TenTienNghi}">
-                <i class="bi bi-pencil-square"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${item.IDTienNghi}" data-name="${item.TenTienNghi}">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `);
-                    tbody.append(tr);
-                });
-
-            // Bind actions
-            $('.btn-edit').off('click').on('click', function() {
-                const id = $(this).data('id');
-                const name = $(this).data('name');
-                $('#tnId').val(id);
-                $('#TenTienNghi').val(name);
-                $('#modalTitle').text('Sửa tiện nghi');
-                new bootstrap.Modal(document.getElementById('modalCreateEdit')).show();
-            });
-
-            $('.btn-delete').off('click').on('click', function() {
-                $('#deleteId').val($(this).data('id'));
-                $('#deleteName').text($(this).data('name'));
-                new bootstrap.Modal(document.getElementById('modalDelete')).show();
-            });
-        }
-
-        function renderCheckboxList(allTienNghi, checkedIds) {
-            const cont = $('#checkboxTienNghiList');
-            const filter = ($('#filterCheckbox').val() || '').toLowerCase();
-            cont.empty();
-            allTienNghi
-                .filter(x => (x.TenTienNghi || '').toLowerCase().includes(filter))
-                .forEach(item => {
-                    const id = Number(item.IDTienNghi);
-                    const checked = checkedIds.includes(id) ? 'checked' : '';
-                    cont.append(`
-          <div class="form-check">
-            <input class="form-check-input chk-tiennghi" type="checkbox" value="${id}" id="chk_${id}" ${checked}>
-            <label class="form-check-label" for="chk_${id}">${item.TenTienNghi}</label>
-          </div>
-        `);
-                });
-        }
-
-        function renderCurrentAssigned(labels) {
-            const cont = $('#currentAssigned');
-            if (!labels.length) {
-                cont.html('<em>Chưa gán tiện nghi nào.</em>');
-                return;
-            }
-            cont.html(labels.map(x => `<span class="badge bg-secondary me-1 mb-1">${x}</span>`).join(' '));
-        }
-
-        // RENDER Tiện nghi trong Modal Phòng
-        function renderPTienNghiList(allTienNghi, selectedIds) {
-            const cont = $('#pTienNghiList');
-            const filter = ($('#pFilterTienNghi').val() || '').toLowerCase();
-            cont.empty();
-            allTienNghi
-                .filter(x => (x.TenTienNghi || '').toLowerCase().includes(filter))
-                .forEach(item => {
-                    const id = Number(item.IDTienNghi);
-                    const checked = selectedIds.includes(id) ? 'checked' : '';
-                    cont.append(`
-          <div class="form-check">
-            <input class="form-check-input p-chk-tiennghi" type="checkbox" value="${id}" id="p_chk_${id}" ${checked}>
-            <label class="form-check-label" for="p_chk_${id}">${item.TenTienNghi}</label>
-          </div>
-        `);
-                });
-        }
-
-        // RENDER Phòng (bảng)
-        function renderPhongTable(items) {
-            const tbody = $('#tablePhong tbody');
-            const keyword = ($('#searchPhong').val() || '').toLowerCase();
-            tbody.empty();
-
-            items
-                .filter(p => {
-                    const joined = [
-                        p.SoPhong || '',
-                        p.TenLoaiPhong || '',
-                        (p.TrangThai || ''),
-                        (p.XepHangSao || '')
-                    ].join(' ').toLowerCase();
-                    return joined.includes(keyword);
-                })
-                .forEach(p => {
-                    const badges = (p.tien_nghi || [])
-                        .map(tn => `<span class="badge bg-secondary me-1 mb-1">${tn.TenTienNghi}</span>`)
-                        .join(' ');
-                    const tr = $(`
-          <tr>
-            <td>${p.IDPhong}</td>
-            <td>${p.SoPhong}</td>
-            <td>${p.TenLoaiPhong || ''}</td>
-            <td>${p.XepHangSao ?? ''}</td>
-            <td>${p.TrangThai || ''}</td>
-            <td>${badges || '<em class="text-muted">Chưa có</em>'}</td>
-            <td class="text-end">
-              <button class="btn btn-sm btn-outline-primary me-2 btn-edit-phong"
-                data-id="${p.IDPhong}"
-                data-sophong="${p.SoPhong}"
-                data-idloaiphong="${p.IDLoaiPhong}"
-                data-xephangsao="${p.XepHangSao ?? ''}"
-                data-trangthai="${p.TrangThai || 'Trống'}"
-                data-mota="${(p.MoTa || '').replace(/"/g,'&quot;')}">
-                <i class="bi bi-pencil-square"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger btn-delete-phong"
-                data-id="${p.IDPhong}" data-name="${p.SoPhong}">
-                <i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `);
-                    tbody.append(tr);
-                });
-
-            // Bind actions edit/delete phòng
-            $('.btn-edit-phong').off('click').on('click', async function() {
-                const id = Number($(this).data('id'));
-                $('#pId').val(id);
-                $('#pSoPhong').val($(this).data('sophong'));
-                $('#pIDLoaiPhong').val(String($(this).data('idloaiphong')));
-                $('#pXepHangSao').val($(this).data('xephangsao') || '');
-                $('#pTrangThai').val($(this).data('trangthai') || 'Trống');
-                $('#pMoTa').val($(this).data('mota') || '');
-
-                // Lấy tiện nghi hiện có của phòng để tick sẵn
-                const room = PHONG_TABLE.find(r => Number(r.IDPhong) === id);
-                if (room && Array.isArray(room.tien_nghi)) {
-                    P_SELECTED_TN_IDS = room.tien_nghi.map(t => Number(t.IDTienNghi));
-                } else {
-                    P_SELECTED_TN_IDS = await fetchAssignedIds(id);
-                }
-                renderPTienNghiList(ALL_TIEN_NGHI, P_SELECTED_TN_IDS);
-
-                $('#modalTitlePhong').text('Sửa phòng');
-                new bootstrap.Modal(document.getElementById('modalCreateEditPhong')).show();
-            });
-
-            $('.btn-delete-phong').off('click').on('click', function() {
-                $('#deletePhongId').val($(this).data('id'));
-                $('#deletePhongName').text($(this).data('name'));
-                new bootstrap.Modal(document.getElementById('modalDeletePhong')).show();
-            });
-        }
-
-        // State
-        let ALL_TIEN_NGHI = [];
-        let ALL_PHONG = []; // cho dropdown gán tiện nghi
-        let PHONG_TABLE = []; // cho bảng danh sách phòng (kèm tiện nghi)
-        let SELECTED_TN_IDS = []; // tiện nghi tick cho panel gán
-        let P_SELECTED_TN_IDS = []; // tiện nghi tick trong modal phòng
-
-        // Loaders
-        async function loadTienNghi() {
-            try {
-                const json = await apiFetch(`${API_BASE}/tien-nghi`);
-                ALL_TIEN_NGHI = (json && json.success) ? (json.data || []) : (json?.data || []);
-                renderTienNghiTable(ALL_TIEN_NGHI);
-
-                const pid = $('#selectPhong').val();
-                if (pid) {
-                    const assignedIds = await fetchAssignedIds(pid);
-                    SELECTED_TN_IDS = assignedIds;
-                    renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-                    renderCurrentAssigned(
-                        ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(Number(x.IDTienNghi))).map(x => x.TenTienNghi)
-                    );
-                } else {
-                    SELECTED_TN_IDS = [];
-                    renderCheckboxList(ALL_TIEN_NGHI, []);
-                    renderCurrentAssigned([]);
-                }
-            } catch (e) {
-                showAlert('danger', `Không tải được danh sách tiện nghi. ${e.message || ''}`);
-                console.error(e);
-            }
-        }
-
-        async function loadPhongs() {
-            try {
-                const json = await apiFetch(`${API_BASE}/phong`);
-                ALL_PHONG = (json && json.success) ? (json.data || []) : (json?.data || []);
-                const sel = $('#selectPhong');
-                sel.empty().append(`<option value="">-- Chọn phòng --</option>`);
-                ALL_PHONG.forEach(p => {
-                    sel.append(`<option value="${p.IDPhong}">${p.SoPhong} - ${p.TenLoaiPhong || ''}</option>`);
-                });
-            } catch (e) {
-                showAlert('danger', `Không tải được danh sách phòng (dropdown). ${e.message || ''}`);
-                console.error(e);
-            }
-        }
-
-        async function loadPhongTable() {
-            try {
-                const json = await apiFetch(`${API_BASE}/phong?with=tiennghi`);
-                PHONG_TABLE = (json && json.success) ? (json.data || []) : (json?.data || []);
-                renderPhongTable(PHONG_TABLE);
-            } catch (e) {
-                showAlert('danger', `Không tải được danh sách phòng. ${e.message || ''}`);
-                console.error(e);
-            }
-        }
-
-        async function loadLoaiPhongForModal() {
-            try {
-                const json = await apiFetch(`${API_BASE}/loai-phong`);
-                const data = (json && json.success) ? (json.data || []) : (json?.data || []);
-                const sel = $('#pIDLoaiPhong');
-                sel.empty();
-                data.forEach(lp => sel.append(`<option value="${lp.IDLoaiPhong}">${lp.TenLoaiPhong}</option>`));
-            } catch (e) {
-                showAlert('danger', `Không tải được loại phòng. ${e.message || ''}`);
-                console.error(e);
-            }
-        }
-
-        // Load loại phòng cho dropdown gán tiện nghi
-        async function loadLoaiPhongAssign() {
-            try {
-                const json = await apiFetch(`${API_BASE}/loai-phong`);
-                const data = (json && json.success) ? (json.data || []) : (json?.data || []);
-                const sel = $('#selectLoaiPhongAssign');
-                sel.empty().append(`<option value="">-- Chọn loại phòng --</option>`);
-                data.forEach(lp => sel.append(`<option value="${lp.IDLoaiPhong}">${lp.TenLoaiPhong}</option>`));
-
-                // Mới mở trang: disable dropdown phòng cho tới khi chọn loại
-                $('#selectPhong').prop('disabled', true).empty().append(`<option value="">-- Chọn phòng --</option>`);
-                // Reset panel gán
-                SELECTED_TN_IDS = [];
-                renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-                renderCurrentAssigned([]);
-            } catch (e) {
-                showAlert('danger', `Không tải được loại phòng. ${e.message || ''}`);
-                console.error(e);
-            }
-        }
-
-        // Load phòng theo loại (cho dropdown bên assign)
-        async function loadPhongsByLoai(loaiId) {
-            if (!loaiId) {
-                $('#selectPhong').prop('disabled', true).empty().append(`<option value="">-- Chọn phòng --</option>`);
-                return;
-            }
-            try {
-                const json = await apiFetch(`${API_BASE}/phong?IDLoaiPhong=${encodeURIComponent(loaiId)}`);
-                const items = (json && json.success) ? (json.data || []) : (json?.data || []);
-                const sel = $('#selectPhong');
-                sel.prop('disabled', false);
-                sel.empty().append(`<option value="">-- Chọn phòng --</option>`);
-                items.forEach(p => {
-                    sel.append(`<option value="${p.IDPhong}">${p.SoPhong} - ${p.TenLoaiPhong || ''}</option>`);
-                });
-            } catch (e) {
-                showAlert('danger', `Không tải được phòng theo loại. ${e.message || ''}`);
-                console.error(e);
-            }
-        }
-
-        // Reset panel gán (checkbox + badge)
-        function resetAssignPanel() {
-            SELECTED_TN_IDS = [];
-            renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-            renderCurrentAssigned([]);
-        }
-
-        // Dựa trên loại hiện được chọn để refresh dropdown phòng
-        async function refreshAssignPhongDropdown() {
-            const loaiId = $('#selectLoaiPhongAssign').val();
-            await loadPhongsByLoai(loaiId);
-            // Sau khi đổi loại phòng, reset panel gán cho tới khi chọn phòng
-            resetAssignPanel();
-        }
-
-        async function fetchAssignedIds(phongId) {
-            try {
-                const json = await apiFetch(`${API_BASE}/phong/${phongId}/tien-nghi`);
-                if (json && json.success) {
-                    return (json.data || []).map(x => Number(x));
-                }
-                return (json?.data || []).map(x => Number(x));
-            } catch (e) {
-                showAlert('danger', `Không lấy được tiện nghi của phòng #${phongId}. ${e.message || ''}`);
-                console.error(e);
-                return [];
-            }
-        }
-
-        async function syncPhongTienNghi(phongId, ids) {
-            return await apiFetch(`${API_BASE}/phong/${phongId}/tien-nghi`, {
-                method: 'PUT',
-                body: {
-                    tien_nghi_ids: ids
-                }
-            });
-        }
-
-        // Events
-        $(document).ready(async function() {
-            await loadLoaiPhongAssign(); // MỚI: load danh sách loại phòng cho dropdown assign
-            await loadTienNghi(); // bảng tiện nghi + checkbox
-            await loadPhongTable(); // bảng phòng kèm tiện nghi
-            await loadLoaiPhongForModal(); // dropdown loại phòng trong modal phòng
-
-            // Khi đổi loại phòng -> nạp danh sách phòng theo loại, reset panel gán
-            $('#selectLoaiPhongAssign').on('change', async function() {
-                await refreshAssignPhongDropdown();
-            });
-
-            // Search trong bảng tiện nghi
-            $('#searchTienNghi').on('input', function() {
-                renderTienNghiTable(ALL_TIEN_NGHI);
-            });
-
-            // Lọc checkbox panel gán tiện nghi
-            $('#filterCheckbox').on('input', function() {
-                renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-            });
-
-            // Tick tiện nghi panel gán
-            $('#checkboxTienNghiList').on('change', '.chk-tiennghi', function() {
-                const id = Number($(this).val());
-                if (this.checked) {
-                    if (!SELECTED_TN_IDS.includes(id)) SELECTED_TN_IDS.push(id);
-                } else {
-                    SELECTED_TN_IDS = SELECTED_TN_IDS.filter(x => x !== id);
-                }
-            });
-
-            // Open create tiện nghi
-            $('#btnOpenCreate').on('click', function() {
-                $('#tnId').val('');
-                $('#TenTienNghi').val('');
-                $('#modalTitle').text('Thêm tiện nghi');
-                new bootstrap.Modal(document.getElementById('modalCreateEdit')).show();
-            });
-
-            // Submit create/edit tiện nghi
-            $('#btnSubmitCreateEdit').on('click', async function() {
-                const id = $('#tnId').val();
-                const name = ($('#TenTienNghi').val() || '').trim();
-                if (!name) return showAlert('warning', 'Vui lòng nhập Tên tiện nghi');
-
-                let url = `${API_BASE}/tien-nghi`,
-                    method = 'POST';
-                if (id) {
-                    url = `${API_BASE}/tien-nghi/${id}`;
-                    method = 'PUT';
-                }
-
-                try {
-                    const json = await apiFetch(url, {
-                        method,
-                        body: {
-                            TenTienNghi: name
-                        }
-                    });
-                    if (!json || json.success !== true) throw new Error(json?.message || 'API trả về không hợp lệ.');
-                    showAlert('success', id ? 'Đã cập nhật tiện nghi' : 'Đã tạo tiện nghi');
-                    await loadTienNghi();
-                    await loadPhongTable(); // tiện nghi hiển thị trong bảng phòng cũng thay đổi
-                    const instance = bootstrap.Modal.getInstance(document.getElementById('modalCreateEdit'));
-                    if (instance) instance.hide();
-                } catch (e) {
-                    showAlert('danger', e.message || 'Có lỗi xảy ra khi lưu tiện nghi.');
-                    console.error(e);
-                }
-            });
-
-            // Confirm delete tiện nghi
-            $('#btnConfirmDelete').on('click', async function() {
-                const id = $('#deleteId').val();
-                try {
-                    const json = await apiFetch(`${API_BASE}/tien-nghi/${id}`, {
-                        method: 'DELETE'
-                    });
-                    if (!json || json.success !== true) throw new Error(json?.message || 'Không thể xóa');
-                    showAlert('success', 'Đã xóa tiện nghi');
-                    await loadTienNghi();
-                    await loadPhongTable();
-                    const instance = bootstrap.Modal.getInstance(document.getElementById('modalDelete'));
-                    if (instance) instance.hide();
-                } catch (e) {
-                    showAlert('danger', e.message || 'Không thể xóa');
-                    console.error(e);
-                }
-            });
-
-            // On room change (dropdown gán tiện nghi)
-            $('#selectPhong').on('change', async function() {
-                const pid = $(this).val();
-                if (!pid) {
-                    SELECTED_TN_IDS = [];
-                    renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-                    renderCurrentAssigned([]);
-                    return;
-                }
-                const ids = await fetchAssignedIds(pid);
-                SELECTED_TN_IDS = ids;
-                renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-                renderCurrentAssigned(
-                    ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(Number(x.IDTienNghi))).map(x => x.TenTienNghi)
-                );
-            });
-
-            // Save assignments tiện nghi-phòng (panel bên phải)
-            $('#btnSaveAssign').on('click', async function() {
-                const pid = $('#selectPhong').val();
-                if (!pid) return showAlert('warning', 'Hãy chọn phòng trước khi lưu.');
-                try {
-                    const json = await syncPhongTienNghi(pid, SELECTED_TN_IDS);
-                    if (!json || json.success !== true) throw new Error(json?.message || 'Không thể lưu gán tiện nghi.');
-                    const assigned = (json.data || []);
-                    SELECTED_TN_IDS = assigned.map(x => Number(x.IDTienNghi));
-                    renderCurrentAssigned(assigned.map(x => x.TenTienNghi));
-                    await loadPhongTable(); // cập nhật lại danh sách phòng (cột tiện nghi)
-                    showAlert('success', 'Đã lưu gán tiện nghi cho phòng.');
-                } catch (e) {
-                    showAlert('danger', e.message || 'Không thể lưu gán tiện nghi.');
-                    console.error(e);
-                }
-            });
-
-            // Search phòng (bảng)
-            $('#searchPhong').on('input', function() {
-                renderPhongTable(PHONG_TABLE);
-            });
-
-            // Lọc tiện nghi trong Modal Phòng
-            $('#pFilterTienNghi').on('input', function() {
-                renderPTienNghiList(ALL_TIEN_NGHI, P_SELECTED_TN_IDS);
-            });
-
-            // Tick tiện nghi trong Modal Phòng
-            $('#pTienNghiList').on('change', '.p-chk-tiennghi', function() {
-                const id = Number($(this).val());
-                if (this.checked) {
-                    if (!P_SELECTED_TN_IDS.includes(id)) P_SELECTED_TN_IDS.push(id);
-                } else {
-                    P_SELECTED_TN_IDS = P_SELECTED_TN_IDS.filter(x => x !== id);
-                }
-            });
-
-            // Submit create/edit phòng (kèm sync tiện nghi)
-            $('#btnSubmitCreateEditPhong').on('click', async function() {
-                const id = $('#pId').val();
-                const payload = {
-                    IDLoaiPhong: Number($('#pIDLoaiPhong').val()),
-                    SoPhong: ($('#pSoPhong').val() || '').trim(),
-                    XepHangSao: ($('#pXepHangSao').val() ? Number($('#pXepHangSao').val()) : null),
-                    TrangThai: $('#pTrangThai').val() || 'Trống',
-                    MoTa: $('#pMoTa').val() || null
-                };
-                if (!payload.SoPhong) return showAlert('warning', 'Vui lòng nhập Số phòng');
-                if (!payload.IDLoaiPhong) return showAlert('warning', 'Vui lòng chọn Loại phòng');
-
-                let url = `${API_BASE}/phong`,
-                    method = 'POST';
-                if (id) {
-                    url = `${API_BASE}/phong/${id}`;
-                    method = 'PUT';
-                }
-
-                try {
-                    const json = await apiFetch(url, {
-                        method,
-                        body: payload
-                    });
-                    if (!json || json.success !== true) throw new Error(json?.message || 'Không thể lưu phòng');
-
-                    // Lấy ID phòng đã lưu (trong trường hợp tạo mới)
-                    const savedId = id ? Number(id) : Number(json?.data?.IDPhong);
-                    if (!savedId) throw new Error('Không xác định được ID phòng sau khi lưu.');
-
-                    // Sync tiện nghi kèm theo
-                    await syncPhongTienNghi(savedId, P_SELECTED_TN_IDS);
-
-                    // Cập nhật UI
-                    showAlert('success', id ? 'Đã cập nhật phòng' : 'Đã tạo phòng');
-                    await loadPhongs(); // reload dropdown
-                    await loadPhongTable(); // reload bảng
-
-                    // Nếu dropdown đang chọn chính phòng vừa sửa thì cập nhật panel bên phải
-                    const currentPid = $('#selectPhong').val();
-                    if (String(currentPid) === String(savedId)) {
-                        SELECTED_TN_IDS = [...P_SELECTED_TN_IDS];
-                        renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
-                        renderCurrentAssigned(
-                            ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(Number(x.IDTienNghi))).map(x => x.TenTienNghi)
-                        );
-                    }
-
-                    const instance = bootstrap.Modal.getInstance(document.getElementById('modalCreateEditPhong'));
-                    if (instance) instance.hide();
-                } catch (e) {
-                    showAlert('danger', e.message || 'Không thể lưu phòng');
-                    console.error(e);
-                }
-            });
-
-            // Confirm delete phòng
-            $('#btnConfirmDeletePhong').on('click', async function() {
-                const id = $('#deletePhongId').val();
-                try {
-                    const json = await apiFetch(`${API_BASE}/phong/${id}`, {
-                        method: 'DELETE'
-                    });
-                    if (!json || json.success !== true) throw new Error(json?.message || 'Không thể xóa phòng');
-                    showAlert('success', 'Đã xóa phòng');
-                    await loadPhongs();
-                    await loadPhongTable();
-                    const instance = bootstrap.Modal.getInstance(document.getElementById('modalDeletePhong'));
-                    if (instance) instance.hide();
-                } catch (e) {
-                    showAlert('danger', e.message || 'Không thể xóa phòng');
-                    console.error(e);
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+@extends('layouts.layout2')
+
+@section('title', 'Tiện nghi')
+
+@section('content')
+<div class="container-fluid py-3">
+	{{-- khu vực hiển thị alert --}}
+	<div id="alertArea"></div>
+
+	<!-- Tabs điều hướng -->
+	<ul class="nav nav-pills mb-3" id="amenitiesTabs" role="tablist">
+		<li class="nav-item" role="presentation">
+			<button class="nav-link active" id="tab-manage-tab" data-bs-toggle="pill" data-bs-target="#tab-manage" type="button" role="tab">
+				Quản lý & gán tiện nghi
+			</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="tab-rooms-tab" data-bs-toggle="pill" data-bs-target="#tab-rooms" type="button" role="tab">
+				Phòng & tiện nghi
+			</button>
+		</li>
+	</ul>
+
+	<div class="tab-content">
+		<!-- Tab 1: Quản lý & gán -->
+		<div class="tab-pane fade show active" id="tab-manage" role="tabpanel" aria-labelledby="tab-manage-tab">
+			<div class="row">
+				<div class="col-md-6">
+					{{-- bảng tiện nghi --}}
+					<div class="card">
+						<div class="card-header">
+							<div class="d-flex justify-content-between align-items-center">
+								<h5 class="mb-0">
+									Danh sách tiện nghi
+									<span class="badge bg-secondary ms-2" id="amenitiesCount">0</span>
+								</h5>
+								<button id="btnOpenCreate" class="btn btn-primary btn-sm">
+									<i class="bi bi-plus-lg me-1"></i> Thêm
+								</button>
+							</div>
+						</div>
+						<div class="card-body">
+							<!-- input-group search + clear -->
+							<div class="input-group mb-2">
+								<span class="input-group-text"><i class="bi bi-search"></i></span>
+								<input type="text" id="searchTienNghi" class="form-control" placeholder="Tìm tiện nghi...">
+								<button class="btn btn-outline-secondary" id="clearSearchTienNghi" title="Xóa tìm kiếm">
+									<i class="bi bi-x-lg"></i>
+								</button>
+							</div>
+
+							<!-- Lọc nhanh + sắp xếp -->
+							<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+								<div class="btn-group btn-group-sm" role="group" aria-label="filters">
+									<button class="btn btn-outline-secondary filter-tn active" data-filter="all">Tất cả</button>
+									<button class="btn btn-outline-secondary filter-tn" data-filter="selected">Đã chọn</button>
+									<button class="btn btn-outline-secondary filter-tn" data-filter="unselected">Chưa chọn</button>
+								</div>
+								<div class="ms-auto d-flex align-items-center gap-2">
+									<span class="small text-muted">Sắp xếp:</span>
+									<div class="btn-group btn-group-sm" role="group" aria-label="sort">
+										<button class="btn btn-outline-secondary sort-tn" data-key="IDTienNghi">ID</button>
+										<button class="btn btn-outline-secondary sort-tn" data-key="TenTienNghi">Tên</button>
+									</div>
+								</div>
+							</div>
+
+							<div class="position-relative" id="amenitiesTableWrap">
+								<table class="table table-striped table-hover align-middle m-0" id="tableTienNghi">
+									<thead class="table-light">
+										<tr>
+											<th id="thTnId" class="sortable">ID</th>
+											<th id="thTnName" class="sortable">Tên tiện nghi</th>
+											<th class="text-end">Thao tác</th>
+										</tr>
+									</thead>
+									<tbody>
+										{{-- JS render --}}
+									</tbody>
+								</table>
+								<div class="table-overlay d-none" id="amenitiesOverlay">
+									<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Modal Create/Edit Tiện nghi -->
+					<div class="modal fade" id="modalCreateEdit" tabindex="-1" aria-hidden="true">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="modalTitle">Thêm tiện nghi</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+								</div>
+								<div class="modal-body">
+									<input type="hidden" id="tnId" />
+									<div class="mb-3">
+										<label class="form-label">Tên tiện nghi</label>
+										<input type="text" id="TenTienNghi" class="form-control" placeholder="VD: Điều hòa, Ấm đun nước..." />
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+									<button type="button" class="btn btn-primary" id="btnSubmitCreateEdit">Lưu</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Modal Confirm Delete Tiện nghi -->
+					<div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title">Xóa tiện nghi</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+								<div class="modal-body">
+									<p>Bạn chắc chắn muốn xóa tiện nghi: <strong id="deleteName"></strong>?</p>
+									<input type="hidden" id="deleteId" />
+									<div class="small text-muted">
+										Lưu ý: Các gán tiện nghi của phòng sẽ được gỡ tự động.
+									</div>
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+									<button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-md-6">
+					{{-- phần gán tiện nghi --}}
+					<div class="card">
+						<div class="card-header">
+							<h5 class="mb-0">Gán tiện nghi cho phòng</h5>
+						</div>
+						<div class="card-body position-relative">
+							{{-- Cải thiện UX/UI dropdown: thêm icon, viền nổi bật, hiệu ứng focus --}}
+							<div class="row g-2 align-items-end mb-2 assign-select-row">
+								<div class="col-md-6">
+									<label class="form-label mb-1 text-primary">Loại phòng</label>
+									<div class="input-group">
+										<span class="input-group-text bg-primary text-white"><i class="bi bi-building"></i></span>
+										<select id="selectLoaiPhongAssign" class="form-select form-select-lg shadow-sm"></select>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<label class="form-label mb-1 text-primary">Phòng</label>
+									<div class="input-group">
+										<span class="input-group-text bg-primary text-white"><i class="bi bi-door-closed"></i></span>
+										<select id="selectPhong" class="form-select form-select-lg shadow-sm" disabled></select>
+									</div>
+								</div>
+							</div>
+
+							<div id="assignSelectionInfo" class="small text-muted mb-2">
+								<i class="bi bi-info-circle me-1"></i> Chưa chọn loại phòng/phòng.
+							</div>
+
+							<div class="form-check form-switch mb-2">
+								<input class="form-check-input" type="checkbox" id="applyAllInType" disabled>
+								<label class="form-check-label" for="applyAllInType" id="applyAllLabel">
+									Áp dụng cho tất cả phòng thuộc loại đã chọn
+								</label>
+							</div>
+
+							<div class="mb-2">
+								<input type="text" id="filterCheckbox" class="form-control mb-2" placeholder="Tìm tiện nghi...">
+
+								<!-- sticky toolbar + selected count + unsaved badge -->
+								<div class="assign-toolbar d-flex justify-content-between align-items-center mb-2">
+									<div class="btn-group btn-group-sm" role="group">
+										<button class="btn btn-outline-primary" id="btnSelectAll">
+											<i class="bi bi-check2-square me-1"></i>Chọn tất cả
+										</button>
+										<button class="btn btn-outline-secondary" id="btnClearAll">
+											<i class="bi bi-square me-1"></i>Bỏ chọn
+										</button>
+										<button class="btn btn-outline-dark" id="btnInvert">
+											<i class="bi bi-shuffle me-1"></i>Đảo chọn
+										</button>
+									</div>
+									<div class="d-flex align-items-center gap-2">
+										<span class="small text-muted">Đã chọn: <b id="selectedCount">0</b></span>
+										<span id="unsavedBadge" class="badge bg-warning-subtle text-warning-emphasis d-none">Chưa lưu</span>
+									</div>
+								</div>
+
+								<div id="checkboxTienNghiList" class="form-check-box-list"></div>
+							</div>
+
+							<div class="mb-2">
+								<strong>Tiện nghi hiện tại:</strong>
+								<div id="currentAssigned" class="mt-1"></div>
+							</div>
+							<button id="btnSaveAssign" class="btn btn-primary w-100" disabled>Lưu gán tiện nghi</button>
+
+							<!-- overlay loading riêng cho khu vực gán -->
+							<div id="assignOverlay" class="assign-overlay d-none">
+								<div class="spinner-border text-primary" role="status">
+									<span class="visually-hidden">Loading...</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Tab 2: Phòng & tiện nghi -->
+		<div class="tab-pane fade" id="tab-rooms" role="tabpanel" aria-labelledby="tab-rooms-tab">
+			<div class="row mt-3">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<h5>Bảng phòng</h5>
+						</div>
+						<div class="card-body">
+							<div id="roomFilterChips" class="mb-2"></div>
+							<!-- input-group search + clear -->
+							<div class="input-group mb-2">
+								<span class="input-group-text"><i class="bi bi-search"></i></span>
+								<input type="text" id="searchPhong" class="form-control" placeholder="Tìm phòng...">
+								<button class="btn btn-outline-secondary" id="clearSearchPhong" title="Xóa tìm kiếm">
+									<i class="bi bi-x-lg"></i>
+								</button>
+							</div>
+							<div class="position-relative" id="roomsTableWrap">
+								<table class="table table-striped table-hover align-middle m-0" id="tablePhong">
+									<thead class="table-light">
+										<tr>
+											<th>ID</th>
+											<th>Số phòng</th>
+											<th>Loại phòng</th>
+											<th>Trạng thái</th>
+											<th>Tiện nghi</th>
+										</tr>
+									</thead>
+									<tbody>
+										{{-- JS render --}}
+									</tbody>
+								</table>
+								<div class="table-overlay d-none" id="roomsOverlay">
+									<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div><!-- /tab-rooms -->
+	</div><!-- /tab-content -->
+</div>
+
+<style>
+	/* Hover effect for room table rows */
+	#tablePhong tbody tr {
+		transition: all 0.2s ease;
+		position: relative;
+	}
+
+	#tablePhong tbody tr:hover {
+		background-color: #eef2f7;
+		border: 1px solid #d0d7de;
+		transform: translateY(-1px);
+		cursor: pointer;
+		box-shadow: 0 2px 4px rgba(31, 35, 40, 0.08);
+	}
+
+	/* Style for amenities in room table */
+	#tablePhong .amenity-label {
+		display: inline-block;
+		background-color: #6b7280;
+		color: white;
+		padding: 2px 8px;
+		border-radius: 12px;
+		margin: 2px;
+		font-size: 0.8rem;
+		cursor: pointer;
+	}
+
+	/* Sortable headers */
+	th.sortable { cursor: pointer; user-select: none; }
+	th.sortable::after {
+		content: ' ⇅';
+		font-weight: normal;
+		color: #adb5bd;
+		font-size: .8rem;
+	}
+
+	/* Checkbox list container */
+	.form-check-box-list { max-height: 320px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: .375rem; padding: .5rem .75rem; background: #fff; }
+
+	/* Overlay loading for tables */
+	.table-overlay { position: absolute; inset: 0; background: rgba(255,255,255,.6); display: flex; align-items: center; justify-content: center; z-index: 2; border-radius: .375rem; }
+
+	/* Amenity label clickable filter in rooms table */
+	#tablePhong .amenity-label { display: inline-block; background-color: #6b7280; color: #fff; padding: 2px 8px; border-radius: 12px; margin: 2px; font-size: .8rem; cursor: pointer; }
+
+	/* Toolbar sticky trong khu vực gán */
+	.assign-toolbar {
+		position: sticky;
+		top: 0;
+		background: #fff;
+		z-index: 1;
+		padding: .25rem 0;
+		border-bottom: 1px dashed #e9ecef;
+	}
+
+	/* Chip tiện nghi hiện tại với nút xóa nhỏ */
+	#currentAssigned .amenity-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: .25rem;
+		background-color: #0d6efd;
+		color: #fff;
+		border-radius: 16px;
+		padding: 2px 8px;
+		margin: 2px;
+		font-size: .8rem;
+	}
+	#currentAssigned .amenity-chip .remove {
+		cursor: pointer;
+		opacity: .85;
+	}
+	#currentAssigned .amenity-chip .remove:hover {
+		opacity: 1;
+		text-decoration: underline;
+	}
+
+	/* Overlay cho khu vực gán */
+	.assign-overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(255,255,255,.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 5;
+		border-radius: .375rem;
+	}
+
+	/* Làm rõ vùng checkbox khi disabled theo logic (không chọn phòng) */
+	.form-check-box-list.disabled {
+		pointer-events: none;
+		opacity: .6;
+	}
+
+	/* Tinh chỉnh cụm chọn loại/phòng */
+	.assign-select-row .form-label {
+		font-weight: 600;
+		color: #0d6efd;
+	}
+	.assign-select-row .input-group-text {
+		background-color: #0d6efd;
+		color: #fff;
+		border: none;
+	}
+	.assign-select-row .input-group-text i {
+		line-height: 1;
+		font-size: 1rem;
+	}
+	.form-select:focus {
+		border-color: #0d6efd;
+		box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+	}
+	.form-select-lg {
+		padding: 0.5rem 1rem;
+		font-size: 1.1rem;
+	}
+
+	/* Giữ viền rõ khi select bị disabled */
+	.form-select:disabled {
+		background-color: #f8f9fa;
+		border: 1px solid var(--bs-border-color, #ced4da);
+		opacity: 1;
+	}
+
+	/* Làm mờ label của công tắc khi disabled */
+	.form-check-label.disabled {
+		opacity: 0.6;
+	}
+</style>
+@endsection
+
+@section('scripts')
+<script>
+	const API_BASE = '/api';
+	let ALL_TIEN_NGHI = [];
+	let SELECTED_TN_IDS = [];
+	let PHONG_TABLE = [];
+	let ALL_LOAI_PHONG = [];
+
+	// Trạng thái UI
+	let AMENITY_FILTER_MODE = 'all'; // all | selected | unselected
+	let SORT_STATE = { tn: { key: 'TenTienNghi', dir: 'asc' } };
+	let ROOM_FILTER_AMENITY = '';
+
+	// Debounce helper
+	function debounce(fn, wait = 250) {
+		let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+	}
+
+	// Normalize Vietnamese text (case-insensitive, accent-insensitive)
+	function vnNormalize(str = '') {
+		return String(str).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'd');
+	}
+
+	// Toggle overlay
+	function toggleOverlay(target, show) {
+		const el = target === 'amenities' ? '#amenitiesOverlay' : '#roomsOverlay';
+		$(el).toggleClass('d-none', !show);
+	}
+
+	// Hàm gọi API
+	async function apiFetch(url, options = {}) {
+		const opts = { headers: { 'Content-Type': 'application/json','Accept': 'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, ...options };
+		if (options.body && typeof options.body === 'object') opts.body = JSON.stringify(options.body);
+		const res = await fetch(url, opts);
+		return res.json();
+	}
+
+	// Hiển thị alert
+	function showAlert(type, message) {
+		const alert = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+			${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+		$('#alertArea').html(alert);
+		setTimeout(() => $('.alert').alert('close'), 3000);
+	}
+
+	// Nạp danh sách tiện nghi
+	async function loadTienNghi() {
+		toggleOverlay('amenities', true);
+		const json = await apiFetch(`${API_BASE}/tien-nghi`);
+		ALL_TIEN_NGHI = (json?.data || []).map(x => ({ IDTienNghi: String(x.IDTienNghi), TenTienNghi: x.TenTienNghi }));
+		renderTienNghiTable(ALL_TIEN_NGHI);
+		renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+		toggleOverlay('amenities', false);
+	}
+
+	// Nạp danh sách loại phòng (dropdown)
+	async function loadLoaiPhong() {
+		const json = await apiFetch(`${API_BASE}/loai-phong`);
+		ALL_LOAI_PHONG = json?.data || [];
+		let html = '<option value="">-- Chọn loại phòng --</option>';
+		ALL_LOAI_PHONG.forEach(x => { html += `<option value="${x.IDLoaiPhong}">${x.TenLoaiPhong}</option>`; });
+		$('#selectLoaiPhongAssign').html(html);
+	}
+
+	// Nạp danh sách phòng
+	async function loadPhongs() {
+		const json = await apiFetch(`${API_BASE}/phong`);
+		PHONG_TABLE = json?.data || [];
+		await refreshAssignPhongDropdown();
+	}
+
+	// Nạp danh sách phòng cho bảng
+	async function loadPhongTable() {
+		toggleOverlay('rooms', true);
+		const json = await apiFetch(`${API_BASE}/phong?with=tiennghi`);
+		const raw = json?.data || [];
+		PHONG_TABLE = raw.map(x => {
+			const tnArr = Array.isArray(x.TienNghis) ? x.TienNghis : (Array.isArray(x.tien_nghis) ? x.tien_nghis : []);
+			return { ...x, TienNghis: tnArr, TenPhong: x.TenPhong || x.SoPhong, TrangThai: x.TrangThai || 'Không xác định' };
+		});
+		renderPhongTable(PHONG_TABLE);
+		toggleOverlay('rooms', false);
+	}
+
+	// Theo loại phòng -> dropdown phòng
+	async function refreshAssignPhongDropdown() {
+		const lid = $('#selectLoaiPhongAssign').val();
+		$('#selectPhong').prop('disabled', !lid);
+		$('#applyAllInType').prop('disabled', !lid).prop('checked', !!lid); // Enable và check công tắc khi có loại phòng
+		$('#applyAllLabel').toggleClass('disabled', !lid); // Làm mờ label khi công tắc disable
+		if (!lid) {
+			$('#selectPhong').html('<option value="">-- Chọn phòng --</option>');
+			SELECTED_TN_IDS = [];
+			ASSIGNED_ORIG_IDS = [];
+			renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+			renderCurrentAssigned([]);
+			setDirty(false);
+			return;
+		}
+		const phongs = PHONG_TABLE.filter(x => String(x.IDLoaiPhong) === String(lid));
+		let html = '<option value="">-- Chọn phòng --</option>';
+		phongs.forEach(x => { html += `<option value="${x.IDPhong}">${x.SoPhong}</option>`; });
+		$('#selectPhong').html(html);
+		SELECTED_TN_IDS = [];
+		ASSIGNED_ORIG_IDS = [];
+		renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+		renderCurrentAssigned([]);
+		setDirty(false);
+		updateAssignInfo();
+		refreshSaveButtonState();
+	}
+
+	// Lấy danh sách ID tiện nghi của phòng
+	async function fetchAssignedIds(phongId) {
+		const json = await apiFetch(`${API_BASE}/phong/${phongId}/tien-nghi`);
+		return (json?.data || []).map(id => String(id));
+	}
+
+	// Đồng bộ tiện nghi cho phòng
+	async function syncPhongTienNghi(phongId, tienNghiIds) {
+		return await apiFetch(`${API_BASE}/phong/${phongId}/tien-nghi`, { method: 'PUT', body: { tien_nghi_ids: tienNghiIds } });
+	}
+
+	// Render bảng tiện nghi (lọc + sắp xếp)
+	function renderTienNghiTable(data) {
+		const search = vnNormalize($('#searchTienNghi').val() || '');
+		let filtered = data.filter(x => vnNormalize(x.TenTienNghi).includes(search));
+
+		// Lọc nhanh theo trạng thái chọn
+		if (AMENITY_FILTER_MODE === 'selected') {
+			filtered = filtered.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)));
+		} else if (AMENITY_FILTER_MODE === 'unselected') {
+			filtered = filtered.filter(x => !SELECTED_TN_IDS.includes(String(x.IDTienNghi)));
+		}
+
+		// Sắp xếp
+		const { key, dir } = SORT_STATE.tn;
+		filtered.sort((a, b) => {
+			const va = key === 'IDTienNghi' ? Number(a[key]) : vnNormalize(a[key]);
+			const vb = key === 'IDTienNghi' ? Number(b[key]) : vnNormalize(b[key]);
+			if (va < vb) return dir === 'asc' ? -1 : 1;
+			if (va > vb) return dir === 'asc' ? 1 : -1;
+			return 0;
+		});
+
+		let html = '';
+		if (filtered.length === 0) {
+			html = `<tr><td colspan="3" class="empty-state py-4"><i class="bi bi-inbox me-1"></i> Không có dữ liệu phù hợp</td></tr>`;
+		} else {
+			filtered.forEach(x => {
+				html += `<tr>
+					<td>${x.IDTienNghi}</td>
+					<td>${x.TenTienNghi}</td>
+					<td class="text-end">
+						<button class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="${x.IDTienNghi}" data-name="${x.TenTienNghi}"><i class="bi bi-pencil"></i></button>
+						<button class="btn btn-sm btn-outline-danger btn-delete" data-id="${x.IDTienNghi}"><i class="bi bi-trash"></i></button>
+					</td>
+				</tr>`;
+			});
+		}
+		$('#tableTienNghi tbody').html(html);
+		$('#amenitiesCount').text(filtered.length);
+
+		// Bind actions
+		$('.btn-edit').on('click', function() {
+			const id = $(this).data('id'); const name = $(this).data('name');
+			$('#tnId').val(id); $('#TenTienNghi').val(name); $('#modalTitle').text('Sửa tiện nghi');
+			new bootstrap.Modal(document.getElementById('modalCreateEdit')).show();
+		});
+		$('.btn-delete').on('click', function() {
+			const id = String($(this).data('id'));
+			$('#deleteId').val(id);
+			const tn = ALL_TIEN_NGHI.find(t => String(t.IDTienNghi) === id);
+			$('#deleteName').text(tn ? tn.TenTienNghi : '');
+			new bootstrap.Modal(document.getElementById('modalDelete')).show();
+		});
+	}
+
+	// Render danh sách checkbox tiện nghi
+	function renderCheckboxList(data, selectedIds) {
+		const search = vnNormalize($('#filterCheckbox').val() || '');
+		const filtered = data.filter(x => vnNormalize(x.TenTienNghi).includes(search));
+		let html = '';
+		if (filtered.length === 0) {
+			html = `<div class="empty-state py-2"><i class="bi bi-inbox me-1"></i> Không có tiện nghi</div>`;
+		} else {
+			filtered.forEach(x => {
+				const isChecked = selectedIds.includes(String(x.IDTienNghi)) ? 'checked' : '';
+				html += `<div class="form-check">
+					<input class="form-check-input chk-tiennghi" type="checkbox" value="${x.IDTienNghi}" id="chk-${x.IDTienNghi}" ${isChecked}>
+					<label class="form-check-label" for="chk-${x.IDTienNghi}">${x.TenTienNghi}</label>
+				</div>`;
+			});
+		}
+		$('#checkboxTienNghiList').html(html);
+		$('#selectedCount').text(selectedIds.length);
+	}
+
+	// Render danh sách tiện nghi đang gán (chip removable)
+	function renderCurrentAssigned(items) {
+		const container = $('#currentAssigned');
+		container.empty();
+		if (!items || items.length === 0) {
+			container.html('<i>Chưa có tiện nghi nào được gán</i>');
+			return;
+		}
+		items.forEach(it => {
+			container.append(
+				`<span class="amenity-chip" data-id="${it.id}">
+					${it.name}
+					<a class="remove text-white-50" data-id="${it.id}" title="Bỏ tiện nghi">×</a>
+				</span>`
+			);
+		});
+		// Remove chip -> bỏ chọn tương ứng
+		container.off('click', '.remove').on('click', '.remove', function(e) {
+			e.preventDefault();
+			const id = String($(this).data('id'));
+			SELECTED_TN_IDS = SELECTED_TN_IDS.filter(x => x !== id);
+			$(`#chk-${id}`).prop('checked', false);
+			$('#selectedCount').text(SELECTED_TN_IDS.length);
+			const itemsNow = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+				.map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+			renderCurrentAssigned(itemsNow);
+			setDirty(!areArraysEqual(SELECTED_TN_IDS, ASSIGNED_ORIG_IDS));
+		});
+	}
+
+	// Room filter chips
+	function renderRoomFilterChips() {
+		if (!ROOM_FILTER_AMENITY) return $('#roomFilterChips').empty();
+		$('#roomFilterChips').html(
+			`<span class="badge bg-info text-white">
+				Lọc theo tiện nghi: ${ROOM_FILTER_AMENITY}
+				<a href="#" id="clearAmenityFilter" class="text-white ms-1 text-decoration-none">×</a>
+			</span>`
+		);
+		$('#clearAmenityFilter').on('click', function(e) { e.preventDefault(); ROOM_FILTER_AMENITY = ''; renderRoomFilterChips(); renderPhongTable(PHONG_TABLE); });
+	}
+
+	// Render bảng phòng (hỗ trợ lọc theo tiện nghi)
+	function renderPhongTable(data) {
+		const q = vnNormalize($('#searchPhong').val() || '');
+		const filtered = data.filter(x => {
+			const soPhong = vnNormalize(String(x.SoPhong ?? ''));
+			const tenLoai = vnNormalize(String(x.TenLoaiPhong ?? ''));
+			const trangThai = vnNormalize(String(x.TrangThai ?? ''));
+			const tn = (Array.isArray(x.TienNghis) ? vnNormalize(x.TienNghis.map(t=>t.TenTienNghi).join(',')) : '');
+			let base = (soPhong.includes(q) || tenLoai.includes(q) || trangThai.includes(q) || tn.includes(q));
+			if (ROOM_FILTER_AMENITY) {
+				const hasAmenity = Array.isArray(x.TienNghis) && x.TienNghis.some(t => vnNormalize(t.TenTienNghi).includes(vnNormalize(ROOM_FILTER_AMENITY)));
+				base = base && hasAmenity;
+			}
+			return base;
+		});
+
+		let html = '';
+		if (filtered.length === 0) {
+			html = `<tr><td colspan="5" class="empty-state py-4"><i class="bi bi-inbox me-1"></i> Không có dữ liệu phòng</td></tr>`;
+		} else {
+			filtered.forEach(x => {
+				const amenities = Array.isArray(x.TienNghis) ? x.TienNghis : [];
+				const amenitiesHtml = amenities.length > 0
+					? amenities.map(t => `<span class="amenity-label amenity-filter-chip" data-name="${t.TenTienNghi}">${t.TenTienNghi}</span>`).join('')
+					: '<i>Chưa có tiện nghi</i>';
+				html += `<tr class="phong-row cursor-pointer" data-id="${x.IDPhong}">
+					<td>${x.IDPhong}</td>
+					<td>${x.SoPhong}</td>
+					<td>${x.TenLoaiPhong || ''}</td>
+					<td>${x.TrangThai || ''}</td>
+					<td>${amenitiesHtml}</td>
+				</tr>`;
+			});
+		}
+		$('#tablePhong tbody').html(html);
+
+		// Click badge tiện nghi để lọc nhanh
+		$('.amenity-filter-chip').on('click', function(e) {
+			e.stopPropagation();
+			ROOM_FILTER_AMENITY = $(this).data('name');
+			renderRoomFilterChips();
+			renderPhongTable(PHONG_TABLE);
+		});
+
+		// Click dòng phòng -> đồng bộ chọn dropdown gán
+		$('.phong-row').on('click', async function() {
+			const pid = $(this).data('id');
+			const phong = PHONG_TABLE.find(x => String(x.IDPhong) === String(pid));
+			if (!phong) return showAlert('danger', 'Không tìm thấy phòng');
+			// Chuyển sang tab quản lý để gán nhanh
+			const tabTrigger = document.querySelector('#tab-manage-tab'); tabTrigger && new bootstrap.Tab(tabTrigger).show();
+			$('#selectLoaiPhongAssign').val(phong.IDLoaiPhong);
+			await refreshAssignPhongDropdown();
+			$('#selectPhong').val(phong.IDPhong).trigger('change');
+		});
+	}
+
+	// State quản lý khu vực gán
+	let ASSIGNED_ORIG_IDS = [];
+	let ASSIGN_DIRTY = false;
+
+	function areArraysEqual(a = [], b = []) {
+		if (a.length !== b.length) return false;
+		const sa = [...a].sort(); const sb = [...b].sort();
+		return sa.every((v, i) => v === sb[i]);
+	}
+
+	function toggleAssignOverlay(show) {
+		$('#assignOverlay').toggleClass('d-none', !show);
+	}
+
+	function setDirty(flag) {
+		ASSIGN_DIRTY = !!flag;
+		$('#unsavedBadge').toggleClass('d-none', !ASSIGN_DIRTY);
+		refreshSaveButtonState();
+	}
+
+	function updateAssignInfo() {
+		const lid = $('#selectLoaiPhongAssign').val();
+		const pid = $('#selectPhong').val();
+		const tenLoai = lid ? (ALL_LOAI_PHONG.find(l => String(l.IDLoaiPhong) === String(lid))?.TenLoaiPhong || '') : '';
+		const soPhong = pid ? (PHONG_TABLE.find(p => String(p.IDPhong) === String(pid))?.SoPhong || '') : '';
+		if (!lid && !pid) {
+			$('#assignSelectionInfo').html('<i class="bi bi-info-circle me-1"></i> Chưa chọn loại phòng/phòng.');
+		} else if (lid && !pid) {
+			$('#assignSelectionInfo').html(`<i class="bi bi-building me-1"></i> Loại phòng: <b>${tenLoai}</b>`);
+		} else {
+			$('#assignSelectionInfo').html(`<i class="bi bi-door-closed me-1"></i> Loại: <b>${tenLoai}</b> • Phòng: <b>${soPhong}</b>`);
+		}
+	}
+
+	function refreshSaveButtonState() {
+		const applyAll = $('#applyAllInType').is(':checked');
+		const isApplyAllDisabled = $('#applyAllInType').is(':disabled');
+		const lid = $('#selectLoaiPhongAssign').val();
+		const pid = $('#selectPhong').val();
+		let can = false;
+		if (!isApplyAllDisabled && applyAll) {
+			can = !!lid && ASSIGN_DIRTY; // Cho phép lưu khi áp dụng toàn loại, đã chọn loại phòng và có thay đổi
+		} else {
+			can = !!pid && ASSIGN_DIRTY; // Với phòng đơn, cần chọn phòng và có thay đổi
+		}
+		$('#btnSaveAssign').prop('disabled', !can);
+		// Làm mờ danh sách checkbox khi không chọn phòng (chỉ khi không áp dụng toàn loại)
+		const disableList = !applyAll && !pid;
+		$('#checkboxTienNghiList').toggleClass('disabled', disableList);
+	}
+
+	$(document).ready(async function() {
+		await loadLoaiPhong();
+		await loadPhongs();
+		await loadTienNghi();
+		await loadPhongTable();
+
+		// Debounced searches
+		$('#searchTienNghi').on('input', debounce(function() { renderTienNghiTable(ALL_TIEN_NGHI); }, 200));
+		$('#searchPhong').on('input', debounce(function() { renderPhongTable(PHONG_TABLE); }, 200));
+		$('#filterCheckbox').on('input', debounce(function() { renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS); }, 200));
+
+		// Clear search buttons
+		$('#clearSearchTienNghi').on('click', function() { $('#searchTienNghi').val(''); renderTienNghiTable(ALL_TIEN_NGHI); });
+		$('#clearSearchPhong').on('click', function() { $('#searchPhong').val(''); renderPhongTable(PHONG_TABLE); });
+
+		// Lọc nhanh tiện nghi
+		$('.filter-tn').on('click', function() {
+			$('.filter-tn').removeClass('active');
+			$(this).addClass('active');
+			AMENITY_FILTER_MODE = $(this).data('filter');
+			renderTienNghiTable(ALL_TIEN_NGHI);
+		});
+
+		// Sắp xếp tiện nghi
+		$('.sort-tn').on('click', function() {
+			const key = $(this).data('key');
+			SORT_STATE.tn.dir = (SORT_STATE.tn.key === key && SORT_STATE.tn.dir === 'asc') ? 'desc' : 'asc';
+			SORT_STATE.tn.key = key;
+			renderTienNghiTable(ALL_TIEN_NGHI);
+		});
+
+		// Checkbox changes
+		$('#checkboxTienNghiList').on('change', '.chk-tiennghi', function() {
+			const id = String($(this).val());
+			if (this.checked) {
+				if (!SELECTED_TN_IDS.includes(id)) SELECTED_TN_IDS.push(id);
+			} else {
+				SELECTED_TN_IDS = SELECTED_TN_IDS.filter(x => x !== id);
+			}
+			$('#selectedCount').text(SELECTED_TN_IDS.length);
+			const items = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+				.map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+			renderCurrentAssigned(items);
+			setDirty(!areArraysEqual(SELECTED_TN_IDS, ASSIGNED_ORIG_IDS));
+		});
+
+		// Bulk select/clear current filtered checkboxes
+		$('#btnSelectAll').on('click', function() {
+			const search = vnNormalize($('#filterCheckbox').val() || '');
+			const filteredIds = ALL_TIEN_NGHI.filter(x => vnNormalize(x.TenTienNghi).includes(search)).map(x => String(x.IDTienNghi));
+			filteredIds.forEach(id => { if (!SELECTED_TN_IDS.includes(id)) SELECTED_TN_IDS.push(id); });
+			renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+			const items = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+				.map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+			renderCurrentAssigned(items);
+			setDirty(!areArraysEqual(SELECTED_TN_IDS, ASSIGNED_ORIG_IDS));
+		});
+		$('#btnClearAll').on('click', function() {
+			const search = vnNormalize($('#filterCheckbox').val() || '');
+			const filteredIds = new Set(ALL_TIEN_NGHI.filter(x => vnNormalize(x.TenTienNghi).includes(search)).map(x => String(x.IDTienNghi)));
+			SELECTED_TN_IDS = SELECTED_TN_IDS.filter(id => !filteredIds.has(id));
+			renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+			const items = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+				.map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+			renderCurrentAssigned(items);
+			setDirty(!areArraysEqual(SELECTED_TN_IDS, ASSIGNED_ORIG_IDS));
+		});
+
+		// Đảo chọn
+		$('#btnInvert').on('click', function() {
+			const search = vnNormalize($('#filterCheckbox').val() || '');
+			const filteredIds = new Set(
+				ALL_TIEN_NGHI.filter(x => vnNormalize(x.TenTienNghi).includes(search)).map(x => String(x.IDTienNghi))
+			);
+			const next = new Set(SELECTED_TN_IDS);
+			[...filteredIds].forEach(id => {
+				if (next.has(id)) next.delete(id); else next.add(id);
+			});
+			SELECTED_TN_IDS = [...next];
+			renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+			const items = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+				.map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+			renderCurrentAssigned(items);
+			setDirty(!areArraysEqual(SELECTED_TN_IDS, ASSIGNED_ORIG_IDS));
+		});
+
+		// Thay đổi loại phòng
+		$('#selectLoaiPhongAssign').on('change', async function() {
+			await refreshAssignPhongDropdown();
+		});
+
+		// Chọn phòng -> nạp tiện nghi đã gán
+		$('#selectPhong').on('change', async function() {
+			const pid = $(this).val();
+			updateAssignInfo();
+			refreshSaveButtonState();
+			if (!pid) {
+				SELECTED_TN_IDS = [];
+				ASSIGNED_ORIG_IDS = [];
+				renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+				renderCurrentAssigned([]);
+				setDirty(false);
+				return;
+			}
+			try {
+				toggleAssignOverlay(true);
+				const ids = await fetchAssignedIds(pid);
+				SELECTED_TN_IDS = ids;
+				ASSIGNED_ORIG_IDS = [...ids];
+				renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
+				const items = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+					.map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+				renderCurrentAssigned(items);
+				setDirty(false);
+			} finally {
+				toggleAssignOverlay(false);
+			}
+		});
+
+		// Bật/tắt lưu khi đổi chế độ áp dụng
+		$('#applyAllInType').on('change', function() {
+			refreshSaveButtonState();
+		});
+
+		// Mở modal thêm tiện nghi
+		$('#btnOpenCreate').on('click', function() {
+			$('#tnId').val(''); $('#TenTienNghi').val(''); $('#modalTitle').text('Thêm tiện nghi');
+			const modalEl = document.getElementById('modalCreateEdit');
+			const instance = new bootstrap.Modal(modalEl);
+			modalEl.addEventListener('shown.bs.modal', () => { $('#TenTienNghi').trigger('focus'); }, { once: true });
+			instance.show();
+		});
+
+		// Lưu tiện nghi
+		$('#btnSubmitCreateEdit').on('click', async function() {
+			const id = $('#tnId').val();
+			const name = ($('#TenTienNghi').val() || '').trim();
+			if (!name) return showAlert('warning', 'Vui lòng nhập Tên tiện nghi');
+
+			let url = `${API_BASE}/tien-nghi`,
+				method = 'POST';
+			if (id) {
+				url = `${API_BASE}/tien-nghi/${id}`;
+				method = 'PUT';
+			}
+
+			try {
+				const json = await apiFetch(url, {
+					method,
+					body: {
+						TenTienNghi: name
+					}
+				});
+				if (!json || json.success !== true) throw new Error(json?.message || 'API trả về không hợp lệ.');
+				showAlert('success', id ? 'Đã cập nhật tiện nghi' : 'Đã tạo tiện nghi');
+				await loadTienNghi();
+				await loadPhongTable();
+				const instance = bootstrap.Modal.getInstance(document.getElementById('modalCreateEdit'));
+				if (instance) instance.hide();
+			} catch (e) {
+				showAlert('danger', e.message || 'Có lỗi xảy ra khi lưu tiện nghi.');
+				console.error(e);
+			}
+		});
+
+		// Xóa tiện nghi
+		$('#btnConfirmDelete').on('click', async function() {
+			const id = $('#deleteId').val();
+			try {
+				const json = await apiFetch(`${API_BASE}/tien-nghi/${id}`, {
+					method: 'DELETE'
+				});
+				if (!json || json.success !== true) throw new Error(json?.message || 'Không thể xóa');
+				showAlert('success', 'Đã xóa tiện nghi');
+				await loadTienNghi();
+				await loadPhongTable();
+				const instance = bootstrap.Modal.getInstance(document.getElementById('modalDelete'));
+				if (instance) instance.hide();
+			} catch (e) {
+				showAlert('danger', e.message || 'Không thể xóa');
+				console.error(e);
+			}
+		});
+
+		// Lưu gán tiện nghi
+		$('#btnSaveAssign').on('click', async function() {
+			const pid = $('#selectPhong').val();
+			const lid = $('#selectLoaiPhongAssign').val();
+			const applyAll = $('#applyAllInType').is(':checked');
+			const $btn = $(this);
+			$btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...');
+			toggleAssignOverlay(true);
+
+			try {
+				if (applyAll) {
+					if (!lid) { showAlert('warning', 'Hãy chọn loại phòng trước khi áp dụng cho tất cả phòng.'); return; }
+					const rooms = PHONG_TABLE.filter(x => String(x.IDLoaiPhong) === String(lid)).map(r => String(r.IDPhong));
+					if (rooms.length === 0) { showAlert('warning', 'Không có phòng nào trong loại đã chọn.'); return; }
+					let ok = 0, fail = 0;
+					for (const rid of rooms) {
+						const res = await syncPhongTienNghi(rid, SELECTED_TN_IDS);
+						(res && res.success === true) ? ok++ : fail++;
+					}
+					showAlert(fail === 0 ? 'success' : 'warning', `Đã áp dụng cho ${ok}/${rooms.length} phòng.`);
+				} else {
+					if (!pid) { showAlert('warning', 'Hãy chọn phòng trước khi lưu.'); return; }
+					const json = await syncPhongTienNghi(pid, SELECTED_TN_IDS);
+					if (!json || json.success !== true) throw new Error(json?.message || 'Không thể lưu gán tiện nghi.');
+					showAlert('success', 'Đã lưu gán tiện nghi cho phòng.');
+					ASSIGNED_ORIG_IDS = [...SELECTED_TN_IDS];
+					setDirty(false);
+				}
+				await loadPhongTable();
+			} catch (e) {
+				showAlert('danger', e.message || 'Không thể lưu gán tiện nghi.');
+				console.error(e);
+			} finally {
+				toggleAssignOverlay(false);
+				$btn.prop('disabled', false).text('Lưu gán tiện nghi');
+				refreshSaveButtonState();
+			}
+		});
+
+		// Khi vào tab rooms, cập nhật chips
+		document.getElementById('tab-rooms-tab')?.addEventListener('shown.bs.tab', () => { renderRoomFilterChips(); });
+
+		// Khởi tạo info/save state ban đầu
+		updateAssignInfo();
+		refreshSaveButtonState();
+	});
+</script>
+@endsection

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Amenties;
+namespace App\Http\Controllers\Room;
 
 use App\Http\Controllers\Controller;
-use App\Models\Amenties\LoaiPhong;
+use App\Models\Room\LoaiPhong;
 use Illuminate\Http\Request;
 
 class LoaiPhongController extends Controller

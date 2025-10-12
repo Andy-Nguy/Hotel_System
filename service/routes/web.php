@@ -1,6 +1,10 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Login\AuthController;
+use App\Http\Controllers\Room\LoaiPhongController;
+use App\Http\Controllers\Room\PhongController;
+use App\Http\Controllers\Amenties\TienNghiController;
+use App\Http\Controllers\Amenties\PhongTienNghiController; // fixed back to Amenties
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +39,10 @@ Route::get('/login', function () {
 
 require __DIR__.'/auth.php';
 
-
 Route::get('/tiennghi', function () {
-    return view('amenties.tiennghi');
-})->name('tiennghi.index');
+    return view('amenties.tiennghi2');
+})->name('tiennghi2.index');
+
+Route::get('/room', function () {
+    return view('room.room');
+})->name('room.index');
