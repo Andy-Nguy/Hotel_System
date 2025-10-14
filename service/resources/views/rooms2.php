@@ -16,6 +16,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400&amp;family=Barlow:wght@400&amp;family=Gilda+Display&amp;display=swap" rel="stylesheet">
     <link rel="stylesheet" href="HomePage/css/plugins.css" />
     <link rel="stylesheet" href="HomePage/css/style.css" />
+    <style>
+        /* small localized style for price currency superscript */
+        .price-currency {
+            font-size: 0.6em;
+            vertical-align: super;
+            margin-left: 2px;
+            color: #8c6b4a; /* subtle brown similar to design */
+        }
+        .price-number { font-weight: 300; color: #8c6b4a; }
+    </style>
 </head>
 <body>
     <!-- Preloader -->
@@ -84,9 +94,24 @@
     <section class="section-padding">
         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-                    <?php if (!empty($roomsDetail) && is_array($roomsDetail)): ?>
-                        <?php foreach ($roomsDetail as $idx => $room): ?>
+                <div class="col-md-12" id="rooms-list">
+                    <?php
+                        // Simple server-side pagination: show up to 5 rooms per page.
+                        $perPage = 5;
+                        $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+                        $total = is_array($roomsDetail) ? count($roomsDetail) : 0;
+                        $pages = $total > 0 ? (int) ceil($total / $perPage) : 1;
+                        $typeParam = isset($_GET['type']) ? rawurlencode($_GET['type']) : (isset($type) ? rawurlencode($type) : '');
+                        $offset = ($page - 1) * $perPage;
+                        $roomsPage = [];
+                        if (!empty($roomsDetail) && is_array($roomsDetail)) {
+                            $roomsPage = array_slice($roomsDetail, $offset, $perPage);
+                        }
+                    ?>
+
+                    <?php if (!empty($roomsPage) && is_array($roomsPage)): ?>
+                        <?php foreach ($roomsPage as $i => $room): ?>
+                            <?php $idx = $offset + $i; ?>
                             <?php
                                 $img = isset($room['UrlAnhPhong']) ? $room['UrlAnhPhong'] : '1.jpg';
                                 // prefer slider images if present, otherwise fall back to rooms
@@ -98,20 +123,54 @@
                                 }
 
                                 // <-- add these definitions to avoid "Undefined variable"
-                                $number = $room['SoPhong'] ?? '';
                                 $title  = $room['TenPhong'] ?? ($room['TenPhong'] ?? 'Room');
                             ?>
                             <?php $leftClass = ($idx % 2) ? ' left' : ''; ?>
                             <div class="rooms2 mb-90<?php echo $leftClass; ?> animate-box" data-animate-effect="fadeInUp">
                                 <figure><img src="<?php echo $imgUrl; ?>" alt="" class="img-fluid"></figure>
                                 <div class="caption">
-                                    <h3><?php echo $number ? htmlspecialchars($number) : 'Room'; ?></h3>
+                                    <?php
+                                        // Display price, room number and max people (SoNguoiToiDa) when available
+                                        $priceNumber = isset($room['GiaCoBanMotDem']) ? number_format($room['GiaCoBanMotDem']) : null;
+                                        $roomNumber = !empty($room['SoPhong']) ? htmlspecialchars($room['SoPhong']) : 'Room';
+                                        $maxPeople = isset($room['SoNguoiToiDa']) && $room['SoNguoiToiDa'] !== '' ? (int) $room['SoNguoiToiDa'] : null;
+                                    ?>
+                                    <h3>
+                                        <?php echo $roomNumber; ?>  -  
+                                        
+                                        <?php if ($priceNumber !== null): ?>
+                                            <span class="price-number"><?php echo $priceNumber; ?></span>
+                                            <small class="text-muted price-currency" aria-hidden="true">đ</small>
+                                        <?php else: ?>
+                                            Liên hệ
+                                        <?php endif; ?>
+                                         <span class="price-number"> / Ngày</span>
+                                    </h3>
+
                                     <h4>
                                         <a href="<?php echo '/roomdetails.php?id=' . urlencode($room['IDPhong'] ?? ''); ?>">
                                             <?php echo htmlspecialchars($title); ?>
                                         </a>
                                     </h4>
-                                    <p><?php echo htmlspecialchars($room['MoTa'] ?? ''); ?></p>
+                                    <?php
+                                        $description = $room['MoTa'] ?? '';
+                                        $wordLimit = 20; // số từ muốn hiển thị
+
+                                        $words = explode(' ', strip_tags($description));
+                                        if (count($words) > $wordLimit) {
+                                            $shortDescription = implode(' ', array_slice($words, 0, $wordLimit)) . '...';
+                                        } else {
+                                            $shortDescription = implode(' ', $words);
+                                        }
+                                    ?>
+                                    <p><?php echo htmlspecialchars($shortDescription); ?></p>
+
+                                    <?php if ($maxPeople !== null): ?>
+                                        <p class="text-muted h6 fw-bold mb-2">
+                                            <i class="flaticon-group" aria-hidden="true" style="margin-right:8px"></i>
+                                            Tối đa: <?php echo $maxPeople; ?> người
+                                        </p>
+                                    <?php endif; ?>
                                     <?php // Render amenities from the room's `tien_nghis` if available ?>
                                     <?php if (!empty($room['tien_nghis']) && is_array($room['tien_nghis'])): ?>
                                         <div class="row room-facilities">
@@ -122,15 +181,6 @@
                                                     </ul>
                                                 </div>
                                             <?php endforeach; ?>
-                                        </div>
-                                    <?php else: ?>
-                                        <!-- fallback to original facilities when no amenities provided -->
-                                        <div class="row room-facilities">
-                                            <div class="col-md-4">
-                                                <ul>
-                                                    <li><i class="flaticon-group"></i> <?php echo htmlspecialchars($room['SoNguoiToiDa'] ?? ''); ?> Persons</li>
-                                                </ul>
-                                            </div>
                                         </div>
                                     <?php endif; ?>
                                     <hr class="border-2">
@@ -145,6 +195,28 @@
                                 </div>
                             </div>
                         <?php endforeach; ?>
+
+                        <?php if ($pages > 1): ?>
+                            <nav aria-label="Rooms pagination" class="mt-4">
+                                <ul class="pagination justify-content-center">
+                                    <?php $prev = max(1, $page - 1); ?>
+                                    <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                        <a class="page-link" href="?<?php echo $typeParam !== '' ? 'type=' . $typeParam . '&' : ''; ?>page=<?php echo $prev; ?>" aria-label="Previous">&laquo;</a>
+                                    </li>
+
+                                    <?php for ($p = 1; $p <= $pages; $p++): ?>
+                                        <li class="page-item <?php echo $p === $page ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?<?php echo $typeParam !== '' ? 'type=' . $typeParam . '&' : ''; ?>page=<?php echo $p; ?>"><?php echo $p; ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+
+                                    <?php $next = min($pages, $page + 1); ?>
+                                    <li class="page-item <?php echo $page >= $pages ? 'disabled' : ''; ?>">
+                                        <a class="page-link" href="?<?php echo $typeParam !== '' ? 'type=' . $typeParam . '&' : ''; ?>page=<?php echo $next; ?>" aria-label="Next">&raquo;</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        <?php endif; ?>
                     <?php else: ?>
                         <p>No rooms available at the moment.</p>
                     <?php endif; ?>

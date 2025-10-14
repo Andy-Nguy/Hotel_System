@@ -247,7 +247,6 @@
                         <?php
                         $colClass = ($index >= 3) ? 'col-md-6' : 'col-md-4';
                         $img = isset($room['UrlAnhLoaiPhong']) ? $room['UrlAnhLoaiPhong'] : '1.jpg';
-                        $price = isset($room['GiaCoBanMotDem']) ? $room['GiaCoBanMotDem'] : '';
                         $name = isset($room['TenLoaiPhong']) ? $room['TenLoaiPhong'] : '';
                         $idLoai = isset($room['IDLoaiPhong']) ? $room['IDLoaiPhong'] : '';
                         $displayPrice = $price !== '' ? number_format((float) $price, 0, '.', ',') .  '₫' : '';
@@ -977,9 +976,9 @@
     // Blade render URL thực tế trước khi JS chạy
 
     // Sử dụng URL TƯƠNG ĐỐI để tránh lặp host – Browser tự giữ origin (127.0.0.1:8000)
-    const PROFILE_PATH = '{!! route('taikhoan', [], false) !!}';  // Render /taikhoan (không absolute, tham số false để tắt absolute URL)
-    const LOGIN_PATH = '{!! route('login', [], false) !!}';      // /login
-    const HOME_PATH = '{!! url('/', [], false) !!}';             // /
+    const PROFILE_PATH = "{!! route('taikhoan', [], false) !!}";  // Render /taikhoan (không absolute, tham số false để tắt absolute URL)
+    const LOGIN_PATH = "{!! route('login', [], false) !!}";      // /login
+    const HOME_PATH = "{!! url('/', [], false) !!}";             // /
 
     function goToProfile(event) {
         event.preventDefault();

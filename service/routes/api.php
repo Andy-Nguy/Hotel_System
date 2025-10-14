@@ -54,4 +54,9 @@ Route::apiResource('phongs', PhongController::class)->except(['index']);
 Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
 Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
 Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
+// Update profile via API (ajax-friendly, stateless)
+Route::post('/taikhoan', [AuthController::class, 'updateProfileApi']);
 // Explicit route: use index1 for listing phongs
+
+// Booking API: fetch bookings by email or idkhachhang
+Route::get('/datphong', [App\Http\Controllers\Amenties\DatPhongController::class, 'index']);

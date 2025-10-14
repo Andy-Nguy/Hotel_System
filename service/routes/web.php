@@ -171,3 +171,5 @@ Route::get('/tiennghi', function () {
     return view('amenties.tiennghi');
 })->name('tiennghi.index');
 Route::get('/taikhoan', [AuthController::class, 'taikhoan'])->name('taikhoan');
+// POST route to update profile information (HoTen, SoDienThoai, NgaySinh)
+Route::post('/taikhoan', [AuthController::class, 'updateProfile'])->name('taikhoan.update');

@@ -79,8 +79,13 @@ class PhongController extends Controller
     // GET /api/phongs/loai/{maLoai}
     public function searchByLoai($maLoai)
     {
-        
-        $phongs = Phong::with('tienNghis')->where('IDLoaiPhong', $maLoai)->get();
+        $phongs = Phong::with('tienNghis')
+            ->where('IDLoaiPhong', $maLoai)
+            ->where(function ($q) {
+                $q->whereNull('TrangThai')
+                  ->orWhere('TrangThai', '<>', 'Phòng hư');
+            })
+            ->get();
         return response()->json($phongs);
     }
 
@@ -91,7 +96,6 @@ class PhongController extends Controller
             'IDLoaiPhong' => ['required', 'string', 'exists:LoaiPhong,IDLoaiPhong'],
             'SoPhong'     => ['required', 'string', 'max:20', 'unique:Phong,SoPhong'],
             'MoTa'        => ['nullable', 'string'],
-            'UuTienChinh' => ['nullable', 'boolean'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
             'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
@@ -105,7 +109,7 @@ class PhongController extends Controller
             ], 422);
         }
 
-        // 🔹 Tự động sinh ID kiểu P001, P002, ...
+        //  Tự động sinh ID kiểu P001, P002, ...
         $last = Phong::orderBy('IDPhong', 'desc')->first();
         $nextId = $last
             ? 'P' . str_pad((int) substr($last->IDPhong, 1) + 1, 3, '0', STR_PAD_LEFT)
@@ -126,7 +130,6 @@ class PhongController extends Controller
             'IDLoaiPhong' => ['sometimes', 'required', 'string', 'exists:LoaiPhong,IDLoaiPhong'],
             'SoPhong'     => ['sometimes', 'required', 'string', 'max:20', Rule::unique('Phong', 'SoPhong')->ignore($phong->IDPhong, 'IDPhong')],
             'MoTa'        => ['nullable', 'string'],
-            'UuTienChinh' => ['nullable', 'boolean'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
             'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],

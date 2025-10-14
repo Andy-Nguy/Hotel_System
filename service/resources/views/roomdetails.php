@@ -143,13 +143,55 @@ if (!function_exists('safe_text')) {
                                 $class = $s <= $rating ? 'star-rating' : 'star-rating star-empty';
                                 echo '<i class="' . $class . '"></i>';
                             }
+                            $priceNumber = isset($room['GiaCoBanMotDem']) ? number_format($room['GiaCoBanMotDem']) : null;
+                            $maxPeople = isset($room['SoNguoiToiDa']) && $room['SoNguoiToiDa'] !== '' ? (int) $room['SoNguoiToiDa'] : null;
+                            $displayPrice = $priceNumber !== null ? $priceNumber . '₫ ' : '';
                         ?>
                     </span>
-                    <div class="section-subtitle"><?php echo safe_text($room['SoPhong'] ?? ''); ?></div>
+                    <div class="section-subtitle">
+                        <?php 
+                            $soPhong = safe_text($room['SoPhong'] ?? '');
+                            echo $soPhong;
+
+                            if ($displayPrice) {
+                                echo ' - <strong>' . $displayPrice . '</strong>';
+                            }
+                        ?>
+                    </div>
                     <div class="section-title"><?php echo safe_text($room['TenPhong'] ?? 'Room Details'); ?></div>
                 </div>
                 <div class="col-md-8">
-                    <p class="mb-30"><?php echo safe_text($room['MoTa'] ?? 'Hotel non lorem ac erat suscipit bibendum nulla facilisi.'); ?></p>
+                    <?php if ($maxPeople !== null): ?>
+                                        <p class="text-muted h6 fw-bold mb-2">
+                                            <i class="flaticon-group" aria-hidden="true" style="margin-right:8px"></i>
+                                            Tối đa: <?php echo $maxPeople; ?> người
+                                        </p>
+                                    <?php endif; ?>
+                    <p class="mb-30">
+                        <?php
+                            $mota = $room['MoTa'] ?? 'Hotel non lorem ac erat suscipit bibendum nulla facilisi.';
+
+                            // Loại bỏ các <br> cũ để tránh bị lỗi
+                            $mota = strip_tags($mota);
+
+                            // Tách câu
+                            $sentences = preg_split('/(?<=[.?!])\s+/', $mota);
+                            
+                            $formatted = '';
+                            foreach ($sentences as $index => $sentence) {
+                                if (trim($sentence) === '') continue;
+                                $formatted .= trim($sentence) . ' ';
+                                if (($index + 1) % 3 == 0) {
+                                    // Thêm 2 thẻ <br> để có khoảng cách dòng (cách đoạn)
+                                    $formatted .= '<br><br>'; 
+                                }
+                            }
+
+                            echo $formatted;
+                        ?>
+                    </p>
+
+
                     <div class="row">
                         <div class="col-md-6">
                             <h6>Nhận phòng (Check-in)</h6>
@@ -203,28 +245,28 @@ if (!function_exists('safe_text')) {
                     <div class="col-md-3 offset-md-1">
                     <h6>Tiện ích</h6>
                     <ul class="list-unstyled page-list mb-30">
-<?php
-    // chuẩn hoá nguồn tiện nghi từ $room (hỗ trợ nhiều tên trường)
-    $amenities = [];
-    if (is_array($room)) {
-        if (!empty($room['tien_nghis']) && is_array($room['tien_nghis'])) {
-            $amenities = $room['tien_nghis'];
-        } elseif (!empty($room['tienNghis']) && is_array($room['tienNghis'])) {
-            $amenities = $room['tienNghis'];
-        } elseif (!empty($room['tien_nghi']) && is_array($room['tien_nghi'])) {
-            $amenities = $room['tien_nghi'];
-        }
-    }
+            <?php
+                // chuẩn hoá nguồn tiện nghi từ $room (hỗ trợ nhiều tên trường)
+                $amenities = [];
+                if (is_array($room)) {
+                    if (!empty($room['tien_nghis']) && is_array($room['tien_nghis'])) {
+                        $amenities = $room['tien_nghis'];
+                    } elseif (!empty($room['tienNghis']) && is_array($room['tienNghis'])) {
+                        $amenities = $room['tienNghis'];
+                    } elseif (!empty($room['tien_nghi']) && is_array($room['tien_nghi'])) {
+                        $amenities = $room['tien_nghi'];
+                    }
+                }
 
-    if (!empty($amenities)) :
-        foreach ($amenities as $amen) :
-            $label = '';
-            if (is_array($amen)) {
-                $label = $amen['TenTienNghi'] ?? $amen['ten'] ?? $amen['name'] ?? '';
-            } else {
-                $label = (string)$amen;
-            }
-?>
+                if (!empty($amenities)) :
+                    foreach ($amenities as $amen) :
+                        $label = '';
+                        if (is_array($amen)) {
+                            $label = $amen['TenTienNghi'] ?? $amen['ten'] ?? $amen['name'] ?? '';
+                        } else {
+                            $label = (string)$amen;
+                        }
+            ?>
         <li>
             <div class="page-list-icon"> <span class="ti-check"></span> </div>
             <div class="page-list-text">
@@ -233,17 +275,8 @@ if (!function_exists('safe_text')) {
         </li>
     <?php
         endforeach;
-    else:
-        // fallback nếu không có dữ liệu từ API
+    else: 
     ?>
-        <li>
-            <div class="page-list-icon"> <span class="flaticon-group"></span> </div>
-            <div class="page-list-text"><p>1-2 Persons</p></div>
-        </li>
-        <li>
-            <div class="page-list-icon"> <span class="flaticon-wifi"></span> </div>
-            <div class="page-list-text"><p>Free Wifi</p></div>
-        </li>
     <?php endif; ?>
 </ul>
                 </div>
@@ -278,14 +311,14 @@ if (!function_exists('safe_text')) {
                                     }
 
                                     $idLoai = $room['IDLoaiPhong'] ?? '';
-                                    $priceRaw = $room['GiaCoBanMotDem'] ?? '';
-                                    $displayPrice = $priceRaw !== '' ? number_format((float)$priceRaw, 0, '.', ',') . '₫ ' : '';
+                                    
                                     $name = $room['TenLoaiPhong'] ?? '';
                                     // details link: prefer first_phong_id if provided by API, otherwise use type id
                                     // If first_phong_id is missing or null, fall back to the type id
                                     $detailsId = $room['first_phong_id'] ?? $idLoai;
                                     $bookUrl = '/rooms2?type=' . rawurlencode($idLoai);
                                     $detailsUrl = '/roomdetails.php?id=' . rawurlencode($detailsId);
+                                   
                                 ?>
                                 <div class="item">
                                     <div class="position-re o-hidden">
