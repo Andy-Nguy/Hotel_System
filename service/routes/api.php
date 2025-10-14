@@ -54,3 +54,9 @@ Route::get('/phong', function (Request $request, PhongController $controller) {
 // Quan hệ phòng - tiện nghi
 Route::get('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'show']);
 Route::put('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'update']);
+
+use App\Http\Controllers\Services\TTDichVuController;
+use App\Http\Controllers\Services\DichVuController;
+
+Route::resource('dichvu.chitiet', TTDichVuController::class)->except(['create', 'edit']);
+Route::resource('dichvu', DichVuController::class)->except(['create', 'edit']);

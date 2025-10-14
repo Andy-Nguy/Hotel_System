@@ -17,6 +17,7 @@
     <meta property="og:type" content="Website">
     <meta property="og:site_name" content="Bootstrap Gallery">
     <link rel="shortcut icon" href="assets/images/favicon.svg" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- *************
 			************ CSS Files *************
@@ -55,20 +56,20 @@
                     <ul class="sidebar-menu">
                         <li class="{{ request()->routeIs('tiennghi2.index') ? 'active current-page' : '' }}">
                             <a href="{{ route('tiennghi2.index') }}">
-                                <i class="bi bi-box"></i>
+                                <i class="bi bi-stars"></i>
                                 <span class="menu-text">Tiện nghi</span>
                             </a>
                         </li>
                         <li class="{{ request()->routeIs('room.index') ? 'active current-page' : '' }}">
                             <a href="{{ route('room.index') }}">
-                                <i class="bi bi-box"></i>
+                                <i class="bi bi-door-open"></i>
                                 <span class="menu-text">Phòng</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="customers.html">
-                                <i class="bi bi-globe"></i>
-                                <span class="menu-text">Customers</span>
+                        <li class="{{ request()->routeIs('dichvu.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('dichvu.index') }}">
+                                <i class="bi bi-box"></i>
+                                <span class="menu-text">Dịch Vụ</span>
                             </a>
                         </li>
                         <li>

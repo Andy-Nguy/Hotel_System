@@ -46,3 +46,8 @@ Route::get('/tiennghi', function () {
 Route::get('/room', function () {
     return view('room.room');
 })->name('room.index');
+
+use App\Http\Controllers\Services\DichVuController;
+use App\Http\Controllers\Services\TTDichVuController;
+Route::resource('dichvu', DichVuController::class)->names('dichvu');
+Route::resource('dichvu/{dichvu}/chitiet', TTDichVuController::class)->names('chitiet');

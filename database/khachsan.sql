@@ -1,28 +1,16 @@
 -- =========================================
--- 1. Khách Hàng (online)
+-- RESET DATABASE VÀ TẠO MỚI
 -- =========================================
-CREATE TABLE KhachHang (
-    IDKhachHang INT AUTO_INCREMENT PRIMARY KEY,
-    HoTen VARCHAR(100) NOT NULL,
-    NgaySinh DATE,
-    SoDienThoai VARCHAR(20),
-    Email VARCHAR(100) UNIQUE,
-    NgayDangKy DATE DEFAULT (CURRENT_DATE)
-);
+DROP DATABASE IF EXISTS khachsan;
+
+CREATE DATABASE IF NOT EXISTS khachsan
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE khachsan;
 
 -- =========================================
--- 2. Tài khoản người dùng (login)
--- =========================================
-CREATE TABLE TaiKhoanNguoiDung (
-    IDNguoiDung INT AUTO_INCREMENT PRIMARY KEY,
-    IDKhachHang INT NOT NULL,
-    MatKhau VARCHAR(255) NOT NULL,
-    VaiTro TINYINT, -- 1: Khách hàng, 2: Nhân viên
-    FOREIGN KEY (IDKhachHang) REFERENCES KhachHang(IDKhachHang)
-);
-
--- =========================================
--- 3. Loại Phòng, Phòng
+-- 1. Bảng Loại Phòng
 -- =========================================
 CREATE TABLE LoaiPhong (
     IDLoaiPhong CHAR(10) PRIMARY KEY,
@@ -34,6 +22,7 @@ CREATE TABLE LoaiPhong (
     UuTienChinh BOOLEAN DEFAULT 0
 );
 
+-- Trigger tự động tạo IDLoaiPhong (LPxxx)
 DELIMITER $$
 CREATE TRIGGER trg_LoaiPhong_BeforeInsert
 BEFORE INSERT ON LoaiPhong
@@ -41,18 +30,22 @@ FOR EACH ROW
 BEGIN
     DECLARE new_id INT;
     DECLARE prefix VARCHAR(3) DEFAULT 'LP';
-    SELECT IFNULL(MAX(CAST(SUBSTRING(IDLoaiPhong, 3) AS UNSIGNED)), 0) + 1 INTO new_id FROM LoaiPhong;
+    SELECT IFNULL(MAX(CAST(SUBSTRING(IDLoaiPhong, 3) AS UNSIGNED)), 0) + 1
+    INTO new_id
+    FROM LoaiPhong;
     SET NEW.IDLoaiPhong = CONCAT(prefix, LPAD(new_id, 3, '0'));
 END$$
 DELIMITER ;
 
+
 -- =========================================
--- 2. Bảng Phong
+-- 2. Bảng Phòng
 -- =========================================
 CREATE TABLE Phong (
     IDPhong CHAR(10) PRIMARY KEY,
     IDLoaiPhong CHAR(10) NOT NULL,
     SoPhong VARCHAR(20) NOT NULL,
+    TenPhong VARCHAR(100) NOT NULL,
     MoTa TEXT,
     UuTienChinh BOOLEAN DEFAULT 0,
     XepHangSao INT,
@@ -61,6 +54,7 @@ CREATE TABLE Phong (
     FOREIGN KEY (IDLoaiPhong) REFERENCES LoaiPhong(IDLoaiPhong)
 );
 
+-- Trigger tự động tạo IDPhong (Pxxx)
 DELIMITER $$
 CREATE TRIGGER trg_Phong_BeforeInsert
 BEFORE INSERT ON Phong
@@ -74,13 +68,14 @@ END$$
 DELIMITER ;
 
 -- =========================================
--- 3. Tiện Nghi
+-- 3. Bảng Tiện Nghi
 -- =========================================
 CREATE TABLE TienNghi (
     IDTienNghi CHAR(10) PRIMARY KEY,
     TenTienNghi VARCHAR(100) NOT NULL
 );
 
+-- Trigger tự động tạo IDTienNghi (TNxxx)
 DELIMITER $$
 CREATE TRIGGER trg_TienNghi_BeforeInsert
 BEFORE INSERT ON TienNghi
@@ -94,7 +89,7 @@ END$$
 DELIMITER ;
 
 -- =========================================
--- 4. Tiện Nghi Phòng (Liên kết)
+-- 4. Bảng Tiện Nghi Phòng (Liên kết)
 -- =========================================
 CREATE TABLE TienNghiPhong (
     IDTienNghiPhong CHAR(10) PRIMARY KEY,
@@ -104,6 +99,7 @@ CREATE TABLE TienNghiPhong (
     FOREIGN KEY (IDTienNghi) REFERENCES TienNghi(IDTienNghi)
 );
 
+-- Trigger tự động tạo IDTienNghiPhong (TNPxxx)
 DELIMITER $$
 CREATE TRIGGER trg_TienNghiPhong_BeforeInsert
 BEFORE INSERT ON TienNghiPhong
@@ -115,53 +111,6 @@ BEGIN
     SET NEW.IDTienNghiPhong = CONCAT(prefix, LPAD(new_id, 3, '0'));
 END$$
 DELIMITER ;
-
-
--- =========================================
--- 5. Đặt Phòng
--- =========================================
-CREATE TABLE DatPhong (
-    IDDatPhong INT AUTO_INCREMENT PRIMARY KEY,
-    IDKhachHang INT NULL,
-    IDPhong INT NOT NULL,
-    NgayDatPhong DATE DEFAULT (CURRENT_DATE),
-    NgayNhanPhong DATE NOT NULL,
-    NgayTraPhong DATE NOT NULL,
-    TongTien DECIMAL(18,2) NOT NULL,
-    TienCoc DECIMAL(18,2) DEFAULT 0,
-    TrangThai VARCHAR(50),
-    TrangThaiThanhToan VARCHAR(50),
-    FOREIGN KEY (IDKhachHang) REFERENCES KhachHang(IDKhachHang),
-    FOREIGN KEY (IDPhong) REFERENCES Phong(IDPhong)
-);
-
--- =========================================
--- 6. Hóa Đơn
--- =========================================
-CREATE TABLE HoaDon (
-    IDHoaDon INT AUTO_INCREMENT PRIMARY KEY,
-    IDDatPhong INT NOT NULL,
-    NgayLap DATETIME DEFAULT CURRENT_TIMESTAMP,
-    TongTien DECIMAL(18,2) NOT NULL,
-    TienCoc DECIMAL(18,2) DEFAULT 0,
-    TienThanhToan DECIMAL(18,2),
-    TrangThaiThanhToan VARCHAR(50),
-    GhiChu TEXT,
-    FOREIGN KEY (IDDatPhong) REFERENCES DatPhong(IDDatPhong)
-);
-
--- =========================================
--- 7. Lịch Sử Đặt Phòng
--- =========================================
-CREATE TABLE LichSuDatPhong (
-    IDLichSu INT AUTO_INCREMENT PRIMARY KEY,
-    IDDatPhong INT NOT NULL,
-    TrangThaiCu VARCHAR(50),
-    TrangThaiMoi VARCHAR(50),
-    NgayCapNhat DATETIME DEFAULT CURRENT_TIMESTAMP,
-    GhiChu TEXT,
-    FOREIGN KEY (IDDatPhong) REFERENCES DatPhong(IDDatPhong)
-);
 
 -- =========================================
 -- 5. Bảng Dịch Vụ
@@ -197,83 +146,57 @@ CREATE TABLE CTHDDV (
     -- FOREIGN KEY IDHoaDon: Cần bổ sung khi tạo bảng HoaDon
 );
 
-SHOW TABLES;
+-- =========================================
+-- DỮ LIỆU MẪU (Bắt đầu từ đây)
+-- =========================================
 
-INSERT INTO KhachHang (HoTen, NgaySinh, SoDienThoai, Email)
-VALUES
-('Nguyen Van A', '1998-05-12', '0901234567', 'a@example.com'),
-('Tran Thi B', '2000-09-23', '0902345678', 'b@example.com'),
-('Le Van C', '1995-03-10', '0903456789', 'c@example.com');
+-- Insert data into LoaiPhong (không cần ID vì trigger tự tạo)
+INSERT INTO LoaiPhong (TenLoaiPhong, MoTa, SoNguoiToiDa, GiaCoBanMotDem, UrlAnhLoaiPhong, UuTienChinh) VALUES
+('Phòng Đơn', 'Phòng đơn tiêu chuẩn cho 1 người', 1, 450000, 'images/loai_phong_don.jpg', 1),
+('Phòng Đôi', 'Phòng đôi cho 2 người, đầy đủ tiện nghi', 2, 750000, 'images/loai_phong_doi.jpg', 1),
+('Phòng Gia Đình', 'Phòng rộng rãi cho 4 người', 4, 1200000, 'images/loai_phong_giadinh.jpg', 0),
+('Phòng VIP', 'Phòng cao cấp với view thành phố', 2, 1800000, 'images/loai_phong_vip.jpg', 1),
+('Phòng Suite', 'Phòng sang trọng nhất của khách sạn', 2, 2500000, 'images/loai_phong_suite.jpg', 0);
 
-SELECT * FROM khachhang;
-SELECT * FROM TaiKhoanNguoiDung;
+-- Insert data into Phong (không cần IDPhong)
+INSERT INTO Phong (IDLoaiPhong, SoPhong, TenPhong, MoTa, UuTienChinh, XepHangSao, TrangThai, UrlAnhPhong) VALUES
+('LP001', '101', 'Phòng Đơn 101', 'Phòng đơn có cửa sổ hướng vườn', 1, 3, 'Trống', 'images/phong101.jpg'),
+('LP001', '102', 'Phòng Đơn 102', 'Phòng đơn nhỏ gọn, yên tĩnh', 0, 3, 'Đang dọn', 'images/phong102.jpg'),
+('LP002', '201', 'Phòng Đôi 201', 'Phòng đôi view hồ bơi', 1, 4, 'Trống', 'images/phong201.jpg'),
+('LP002', '202', 'Phòng Đôi 202', 'Phòng đôi tiêu chuẩn', 0, 4, 'Đang thuê', 'images/phong202.jpg'),
+('LP003', '301', 'Phòng Gia Đình 301', 'Phòng gia đình 2 giường lớn', 1, 4, 'Trống', 'images/phong301.jpg'),
+('LP003', '302', 'Phòng Gia Đình 302', 'Phòng gia đình view thành phố', 0, 4, 'Trống', 'images/phong302.jpg'),
+('LP004', '401', 'Phòng VIP 401', 'Phòng VIP ban công lớn', 1, 5, 'Đang thuê', 'images/phong401.jpg'),
+('LP004', '402', 'Phòng VIP 402', 'Phòng VIP view biển', 0, 5, 'Trống', 'images/phong402.jpg'),
+('LP005', '501', 'Phòng Suite 501', 'Phòng Suite sang trọng', 1, 5, 'Trống', 'images/phong501.jpg'),
+('LP005', '502', 'Phòng Suite 502', 'Phòng Suite tầng cao nhất', 0, 5, 'Đang bảo trì', 'images/phong502.jpg');
 
--- 1. Thêm khách hàng (dù là nhân viên, vẫn là bản ghi trong KhachHang)
-INSERT INTO KhachHang (HoTen, NgaySinh, SoDienThoai, Email)
-VALUES ('Nhan Vien', '1998-05-15', '0905123456', 'nhanvien@example.com');
-
--- 2. Lấy IDKhachHang vừa tạo
-SELECT IDKhachHang FROM KhachHang WHERE Email = 'nhanvien@example.com';
--- Mật khẩu đã được mã hóa bằng bcrypt: "123456"
-INSERT INTO TaiKhoanNguoiDung (IDKhachHang, MatKhau, VaiTro)
-VALUES (4, '$2a$10$ZMRF/jCS/nk9kF/aYbgPEeNlAsRZ5GkqBvlua306IBoIRC6HSxKma', 2);
-
-SELECT kh.Email, kh.HoTen, tk.MatKhau, tk.VaiTro
-FROM KhachHang kh
-JOIN TaiKhoanNguoiDung tk ON kh.IDKhachHang = tk.IDKhachHang;
-
-
-CREATE TABLE pending_users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    hoten VARCHAR(100),
-    email VARCHAR(255) UNIQUE,
-    password VARCHAR(255),
-    sodienthoai VARCHAR(15) NULL,
-    ngaysinh DATE NULL,
-    otp CHAR(6),
-    otp_expired_at DATETIME,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-SELECT * FROM taikhoannguoidung
-
-SELECT * FROM Tiennghi
-
-
--- 1) Loại phòng mẫu
-INSERT INTO LoaiPhong (TenLoaiPhong, MoTa, SoNguoiToiDa, GiaCoBanMotDem, UrlAnhLoaiPhong, UuTienChinh)
-VALUES
-('Phòng đơn', 'Phòng 1 giường, phù hợp 1 người', 1, 500000, 'phongdon.jpg', 0),
-('Phòng đôi', 'Phòng 2 người hoặc 2 giường', 2, 800000, 'phongdoi.jpg', 0),
-('Phòng VIP', 'Phòng cao cấp, đầy đủ tiện nghi', 3, 1500000, 'phongvip.jpg', 1);
-
--- 2) Phòng mẫu (gắn IDLoaiPhong tương ứng: 1,2,3)
-INSERT INTO Phong (IDLoaiPhong, SoPhong, MoTa, UuTienChinh, XepHangSao, TrangThai, UrlAnhPhong)
-VALUES
-(1, '101', 'Phòng đơn tầng 1', 0, 3, 'Trống', 'phong101.jpg'),
-(2, '102', 'Phòng đôi tầng 1', 0, 4, 'Trống', 'phong102.jpg'),
-(3, '103', 'Phòng VIP tầng 1', 1, 5, 'Đang sử dụng', 'phong103.jpg'),
-(1, '201', 'Phòng đơn tầng 2', 0, 3, 'Trống', 'phong201.jpg'),
-(2, '202', 'Phòng đôi tầng 2', 0, 4, 'Bảo trì', 'phong202.jpg');
-
--- 3) Tiện nghi mẫu
+-- Insert data into TienNghi (không cần ID)
 INSERT INTO TienNghi (TenTienNghi) VALUES
 ('Wi-Fi miễn phí'),
 ('Máy lạnh'),
-('Tivi Màn hình phẳng'),
+('Tivi màn hình phẳng'),
 ('Bồn tắm'),
-('Minibar'),
-('Ban công'),
-('Dịch vụ phòng 24/7');
+('Minibar');
 
--- 4) Liên kết tiện nghi - phòng (IDPhong căn cứ theo AUTO_INCREMENT thứ tự phía trên)
+-- Insert data into TienNghiPhong
 INSERT INTO TienNghiPhong (IDPhong, IDTienNghi) VALUES
-(1,1),(1,2),(1,3),
-(2,1),(2,2),(2,3),(2,5),
-(3,1),(3,2),(3,3),(3,4),(3,5),
-(4,1),(4,2),(4,3),
-(5,1),(5,2);
+('P001', 'TN001'),
+('P001', 'TN002'),
+('P002', 'TN001'),
+('P003', 'TN001'),
+('P003', 'TN003'),
+('P005', 'TN004'),
+('P005', 'TN002'),
+('P007', 'TN005'),
+('P009', 'TN001'),
+('P009', 'TN003');
 
+-- =========================================
+-- DỮ LIỆU MẪU CHO DỊCH VỤ
+-- =========================================
+dichvudichvudichvu
+-- SỬA ĐỔI: Cập nhật dữ liệu mẫu cho TenDichVu
 INSERT INTO DichVu (IDDichVu, TenDichVu, TienDichVu, HinhDichVu) VALUES
 ('DV001', 'Ăn sáng tại phòng', 60000.00, 'images/dv_breakfast.jpg'),
 ('DV002', 'Giặt là', 20000.00, 'images/dv_laundry.jpg'),
