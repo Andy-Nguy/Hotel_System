@@ -9,25 +9,28 @@ use App\Http\Controllers\Rooms\RoomRepository;
 
 class RoomController extends Controller
 {
-    /**
-     * GET /api/rooms/available
-     * Lấy tất cả phòng trống trong khoảng thời gian
-     */
     private RoomRepository $roomRepository;
-     public function __construct(RoomRepository $roomRepository)
+
+    public function __construct(RoomRepository $roomRepository)
     {
         $this->roomRepository = $roomRepository;
     }
+
+    /**
+     * ============================================
+     * GET /api/rooms/available
+     * Lấy tất cả phòng trống trong khoảng thời gian
+     * ============================================
+     */
     public function getAvailableRooms(Request $request)
     {
         $checkIn = $request->query('check_in');
         $checkOut = $request->query('check_out');
 
-        // Validate ngày
         if (!$this->validateDates($checkIn, $checkOut)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Vui lòng cung cấp ngày hợp lệ (check_in < check_out)',
+                'message' => 'Ngày nhận phòng phải trước ngày trả phòng.',
             ], 400);
         }
 
@@ -36,13 +39,17 @@ class RoomController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $rooms,
-            'message' => empty($rooms) ? 'Không tìm thấy phòng trống nào.' : '',
+            'message' => $rooms->isEmpty()
+                ? 'Không tìm thấy phòng trống nào.'
+                : '',
         ]);
     }
 
     /**
+     * ===================================================
      * GET /api/rooms/available/by_type
-     * Lấy phòng trống theo loại phòng
+     * Lấy danh sách phòng trống theo loại phòng
+     * ===================================================
      */
     public function getAvailableRoomsByType(Request $request)
     {
@@ -69,29 +76,69 @@ class RoomController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $rooms,
-            'message' => empty($rooms)
+            'message' => $rooms->isEmpty()
                 ? 'Không tìm thấy phòng trống thuộc loại này.'
                 : '',
         ]);
     }
 
     /**
-     * Hàm dùng chung để truy vấn phòng trống
+     * ============================================
+     * GET /api/rooms/available/by_id
+     * Kiểm tra 1 phòng cụ thể có trống hay không
+     * ============================================
+     */
+    public function getAvailableRoomById(Request $request)
+    {
+        $checkIn = $request->query('check_in');
+        $checkOut = $request->query('check_out');
+        $roomId = $request->query('id');
+
+        if (empty($roomId)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Vui lòng cung cấp ID phòng (id).',
+            ], 400);
+        }
+
+        if (!$this->validateDates($checkIn, $checkOut)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ngày nhận phòng phải trước ngày trả phòng.',
+            ], 400);
+        }
+
+        $room = $this->roomRepository->findSingleAvailableRoom($checkIn, $checkOut, $roomId);
+
+        if (!$room) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Phòng không trống hoặc đang được đặt.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $room,
+        ]);
+    }
+
+    /**
+     * ============================================
+     * Hàm chung truy vấn phòng trống
+     * ============================================
      */
     private function executeRoomQuery(string $checkIn, string $checkOut, ?string $roomTypeId = null)
     {
         $query = DB::table('Phong as P')
             ->join('LoaiPhong as LP', 'P.IDLoaiPhong', '=', 'LP.IDLoaiPhong')
-            ->leftJoin('DatPhong as DP', function ($join) use ($checkIn, $checkOut) {
-                $join->on('P.IDPhong', '=', 'DP.IDPhong')
-                    ->whereIn('DP.TrangThai', [1, 2, 3]) // Đang đặt, đang ở, giữ chỗ
-                    ->where(function ($q) use ($checkIn, $checkOut) {
-                        $q->where('DP.NgayNhanPhong', '<', $checkOut)
-                          ->where('DP.NgayTraPhong', '>', $checkIn);
-                    });
-            })
-            ->whereNull('DP.IDDatPhong')
-            ->where('P.TrangThai', 'Trống');
+            ->where('P.TrangThai', 'Trống')
+            // ->where('P.IsActive', true) // nếu có cột này
+            ->whereNotExists(function ($sub) {
+                $sub->from('DatPhong as DP')
+                    ->whereColumn('DP.IDPhong', 'P.IDPhong')
+                    ->whereIn('DP.TrangThai', [1, 2, 3]); // Chờ xác nhận, Đã xác nhận, Đang sử dụng
+            });
 
         if ($roomTypeId) {
             $query->where('P.IDLoaiPhong', $roomTypeId);
@@ -104,37 +151,16 @@ class RoomController extends Controller
                 'P.MoTa',
                 'P.UrlAnhPhong',
                 'LP.TenLoaiPhong',
-                // 'LP.GiaCoBanMotDem',
                 'P.SoNguoiToiDa'
             )
-            // ->orderBy('LP.GiaCoBanMotDem', 'ASC')
+            ->orderBy('P.SoPhong')
             ->get();
     }
-    public function getAvailableRoomById()
-{
-    $checkIn  = $_GET['check_in'] ?? null;
-    $checkOut = $_GET['check_out'] ?? null;
-    $roomId   = $_GET['id'] ?? null;
 
-    // Kiểm tra tham số
-    if (empty($roomId)) {
-        return response()->json(['error' => 'Vui lòng cung cấp ID phòng (id).'], 400);
-    }
-
-    if (!$this->validateDates($checkIn, $checkOut)) {
-        return;
-    }
-    // Gọi hàm repository kiểm tra 1 phòng cụ thể
-    $room = $this->roomRepository->findSingleAvailableRoom($checkIn, $checkOut, $roomId);
-
-    if (!$room) {
-        return response()->json(['error' => 'Phòng không trống hoặc bị trùng lịch đặt.'], 404);
-    }
-
-    return response()->json(['status' => 'success', 'data' => $room], 200);
-}
     /**
-     * Kiểm tra tính hợp lệ của ngày
+     * ============================================
+     * Hàm kiểm tra tính hợp lệ của ngày
+     * ============================================
      */
     private function validateDates(?string $checkIn, ?string $checkOut): bool
     {
