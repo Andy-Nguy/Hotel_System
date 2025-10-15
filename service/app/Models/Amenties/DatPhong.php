@@ -52,6 +52,12 @@ class DatPhong extends Model
     {
         return $this->belongsTo(\App\Models\Amenties\Phong::class, 'IDPhong', 'IDPhong');
     }
+    
+    // Relation to invoice (HoaDon) - one booking may have one invoice
+    public function hoaDon()
+    {
+        return $this->hasOne(\App\Models\Amenties\HoaDon::class, 'IDDatPhong', 'IDDatPhong');
+    }
 
     public function getRouteKeyName()
     {

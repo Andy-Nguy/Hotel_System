@@ -249,7 +249,14 @@
                         $img = isset($room['UrlAnhLoaiPhong']) ? $room['UrlAnhLoaiPhong'] : '1.jpg';
                         $name = isset($room['TenLoaiPhong']) ? $room['TenLoaiPhong'] : '';
                         $idLoai = isset($room['IDLoaiPhong']) ? $room['IDLoaiPhong'] : '';
-                        $displayPrice = $price !== '' ? number_format((float) $price, 0, '.', ',') .  '₫' : '';
+                        // determine price from room data - prefer GiaCoBanMotDem, then Gia
+                        $price = '';
+                        if (isset($room['GiaCoBanMotDem']) && $room['GiaCoBanMotDem'] !== null) {
+                            $price = $room['GiaCoBanMotDem'];
+                        } elseif (isset($room['Gia']) && $room['Gia'] !== null) {
+                            $price = $room['Gia'];
+                        }
+                        $displayPrice = ($price !== '' && $price !== null) ? number_format((float) $price, 0, '.', ',') .  '₫' : '';
                         $imgUrl = '/HomePage/img/rooms/' . rawurlencode($img); // root-relative
                         ?>
                         <div class="<?php echo $colClass; ?>">
@@ -318,54 +325,40 @@
                 </div>
                 <div class="col-md-8">
                     <div class="owl-carousel owl-theme">
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/1.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room cleaning</div>
-                                <div class="amount">$50<span>/ month</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
+                        <?php if (!empty($services) && is_array($services)): ?>
+                            <?php foreach ($services as $i => $s): ?>
+                                <?php
+                                    $img = isset($s['HinhDichVu']) ? $s['HinhDichVu'] : '1.jpg';
+                                    $imgUrl = '/HomePage/img/pricing/' . rawurlencode($img);
+                                    $name = $s['TenDichVu'] ?? 'Dịch vụ';
+                                    $price = isset($s['TienDichVu']) ? number_format((float)$s['TienDichVu'], 0, '.', ',') . '₫' : '';
+                                    $features = (!empty($s['ThongTin']) && is_array($s['ThongTin'])) ? $s['ThongTin'] : [];
+                                ?>
+                                <div class="pricing-card">
+                                    <img src="<?php echo $imgUrl; ?>" alt="<?php echo htmlspecialchars($name); ?>">
+                                    <div class="desc">
+                                        <div class="name"><?php echo htmlspecialchars($name); ?></div>
+                                        <?php if ($price): ?><div class="amount"><?php echo $price; ?><span></span></div><?php endif; ?>
+                                        <ul class="list-unstyled list">
+                                            <?php if (!empty($features)): ?>
+                                                <?php foreach ($features as $f): ?>
+                                                    <li><i class="ti-check"></i> <?php echo htmlspecialchars($f['ThongTinDV'] ?? ''); ?></li>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <li><i class="ti-close unavailable"></i>Không có thông tin</li>
+                                            <?php endif; ?>
+                                        </ul>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="pricing-card">
+                                <img src="HomePage/img/pricing/1.jpg" alt="">
+                                <div class="desc">
+                                    <div class="name">Không có dịch vụ</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/2.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Drinks included</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/3.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room Breakfast</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/4.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Safe & Secure</div>
-                                <div class="amount">$15<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -972,7 +965,8 @@
     <script src="HomePage/js/select2.js"></script>
     <script src="HomePage/js/datepicker.js"></script>
     <script src="HomePage/js/smooth-scroll.min.js"></script>
-    <script src="HomePage/js/custom.js"></script><script>
+    <script src="HomePage/js/custom.js"></script>
+    <script>
     // Blade render URL thực tế trước khi JS chạy
 
     // Sử dụng URL TƯƠNG ĐỐI để tránh lặp host – Browser tự giữ origin (127.0.0.1:8000)

@@ -124,4 +124,74 @@ class DatPhongController extends Controller
             'current' => $current,
         ]);
     }
+
+    /**
+     * Return booking details for a specific IDDatPhong including invoice and services used
+     * GET /api/datphong/{iddatphong}
+     */
+    public function show($iddatphong)
+    {
+        $dp = DatPhong::with(['phong', 'khachHang', 'hoaDon.cthddvs.dichVu'])
+            ->where('IDDatPhong', $iddatphong)
+            ->first();
+
+        if (!$dp) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+        $payStatus1 = [
+            1 => 'Chưa thanh toán',
+            2 => 'Đã thanh toán',
+        ];
+        $hoaDon = null;
+        if ($dp->hoaDon) {
+            $hoaDon = [
+                'IDHoaDon' => $dp->hoaDon->IDHoaDon,
+                'NgayLap' => $dp->hoaDon->NgayLap ? $dp->hoaDon->NgayLap->format('Y-m-d H:i:s') : null,
+                'TongTienHoaDon' => (float) $dp->hoaDon->TongTien,
+                'TienCoc' => (float) $dp->hoaDon->TienCoc,
+                'TienThanhToan' => (float) $dp->hoaDon->TienThanhToan,
+                'TrangThaiThanhToan' => $dp->hoaDon->TrangThaiThanhToan,
+                'TrangThaiThanhToanLabel' => $payStatus1[$dp->hoaDon->TrangThaiThanhToan] ?? 'Không xác định',
+                'GhiChu' => $dp->hoaDon->GhiChu,
+                'DichVus' => $dp->hoaDon->cthddvs->map(function ($c) {
+                    return [
+                        'TenDichVu' => $c->dichVu ? $c->dichVu->TenDichVu : null,
+                        // use the price recorded on the invoice item (CTHDDV)
+                        'TienDichVu' => (float) $c->TienDichVu,
+                        'ThoiGianThucHien' => $c->ThoiGianThucHien ? $c->ThoiGianThucHien->format('Y-m-d H:i:s') : null,
+                    ];
+                })->values(),
+            ];
+        }
+        $statusLabels = [
+            1 => 'Chờ xác nhận',
+            2 => 'Đã xác nhận',
+            0 => 'Đã hủy',
+            3 => 'Đang sử dụng',
+            4 => 'Hoàn thành',
+        ];
+        $payStatus2 = [
+            1 => 'Chưa thanh toán',
+            2 => 'Đã thanh toán',
+            0 => 'Đã cọc',
+            -1 => 'Chưa cọc',
+        ];
+        $result = [
+            'IDDatPhong' => $dp->IDDatPhong,
+            'SoPhong' => $dp->phong ? $dp->phong->SoPhong : null,
+            'TenPhong' => $dp->phong ? $dp->phong->TenPhong : null,
+            'GiaPhong' => (float) $dp->GiaPhong,
+            'NgayDatPhong' => $dp->NgayDatPhong ? $dp->NgayDatPhong->format('Y-m-d') : null,
+            'NgayNhanPhong' => $dp->NgayNhanPhong ? $dp->NgayNhanPhong->format('Y-m-d') : null,
+            'NgayTraPhong' => $dp->NgayTraPhong ? $dp->NgayTraPhong->format('Y-m-d') : null,
+            'TongTienPhong' => (float) $dp->TongTien,
+            'TrangThaiDatPhong' => $dp->TrangThai,
+            'TrangThaiDatPhongLabel' => $statusLabels[$dp->TrangThai] ?? 'Không xác định',
+            'TrangThaiThanhToan' => $dp->TrangThaiThanhToan,
+            'TrangThaiThanhToanLabel' => $payStatus2[$dp->TrangThaiThanhToan] ?? 'Không xác định',
+            'HoaDon' => $hoaDon,
+        ];
+
+        return response()->json($result);
+    }
 }

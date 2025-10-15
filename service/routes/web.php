@@ -67,7 +67,11 @@ Route::get('/', function (Request $request) use ($callApi) {
         }
     }
 
-    return view('welcome', compact('rooms'));
+    // Fetch services to render on the homepage (server-side)
+    $svcData = $callApi('/api/dichvu') ?: [];
+    $services = is_array($svcData) ? $svcData : [];
+
+    return view('welcome', compact('rooms', 'services'));
 });
 
 

@@ -60,3 +60,8 @@ Route::post('/taikhoan', [AuthController::class, 'updateProfileApi']);
 
 // Booking API: fetch bookings by email or idkhachhang
 Route::get('/datphong', [App\Http\Controllers\Amenties\DatPhongController::class, 'index']);
+// Booking details: include HoaDon and used services
+Route::get('/datphong/{iddatphong}', [App\Http\Controllers\Amenties\DatPhongController::class, 'show']);
+
+// Services API
+Route::get('/dichvu', [App\Http\Controllers\Amenties\DichVuController::class, 'index']);
