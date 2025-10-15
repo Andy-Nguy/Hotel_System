@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Amenties\TienNghiController;
 use App\Http\Controllers\Amenties\PhongController;
 use App\Http\Controllers\Amenties\LoaiPhongController;
+use App\Http\Controllers\Rooms\RoomController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,6 +28,13 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('session')->get('/auth/check-role', [AuthController::class, 'checkRole']);
+
+Route::prefix('rooms')->group(function () {
+    Route::get('/available', [RoomController::class, 'getAvailableRooms']);
+    Route::get('/available/by_type', [RoomController::class, 'getAvailableRoomsByType']);
+    Route::get('/available/by_room', [RoomController::class, 'getAvailableRoomById']);
+});
+
 
 
 // CRUD Tiện nghi
