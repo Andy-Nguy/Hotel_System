@@ -404,6 +404,8 @@
     </style>
 </head>
 <body>
+    <!-- Top alert container -->
+    <div id="topAlertContainer" style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:2000; width:90%; max-width:600px; display:none;"></div>
     <!-- Progress scroll totop -->
     <div class="progress-wrap cursor-pointer">
         <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
@@ -416,11 +418,11 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-6 col-md-6 cappa-logo-wrap">
-                    <a href="index.html" class="cappa-logo"><img src="HomePage/img/logo.png" alt="Cappa Luxury Hotel"></a>
+                    <a href="./" class="cappa-logo"><img src="HomePage/img/logo.png" alt="Cappa Luxury Hotel"></a>
                 </div>
-                <div class="col-6 col-md-6 text-right">
-                    <a href="index.html" style="font-family: 'Barlow', sans-serif; color: #aa8453; font-weight: 500;">← Back to Home</a>
-                </div>
+                <!-- <div class="col-6 col-md-6 text-right">
+                    <a href="./" style="font-family: 'Barlow', sans-serif; color: #aa8453; font-weight: 500;">← Back to Home</a>
+                </div> -->
             </div>
         </div>
     </header>
@@ -739,6 +741,9 @@
             paymentMethod: null
         };
 
+        // Paths (rendered by Blade so routes are correct relative URLs)
+        const LOGIN_PATH = '{!! route('login', [], false) !!}';
+
         // Initialize and load booking from backend API (no mock data)
         document.addEventListener('DOMContentLoaded', function() {
             loadBookingFromURL();
@@ -756,6 +761,54 @@
             bookingData.selectedRoom = roomId;
             bookingData.checkIn = checkIn;
             bookingData.checkOut = checkOut;
+
+            // Authentication check: if user is not logged in, show a modal prompting to login
+            const userEmail = localStorage.getItem('email');
+            if (!userEmail) {
+                // Save redirect for after login
+                localStorage.setItem('redirect_after_login', window.location.pathname + window.location.search);
+
+                // Show a brief alert banner, then show modal (Bootstrap) as non-dismissible (force login)
+                showAuthAlert('Bạn chưa đăng nhập — bạn sẽ được chuyển tới trang đăng nhập để tiếp tục đặt phòng.');
+                if (window.jQuery && typeof window.jQuery('#loginRequiredModal').modal === 'function') {
+                    // small delay so the banner is visible before modal appears
+                    setTimeout(() => window.jQuery('#loginRequiredModal').modal({ backdrop: 'static', keyboard: false, show: true }), 600);
+                } else {
+                    // Fallback: show banner briefly then redirect to login (no cancel)
+                    setTimeout(() => { window.location.href = LOGIN_PATH; }, 1200);
+                }
+
+                // stop further processing until user acts
+                return;
+            }
+
+            // Auto-fill guest info from localStorage if available
+            const storedName = localStorage.getItem('userName') || '';
+            const storedPhone = localStorage.getItem('phone') || '';
+            const nameParts = storedName.trim().split(/\s+/);
+            const firstNamePrefill = nameParts.length ? nameParts.shift() : '';
+            const lastNamePrefill = nameParts.length ? nameParts.join(' ') : '';
+
+            // Fill guest form fields if present
+            const firstEl = document.getElementById('firstName');
+            const lastEl = document.getElementById('lastName');
+            const emailEl = document.getElementById('email');
+            const phoneEl = document.getElementById('phone');
+            if (firstEl && !firstEl.value) firstEl.value = firstNamePrefill;
+            if (lastEl && !lastEl.value) lastEl.value = lastNamePrefill;
+            if (emailEl && !emailEl.value) emailEl.value = userEmail;
+            if (phoneEl && !phoneEl.value) phoneEl.value = storedPhone;
+
+            // Seed bookingData.guestInfo so updatePaymentSummary works immediately
+            bookingData.guestInfo = {
+                firstName: firstEl ? firstEl.value.trim() : firstNamePrefill,
+                lastName: lastEl ? lastEl.value.trim() : lastNamePrefill,
+                email: userEmail,
+                phone: phoneEl ? phoneEl.value.trim() : storedPhone,
+                adults: document.getElementById('adults') ? document.getElementById('adults').value : '2',
+                children: document.getElementById('children') ? document.getElementById('children').value : '0',
+                specialRequests: document.getElementById('specialRequests') ? document.getElementById('specialRequests').value : ''
+            };
 
             // Fetch room details from API
             try {
@@ -1003,6 +1056,45 @@
         document.getElementById('phone')?.addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/[^\d+\-\(\)\s]/g, '');
         });
+    </script>
+    <!-- Login required modal -->
+    <div class="modal fade" id="loginRequiredModal" tabindex="-1" role="dialog" aria-labelledby="loginRequiredLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginRequiredLabel">Cần đăng nhập</h5>
+                    <!-- no close button: user must login -->
+                </div>
+                <div class="modal-body">
+                    <p>Vui lòng đăng nhập để tiếp tục đặt phòng. Bạn sẽ được chuyển về trang này sau khi đăng nhập.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="loginNowBtn" class="btn btn-primary">Đăng nhập</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginNowBtn')?.addEventListener('click', function() {
+            // redirect to login page (LOGIN_PATH is rendered earlier)
+            window.location.href = LOGIN_PATH;
+        });
+    </script>
+
+    <script>
+        // Show a temporary top alert message (Vietnamese). type: 'info'|'danger'|'success'
+        function showAuthAlert(message, type = 'info', timeout = 3000) {
+            const container = document.getElementById('topAlertContainer');
+            if (!container) return;
+            container.innerHTML = `<div class="alert alert-${type}" role="alert" style="margin:0;">
+                ${message}
+            </div>`;
+            container.style.display = 'block';
+            setTimeout(() => {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }, timeout);
+        }
     </script>
 </body>
 </html>

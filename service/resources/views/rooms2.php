@@ -484,6 +484,201 @@
     <script src="HomePage/js/datepicker.js"></script>
     <script src="HomePage/js/smooth-scroll.min.js"></script>
     <script src="HomePage/js/custom.js"></script>
+    <!-- Availability modal helpers and room-by-type search -->
+    <div class="modal fade" id="availabilityModalByType" tabindex="-1" role="dialog" aria-labelledby="availabilityModalByTypeLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="availabilityModalByTypeLabel">Available Rooms</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="availabilityByTypeBody" class="row"></div>
+                </div>
+                <!-- <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.booking-inner .form1');
+        if (!form) return;
+
+        function showModal(elId) {
+            const modalEl = document.getElementById(elId);
+            if (!modalEl) return;
+            if (window.jQuery && typeof window.jQuery('#' + elId).modal === 'function') {
+                window.jQuery('#' + elId).modal('show');
+                return;
+            }
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            modalEl.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('modal-open');
+            let backdrop = document.querySelector('.modal-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                document.body.appendChild(backdrop);
+            }
+            const dismissEls = modalEl.querySelectorAll('[data-dismiss="modal"]');
+            dismissEls.forEach(el => {
+                if (!el._handler) {
+                    el._handler = function(evt) { evt && evt.preventDefault(); hideModal(elId); };
+                    el.addEventListener('click', el._handler);
+                }
+            });
+        }
+
+        function hideModal(elId) {
+            const modalEl = document.getElementById(elId);
+            if (!modalEl) return;
+            if (window.jQuery && typeof window.jQuery('#' + elId).modal === 'function') {
+                window.jQuery('#' + elId).modal('hide');
+                return;
+            }
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            modalEl.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.parentNode.removeChild(backdrop);
+        }
+
+        // parse dates like welcome page
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function parseDateFlexible(s) {
+            if (!s) return null;
+            if (s.indexOf('/') !== -1) {
+                const parts = s.split('/').map(p => p.trim());
+                if (parts.length === 3) return new Date(parts[2] + '-' + parts[1] + '-' + parts[0]);
+            }
+            const d = new Date(s);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const inputCheckIn = form.querySelector('#check_in') || form.querySelector('input[name="check_in"]') || form.querySelectorAll('.datepicker')[0];
+            const inputCheckOut = form.querySelector('#check_out') || form.querySelector('input[name="check_out"]') || form.querySelectorAll('.datepicker')[1];
+            const checkIn = inputCheckIn ? inputCheckIn.value : '';
+            const checkOut = inputCheckOut ? inputCheckOut.value : '';
+
+            const inDate = parseDateFlexible(checkIn);
+            const outDate = parseDateFlexible(checkOut);
+            if (inDate && outDate) {
+                const inTime = new Date(inDate.getFullYear(), inDate.getMonth(), inDate.getDate()).getTime();
+                const outTime = new Date(outDate.getFullYear(), outDate.getMonth(), outDate.getDate()).getTime();
+                if (inTime >= outTime) {
+                    const b = document.getElementById('availabilityByTypeBody');
+                    b.innerHTML = '<div class="col-12 text-center py-4 text-warning">Không thể check-in và check-out cùng một ngày. Vui lòng chọn ngày check-out ít nhất 1 ngày sau check-in.</div>';
+                    showModal('availabilityModalByType');
+                    return;
+                }
+            }
+
+            const modalBody = document.getElementById('availabilityByTypeBody');
+            modalBody.innerHTML = '<div class="col-12 text-center py-4">Loading...</div>';
+
+            try {
+                // Retrieve current type from URL or window scope
+                const urlParams = new URLSearchParams(window.location.search);
+                const type = urlParams.get('type') || '';
+                const url = new URL('/api/rooms/available/by_type', window.location.origin);
+                // The API expects 'room_type_id' (backend validation message shows this). Send that param.
+                if (type) url.searchParams.set('room_type_id', type);
+                if (checkIn) url.searchParams.set('check_in', checkIn);
+                if (checkOut) url.searchParams.set('check_out', checkOut);
+
+                const res = await fetch(url.toString(), { credentials: 'same-origin' });
+
+                // If server returns non-2xx show status and response body for debugging
+                if (!res.ok) {
+                    let bodyText;
+                    try { bodyText = await res.text(); } catch (e) { bodyText = '<unable to read response body>'; }
+                    console.error('rooms2: API returned non-OK', res.status, bodyText);
+                    modalBody.innerHTML = `
+                        <div class="col-12 text-center py-4 text-danger">
+                            Lỗi khi gọi API (HTTP ${res.status}).<br>
+                            ${escapeHtml(bodyText).slice(0, 300)}
+                            <div class="mt-2 small text-muted">Kiểm tra console hoặc network tab để biết chi tiết.</div>
+                        </div>`;
+                    showModal('availabilityModalByType');
+                    return;
+                }
+
+                const data = await res.json().catch(async (e) => {
+                    const txt = await res.text().catch(()=>'');
+                    console.error('rooms2: Failed to parse JSON', e, txt);
+                    return {__rawText: txt};
+                });
+
+                // normalize rooms array from several possible shapes
+                const rooms = Array.isArray(data) ? data : (data.rooms || data.data || data.items || []);
+
+                // If API returned an empty array but included a message or error, show it
+                if ((!rooms || rooms.length === 0)) {
+                    const serverMsg = (data && (data.message || data.error || data.msg)) ? (data.message || data.error || data.msg) : null;
+                    const debugSnippet = serverMsg ? escapeHtml(String(serverMsg)) : (data && data.__rawText ? escapeHtml(String(data.__rawText)) : '');
+                    modalBody.innerHTML = `\
+                        <div class="col-12 text-center py-4">\
+                            Không có phòng phù hợp cho ngày bạn chọn. Vui lòng thử chọn ngày khác hoặc liên hệ khách sạn để hỗ trợ.\
+                            ${debugSnippet ? ('<div class="mt-2 small text-muted">Info: ' + debugSnippet + '</div>') : '' }\
+                        </div>`;
+                } else {
+                    modalBody.innerHTML = rooms.map(room => {
+                        const id = room.id || room.MaPhong || room.IDPhong || '';
+                        const title = room.name || room.TenPhong || room.Ten || room.ten || 'Room';
+                        const desc = room.description || room.MoTa || room.mo_ta || '';
+                        const images = room.images || room.HinhAnh || room.hinh_anh || [];
+                        const img = (Array.isArray(images) && images.length) ? images[0] : (room.image || room.AnhDaiDien || 'HomePage/img/rooms/1.jpg');
+                        const capacity = room.capacity || room.SucChua || room.SoNguoi || room.SoNguoiToiDa || '';
+                        const price = room.price || room.Gia || room.gia || '';
+
+                        return `\
+                            <div class="col-md-6 mb-3">\
+                                <div class="card">\
+                                    <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">\
+                                        <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">\
+                                    </div>\
+                                    <div class="card-body">\
+                                        <h5 class="card-title">${title} ${id?('<small class="text-muted">#'+id+'</small>'):''}</h5>\
+                                        ${desc?('<p class="card-text">'+desc+'</p>') : ''}\
+                                        <p class="mb-1"><small class="text-muted">Capacity: ${capacity}</small></p>\
+                                        ${price?('<p class="mb-0"><strong>'+price+'</strong></p>'):''}\
+                                    </div>\
+                                    <div class="card-footer">\
+                                        <a href="/roomdetails.php?id=${id}" class="btn btn-sm btn-outline-primary">Details</a>\
+                                        <a href="/booking?room=${id}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}" class="btn btn-sm btn-primary">Book Now</a>\
+                                    </div>\
+                                </div>\
+                            </div>`;
+                    }).join('\n');
+                }
+
+                showModal('availabilityModalByType');
+            } catch (err) {
+                console.error('Error fetching availability by type', err);
+                modalBody.innerHTML = '<div class="col-12 text-center py-4 text-danger">Không thể tải danh sách phòng. Có thể do lỗi mạng hoặc không có phòng cho ngày đã chọn. Vui lòng thử lại sau hoặc liên hệ chúng tôi để được hỗ trợ.</div>';
+                showModal('availabilityModalByType');
+            }
+        });
+    });
+    </script>
 </body>
 
 <!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/rooms2.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:17 GMT -->
