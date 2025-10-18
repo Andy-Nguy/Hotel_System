@@ -171,3 +171,13 @@ Route::get('/tiennghi', function () {
     return view('amenties.tiennghi');
 })->name('tiennghi.index');
 Route::get('/taikhoan', [AuthController::class, 'taikhoan'])->name('taikhoan');
+
+//DuyAnh 
+// Booking page route (support both /booking and /booking.php links)
+Route::get('/booking', function (Request $request) {
+    // The booking view reads URL params via client-side JS (room, check_in, check_out)
+    return view('booking');
+});
+Route::get('/booking.php', function (Request $request) {
+    return view('booking');
+});
