@@ -1019,6 +1019,104 @@
         window.location.href = '/';
     }
 </script>
+
+<!-- Availability Modal (Bootstrap) -->
+<div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="availabilityModalLabel">Available Rooms</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="availabilityModalBody" class="row"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.booking-inner .form1') || document.getElementById('availability-form');
+    if (!form) return;
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const inputCheckIn = form.querySelector('#check_in') || form.querySelector('input[name="check_in"]') || form.querySelectorAll('.datepicker')[0];
+        const inputCheckOut = form.querySelector('#check_out') || form.querySelector('input[name="check_out"]') || form.querySelectorAll('.datepicker')[1];
+        const checkIn = inputCheckIn ? inputCheckIn.value : '';
+        const checkOut = inputCheckOut ? inputCheckOut.value : '';
+
+        const modalBody = document.getElementById('availabilityModalBody');
+        modalBody.innerHTML = '<div class="col-12 text-center py-4">Loading...</div>';
+
+        try {
+            const url = new URL('/api/rooms/available', window.location.origin);
+            if (checkIn) url.searchParams.set('check_in', checkIn);
+            if (checkOut) url.searchParams.set('check_out', checkOut);
+
+            const res = await fetch(url.toString(), { credentials: 'same-origin' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            const rooms = Array.isArray(data) ? data : (data.rooms || data.data || []);
+
+            if (!rooms || rooms.length === 0) {
+                modalBody.innerHTML = '<div class="col-12 text-center py-4">No rooms available for the selected dates.</div>';
+            } else {
+                modalBody.innerHTML = rooms.map(room => {
+                    const id = room.id || room.MaPhong || room.IDPhong || '';
+                    const title = room.name || room.TenPhong || room.Ten || room.ten || 'Room';
+                    const desc = room.description || room.MoTa || room.mo_ta || '';
+                    const images = room.images || room.HinhAnh || room.hinh_anh || [];
+                    const img = (Array.isArray(images) && images.length) ? images[0] : (room.image || room.AnhDaiDien || 'HomePage/img/rooms/1.jpg');
+                    const capacity = room.capacity || room.SucChua || room.SoNguoi || room.SoNguoiToiDa || '';
+                    const price = room.price || room.Gia || room.gia || '';
+
+                    return `\
+                        <div class="col-md-6 mb-3">\
+                            <div class="card">\
+                                <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">\
+                                    <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">\
+                                </div>\
+                                <div class="card-body">\
+                                    <h5 class="card-title">${title} ${id?('<small class="text-muted">#'+id+'</small>'):''}</h5>\
+                                    ${desc?('<p class="card-text">'+desc+'</p>') : ''}\
+                                    <p class="mb-1"><small class="text-muted">Capacity: ${capacity}</small></p>\
+                                    ${price?('<p class="mb-0"><strong>'+price+'</strong></p>'):''}\
+                                </div>\
+                                <div class="card-footer">\
+                                    <a href="/roomdetails?id=${id}" class="btn btn-sm btn-outline-primary">Details</a>\
+                                    <a href="/booking?room=${id}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}" class="btn btn-sm btn-primary">Book Now</a>\
+                                </div>\
+                            </div>\
+                        </div>`;
+                }).join('\n');
+            }
+
+            if (window.jQuery && typeof window.jQuery('#availabilityModal').modal === 'function') {
+                window.jQuery('#availabilityModal').modal('show');
+            } else {
+                document.getElementById('availabilityModal').style.display = 'block';
+            }
+
+        } catch (err) {
+            console.error('Error fetching availability', err);
+            modalBody.innerHTML = '<div class="col-12 text-center py-4 text-danger">Error loading rooms. See console for details.</div>';
+            if (window.jQuery && typeof window.jQuery('#availabilityModal').modal === 'function') {
+                window.jQuery('#availabilityModal').modal('show');
+            } else {
+                document.getElementById('availabilityModal').style.display = 'block';
+            }
+        }
+    });
+});
+</script>
+
 </body>
 
 <!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:06 GMT -->
