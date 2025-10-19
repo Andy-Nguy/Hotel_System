@@ -573,7 +573,7 @@
 
                     <div class="btn-group">
                         <button class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel Booking</button>
-                        <button class="btn btn-primary" onclick="nextStep(2)">Continue to Payment</button>
+                        <button class="btn btn-primary" onclick="goToPayment()">Continue to Payment</button>
                     </div>
                 </div>
 
@@ -906,6 +906,73 @@
             }
 
             showStep(step);
+        }
+
+        // Save pending booking and navigate to payment page
+        function goToPayment() {
+            // validate guest information (reuse nextStep validations)
+            const firstNameEl = document.getElementById('firstName');
+            const lastNameEl = document.getElementById('lastName');
+            const emailEl = document.getElementById('email');
+            const phoneEl = document.getElementById('phone');
+
+            const firstName = firstNameEl ? firstNameEl.value.trim() : '';
+            const lastName = lastNameEl ? lastNameEl.value.trim() : '';
+            const email = emailEl ? emailEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+
+            if (!firstName || !lastName || !email || !phone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            // update bookingData.guestInfo
+            bookingData.guestInfo = {
+                firstName,
+                lastName,
+                email,
+                phone,
+                adults: document.getElementById('adults') ? document.getElementById('adults').value : '2',
+                children: document.getElementById('children') ? document.getElementById('children').value : '0',
+                specialRequests: document.getElementById('specialRequests') ? document.getElementById('specialRequests').value : ''
+            };
+
+            // ensure computed fields (nights, total) exist
+            if (!bookingData.nights) {
+                const checkInDate = new Date(bookingData.checkIn);
+                const checkOutDate = new Date(bookingData.checkOut);
+                bookingData.nights = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)));
+            }
+            if (!bookingData.total) {
+                bookingData.total = (bookingData.roomPrice || 0) * bookingData.nights;
+            }
+
+            // Store a pending booking for the payment page to consume
+            try {
+                const pending = {
+                    roomId: bookingData.selectedRoom,
+                    roomName: bookingData.roomName,
+                    roomPrice: bookingData.roomPrice,
+                    checkIn: bookingData.checkIn,
+                    checkOut: bookingData.checkOut,
+                    nights: bookingData.nights,
+                    total: bookingData.total,
+                    guestInfo: bookingData.guestInfo
+                };
+                localStorage.setItem('pendingBooking', JSON.stringify(pending));
+            } catch (e) {
+                console.warn('Unable to save pendingBooking to localStorage', e);
+            }
+
+            // Navigate to payment page with minimal query params for convenience
+            const params = new URLSearchParams({ room: bookingData.selectedRoom || '', total: bookingData.total || 0 });
+            window.location.href = '/payment?' + params.toString();
         }
 
         function prevStep(step) {

@@ -181,3 +181,14 @@ Route::get('/booking', function (Request $request) {
 Route::get('/booking.php', function (Request $request) {
     return view('booking');
 });
+
+// Payment page routes (support both /payment and /payment.php links)
+Route::get('/payment', function (Request $request) {
+    // Payment page will read pending booking data from localStorage or URL params
+    return view('payment');
+});
+Route::get('/payment.php', function (Request $request) {
+    return view('payment');
+});
+
+// Note: Pay-at-hotel is handled inline on the payment page (no separate route)
