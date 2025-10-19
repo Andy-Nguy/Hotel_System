@@ -64,3 +64,21 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+Project notes
+
+This project includes a reusable Blade partial for the main navigation menu at `resources/views/partials/menu.blade.php`.
+
+To include the menu in any Blade view use:
+
+```
+@include('partials.menu')
+```
+
+If you need to pass data to the partial, use the second parameter:
+
+```
+@include('partials.menu', ['user' => $user])
+```

@@ -148,7 +148,7 @@
         </svg>
     </div>
     <!-- Menu -->
-    @include('partials.menu')
+    <?php echo $__env->make('partials.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -170,7 +170,7 @@
             <div class="row">
                 <div class="col-md-12 text-left caption mt-90">
                     <h5>Xin chào</h5>
-                    <h1>{{ $user->HoTen }}</h1>
+                    <h1><?php echo e($user->HoTen); ?></h1>
                 </div>
             </div>
         </div>
@@ -187,24 +187,24 @@
                             <div class="col-md-6">
                                 <div class="profile-info" id="profile-hoTen">
                                     <div class="profile-label">Họ tên</div>
-                                    <div class="profile-value" id="val-HoTen">{{ $user->HoTen }}</div>
+                                    <div class="profile-value" id="val-HoTen"><?php echo e($user->HoTen); ?></div>
                                 </div>
 
                                 <div class="profile-info" id="profile-phone">
                                     <div class="profile-label">Số điện thoại</div>
-                                    <div class="profile-value" id="val-SoDienThoai">{{ $user->SoDienThoai ?? 'Chưa cập nhật' }}</div>
+                                    <div class="profile-value" id="val-SoDienThoai"><?php echo e($user->SoDienThoai ?? 'Chưa cập nhật'); ?></div>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="profile-info" id="profile-email">
                                     <div class="profile-label">Email</div>
-                                    <div class="profile-value" id="val-Email">{{ $user->Email }}</div>
+                                    <div class="profile-value" id="val-Email"><?php echo e($user->Email); ?></div>
                                 </div>
 
                                 <div class="profile-info" id="profile-birth">
                                     <div class="profile-label">Ngày sinh</div>
-                                    <div class="profile-value" id="val-NgaySinh">{{ $user->NgaySinh ?? 'Chưa cập nhật' }}</div>
+                                    <div class="profile-value" id="val-NgaySinh"><?php echo e($user->NgaySinh ?? 'Chưa cập nhật'); ?></div>
                                 </div>
                             </div>
                         </div>
@@ -217,9 +217,9 @@
                         </div>
 
                         <!-- Hidden form used only to provide action URL and CSRF token for JS -->
-                        <form id="edit-profile-form" method="POST" action="{{ route('taikhoan.update', [], false) }}" style="display:none">
-                            @csrf
-                            <input type="hidden" name="email" value="{{ $user->Email }}">
+                        <form id="edit-profile-form" method="POST" action="<?php echo e(route('taikhoan.update', [], false)); ?>" style="display:none">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="email" value="<?php echo e($user->Email); ?>">
                         </form>
                     </div>
                 </div>
@@ -259,7 +259,7 @@
         </div>
     </section>
     <!-- Footer -->
-    @include('partials.footer')
+    <?php echo $__env->make('partials.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -555,9 +555,9 @@
     });
 
     // avoid redeclaring globals when partial already set them
-    window.PROFILE_PATH = window.PROFILE_PATH || "{!! route('taikhoan', [], false) !!}";
-    window.LOGIN_PATH = window.LOGIN_PATH || "{!! route('login', [], false) !!}";
-    window.HOME_PATH = window.HOME_PATH || '{!! url('/', [], false) !!}';
+    window.PROFILE_PATH = window.PROFILE_PATH || "<?php echo route('taikhoan', [], false); ?>";
+    window.LOGIN_PATH = window.LOGIN_PATH || "<?php echo route('login', [], false); ?>";
+    window.HOME_PATH = window.HOME_PATH || '<?php echo url('/', [], false); ?>';
 
     function goToProfile(event) {
         event.preventDefault();
@@ -1108,4 +1108,4 @@
     }
 </script>
 </body>
-</html>
+</html><?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/taikhoan.blade.php ENDPATH**/ ?>

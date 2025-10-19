@@ -62,6 +62,8 @@ Route::post('/taikhoan', [AuthController::class, 'updateProfileApi']);
 Route::get('/datphong', [App\Http\Controllers\Amenties\DatPhongController::class, 'index']);
 // Booking details: include HoaDon and used services
 Route::get('/datphong/{iddatphong}', [App\Http\Controllers\Amenties\DatPhongController::class, 'show']);
+// Cancel a booking (set TrangThai = 0)
+Route::post('/datphong/{iddatphong}/cancel', [App\Http\Controllers\Amenties\DatPhongController::class, 'cancel']);
 
 // Services API
 Route::get('/dichvu', [App\Http\Controllers\Amenties\DichVuController::class, 'index']);

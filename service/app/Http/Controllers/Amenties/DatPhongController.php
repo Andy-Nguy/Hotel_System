@@ -194,4 +194,31 @@ class DatPhongController extends Controller
 
         return response()->json($result);
     }
+
+    /**
+     * Cancel a booking by setting TrangThai = 0
+     * POST /api/datphong/{iddatphong}/cancel
+     */
+    public function cancel(Request $request, $iddatphong)
+    {
+        $dp = DatPhong::where('IDDatPhong', $iddatphong)->first();
+        if (!$dp) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        // Only update if not already cancelled
+        if ((int) $dp->TrangThai === 0) {
+            return response()->json(['message' => 'Already cancelled', 'IDDatPhong' => $dp->IDDatPhong, 'TrangThai' => $dp->TrangThai]);
+        }
+
+        $dp->TrangThai = 0;
+        try {
+            $dp->save();
+        } catch (\Throwable $e) {
+            logger()->error('Failed to cancel booking ' . $iddatphong . ': ' . $e->getMessage());
+            return response()->json(['error' => 'failed_to_update'], 500);
+        }
+
+        return response()->json(['message' => 'Cancelled', 'IDDatPhong' => $dp->IDDatPhong, 'TrangThai' => $dp->TrangThai]);
+    }
 }

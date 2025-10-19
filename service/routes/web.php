@@ -30,7 +30,10 @@ $callApi = function(string $endpoint, int $timeout = 5) use ($apiPrefix) {
 
         // else perform internal dispatch (same Laravel app)
         $subRequest = Request::create($normalized, 'GET');
-        $subResponse = app()->handle($subRequest);
+        // Use the HTTP kernel to handle the internal subrequest
+        /** @var \Illuminate\Contracts\Http\Kernel $httpKernel */
+        $httpKernel = app()->make(\Illuminate\Contracts\Http\Kernel::class);
+        $subResponse = $httpKernel->handle($subRequest);
         $status = $subResponse->getStatusCode();
         if ($status >= 200 && $status < 300) {
             return json_decode($subResponse->getContent(), true);
@@ -41,6 +44,26 @@ $callApi = function(string $endpoint, int $timeout = 5) use ($apiPrefix) {
         return null;
     }
 };
+// Temporary debug endpoint: exposes what Laravel sees for a request
+Route::get('/__debug/request-info', function (Request $request) {
+    try {
+        return response()->json([
+            'path_info' => $request->getPathInfo(),
+            'request_uri' => $_SERVER['REQUEST_URI'] ?? null,
+            'query' => $request->query(),
+            'server' => [
+                'REQUEST_METHOD' => $_SERVER['REQUEST_METHOD'] ?? null,
+                'REQUEST_URI' => $_SERVER['REQUEST_URI'] ?? null,
+                'PHP_SELF' => $_SERVER['PHP_SELF'] ?? null,
+                'SCRIPT_NAME' => $_SERVER['SCRIPT_NAME'] ?? null,
+                'ORIG_PATH_INFO' => $_SERVER['ORIG_PATH_INFO'] ?? null,
+            ],
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json(['error' => 'debug-failed', 'message' => $e->getMessage()]);
+    }
+});
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -91,7 +114,11 @@ $rooms2Handler = function (Request $request) use ($callApi) {
     $typeInfo = $callApi('/api/loaiphongs/' . urlencode($type));
     $typeName = is_array($typeInfo) ? ($typeInfo['TenLoaiPhong'] ?? ($typeInfo['ten'] ?? null)) : null;
 
-    return view('rooms2', compact('roomsDetail', 'type', 'typeName'));
+    // Fetch services to render on the rooms2 page (same as homepage)
+    $svcData = $callApi('/api/dichvu') ?: [];
+    $services = is_array($svcData) ? $svcData : [];
+
+    return view('rooms2', compact('roomsDetail', 'services', 'typeName' ,'type'));
 };
 
 // register both URIs -> same handler
@@ -102,10 +129,10 @@ Route::get('/rooms2', $rooms2Handler);
 /*
  |-----------------------------------------------------------------------
  | Room details route
- | Template links use /roomdetails.php?id=...
+ | Template links use /roomdetails?id=... (and legacy /roomdetails.php?id=...)
  |-----------------------------------------------------------------------
  */
-Route::get('/roomdetails.php', function (Request $request) use ($callApi) {
+$roomdetailsHandler = function (Request $request) use ($callApi) {
     $rawId = $request->query('id', null);
     $room = null;
     $resolvedId = null;
@@ -144,8 +171,45 @@ Route::get('/roomdetails.php', function (Request $request) use ($callApi) {
     // expose $id for the view (compact expects 'id')
     $id = $rawId;
 
-    return view('roomdetails', compact('id','room','resolvedId','rooms'));
-});
+    // Quick debug endpoint: if ?debug=1 is present, return JSON instead of rendering
+    if ($request->query('debug') == '1') {
+        try {
+            return response()->json([
+                'rawId' => $rawId,
+                'resolvedId' => $resolvedId,
+                'room_found' => is_array($room) && !empty($room),
+                'room_sample' => is_array($room) ? array_slice($room, 0, 10) : $room,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'debug-failed', 'message' => $e->getMessage()]);
+        }
+    }
+
+    // Debug: log resolution result so we can see if a room was found
+    try {
+        logger()->info('roomdetails.route.result', [
+            'rawId' => $rawId,
+            'resolvedId' => $resolvedId,
+            'room_found' => is_array($room) && !empty($room),
+        ]);
+    } catch (\Throwable $e) {
+        // do nothing — logging must not break the response
+    }
+
+    // For debugging: return the view with an extra header so we can confirm what rendered
+    try {
+        $response = response()->view('roomdetails', compact('id','room','resolvedId','rooms'));
+        $response->header('X-Rendered-View', 'roomdetails');
+        return $response;
+    } catch (\Throwable $e) {
+        // fallback to plain view if response() helper fails for any reason
+        return view('roomdetails', compact('id','room','resolvedId','rooms'));
+    }
+};
+
+// Register both URIs -> same handler (prefer /roomdetails without .php)
+Route::get('/roomdetails', $roomdetailsHandler);
+Route::get('/roomdetails.php', $roomdetailsHandler);
 
 
 // --- CỤM ROUTE ĐĂNG KÝ ---
@@ -174,6 +238,45 @@ require __DIR__.'/auth.php';
 Route::get('/tiennghi', function () {
     return view('amenties.tiennghi');
 })->name('tiennghi.index');
+// Restaurant page (legacy URI: /restaurant.html)
+Route::get('/restaurant', function () {
+    return view('Orther_user.restaurant');
+});
+Route::get('/restaurant.html', function () {
+    return view('Orther_user.restaurant');
+});
+// Spa & Wellness page (both /spa-wellness and legacy /spa-wellness.html)
+Route::get('/spa-wellness', function () {
+    return view('Orther_user.spa_wellness');
+});
+Route::get('/spa-wellness.html', function () {
+    return view('Orther_user.spa_wellness');
+});
+// About page (both /about and legacy /about.html)
+Route::get('/about', function () {
+    return view('Orther_user.about');
+});
+Route::get('/about.html', function () {
+    return view('Orther_user.about');
+});
+// Services page (both /services and legacy /services.html)
+Route::get('/services', function () {
+    return view('Orther_user.services');
+});
+
+Route::get('/facilities', function () {
+    return view('Orther_user.facilities');
+});
+
+
+Route::get('/faq', function () {
+    return view('Orther_user.faq');
+});
+Route::get('/contact', function () {
+    return view('Orther_user.contact');
+});
+
+
 Route::get('/taikhoan', [AuthController::class, 'taikhoan'])->name('taikhoan');
 // POST route to update profile information (HoTen, SoDienThoai, NgaySinh)
 Route::post('/taikhoan', [AuthController::class, 'updateProfile'])->name('taikhoan.update');

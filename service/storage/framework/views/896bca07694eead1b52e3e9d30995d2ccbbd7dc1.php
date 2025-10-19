@@ -62,10 +62,10 @@
         </svg>
     </div>
     <!-- Menu -->
-    @include('partials.menu')
+    <?php echo $__env->make('partials.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <!-- Logo & Menu Burger -->
-    @include('partials.logo&menuburger')
+    <?php echo $__env->make('partials.logo&menuburger', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Slider -->
     <header class="header slider-fade">
         <div class="owl-carousel owl-theme">
@@ -136,7 +136,7 @@
         </div>
     </header>
     <!-- About -->
-    @include('partials.about')
+    <?php echo $__env->make('partials.about', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Rooms -->
     <section class="rooms1 section-padding bg-cream" data-scroll-index="1">
         <div class="container">
@@ -210,7 +210,7 @@
         </div>
     </section>
     <!-- Pricing -->
-    @include('partials.pricing', ['services' => $services ?? []])
+    <?php echo $__env->make('partials.pricing', ['services' => $services ?? []], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Promo Video -->
     <section class="video-wrapper video section-padding bg-img bg-fixed" data-overlay-dark="3"
         data-background="HomePage/img/slider/2.jpg">
@@ -238,7 +238,7 @@
         </div>
     </section>
     <!-- Facilities -->
-    @include('partials.facilities')
+    <?php echo $__env->make('partials.facilities', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Booking Search -->
     <section class="section-padding bg-cream">
         <div class="container">
@@ -310,16 +310,16 @@
         </div>
     </section>
     <!-- Testimonials -->
-    @include('partials.testiominals')
+    <?php echo $__env->make('partials.testiominals', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Services -->
-    @include('partials.services')
+    <?php echo $__env->make('partials.services', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- News -->
-    @include('partials.news')
+    <?php echo $__env->make('partials.news', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Reservation & Clients-->
-    @include('partials.reservation')
+    <?php echo $__env->make('partials.reservation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     
     <!-- Footer -->
-    @include('partials.footer')
+    <?php echo $__env->make('partials.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -386,6 +386,6 @@ function logout() {
   localStorage.clear(); // Xóa token, userName, role, email, v.v.
   
   // Chuyển về trang chủ (sử dụng URL tương đối để giữ host:port)
-  window.location.href = '{!! url('/', [], false) !!}';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
+  window.location.href = '<?php echo url('/', [], false); ?>';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
 }
-</script>
+</script><?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/welcome.blade.php ENDPATH**/ ?>

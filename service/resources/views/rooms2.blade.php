@@ -42,29 +42,7 @@
         </svg>
     </div>
     <!-- Simplified Menu (rooms-only) -->
-    <div class="cappa-wrap">
-        <div class="cappa-wrap-inner">
-            <nav class="cappa-menu">
-                <ul>
-                    <li><a href="rooms.html">Rooms</a></li>
-                    <li><a href="rooms2.html" class="active">Rooms 2</a></li>
-                    <li><a href="rooms3.html">Rooms 3</a></li>
-                    <li><a href="room-details.html">Room Details</a></li>
-                    <li><a href="#" class="reservation-link">Reservation: <strong>855 100 4444</strong></a></li>
-                </ul>
-            </nav>
-            <div class="cappa-menu-footer">
-                <div class="reservation">
-                    <a href="tel:8551004444">
-                        <div class="icon d-flex justify-content-center align-items-center">
-                            <i class="flaticon-call"></i>
-                        </div>
-                        <div class="call">Reservation<br><span>855 100 4444</span></div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('partials.menu')
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -83,7 +61,6 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12 caption mt-90">
-                    <span><i class="star-rating"></i></span>
                     <h5>The Cappa Luxury Hotel</h5>
                     <h1><?php echo htmlspecialchars($typeName ?? 'Rooms & Suites'); ?></h1>
                 </div>
@@ -292,76 +269,7 @@
             </div>
     </section> 
     <!-- Pricing -->
-    <section class="pricing section-padding bg-blck">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="section-subtitle"><span>Best Prices</span></div>
-                    <div class="section-title"><span>Extra Services</span></div>
-                    <p class="color-2">The best prices for your relaxing vacation. The utanislen quam nestibulum ac quame odion elementum sceisue the aucan.</p>
-                    <p class="color-2">Orci varius natoque penatibus et magnis disney parturient monte nascete ridiculus mus nellen etesque habitant morbine.</p>
-                    <div class="reservations mb-30">
-                        <div class="icon"><span class="flaticon-call"></span></div>
-                        <div class="text">
-                            <p class="color-2">For information</p> <a href="tel:855-100-4444">855 100 4444</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="owl-carousel owl-theme">
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/1.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room cleaning</div>
-                                <div class="amount">$50<span>/ month</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/2.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Drinks included</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/3.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room Breakfast</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/4.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Safe & Secure</div>
-                                <div class="amount">$15<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('partials.pricing', ['services' => $services ?? []])
     <!-- Reservation & Booking Form -->
     <section class="testimonials">
         <div class="background bg-img bg-fixed section-padding pb-0" data-background="HomePage/img/slider/2.jpg" data-overlay-dark="2">
@@ -378,68 +286,6 @@
                             </div>
                         </div> 
                         <p><i class="ti-check"></i><small>Call us, it's toll-free.</small></p>
-                    </div>
-                    <!-- Booking From -->
-                    <div class="col-md-5 offset-md-2">
-                        <div class="booking-box">
-                            <div class="head-box">
-                                <h6>Rooms & Suites</h6>
-                                <h4>Hotel Booking Form</h4>
-                            </div>
-                                <div class="section-title text-center">
-                                    <h1><?php echo htmlspecialchars($typeName ?? 'Rooms &amp; Suites'); ?></h1>
-                                    <p>Discover our comfortable and elegant rooms, designed for your perfect stay.</p>
-                                </div>
-                                            <div class="input1_wrapper">
-                                                <label>Check in</label>
-                                                <div class="input1_inner">
-                                                    <input type="text" class="form-control input datepicker" placeholder="Check in">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="input1_wrapper">
-                                                <label>Check out</label>
-                                                <div class="input1_inner">
-                                                    <input type="text" class="form-control input datepicker" placeholder="Check out">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="select1_wrapper">
-                                                <label>Adults</label>
-                                                <div class="select1_inner">
-                                                    <select class="select2 select" style="width: 100%">
-                                                        <option value="0">Adults</option>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="select1_wrapper">
-                                                <label>Children</label>
-                                                <div class="select1_inner">
-                                                    <select class="select2 select" style="width: 100%">
-                                                        <option value="0">Children</option>
-                                                        <option value="1">1</option>
-                                                        <option value="2">2</option>
-                                                        <option value="3">3</option>
-                                                        <option value="4">4</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <button type="submit" class="btn-form1-submit mt-15">Check Availability</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -475,68 +321,7 @@
         </div>
     </section>
     <!-- Footer -->
-    <footer class="footer">
-            <div class="footer-top">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="footer-column footer-about">
-                                <h3 class="footer-title">About Hotel</h3>
-                                <p class="footer-about-text">Welcome to the best five-star deluxe hotel in New York. Hotel elementum sesue the aucan vestibulum aliquam justo in sapien rutrum volutpat.</p>
-                                
-                                <div class="footer-language"> <i class="lni ti-world"></i>
-                                    <select onchange="location = this.value;">
-                                        <option value="#0">English</option>
-                                        <option value="#0">German</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 offset-md-1">
-                            <div class="footer-column footer-explore clearfix">
-                                <h3 class="footer-title">Explore</h3>
-                                <ul class="footer-explore-list list-unstyled">
-                                    <li><a href="index.html">Home</a></li>
-                                    <li><a href="rooms.html">Rooms & Suites</a></li>
-                                    <li><a href="restaurant.html">Restaurant</a></li>
-                                    <li><a href="spa-wellness.html">Spa & Wellness</a></li>
-                                    <li><a href="about.html">About Hotel</a></li>
-                                    <li><a href="contact.html">Contact</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="footer-column footer-contact">
-                                <h3 class="footer-title">Contact</h3>
-                                <p class="footer-contact-text">1616 Broadway NY, New York 10001<br>United States of America</p>
-                                <div class="footer-contact-info">
-                                        <p class="footer-contact-phone"><span class="flaticon-call"></span> 855 100 4444</p>
-                                        <p class="footer-contact-mail">info@luxuryhotel.com</p>
-                                </div>
-                                <div class="footer-about-social-list">
-                                    <a href="#"><i class="ti-instagram"></i></a>
-                                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
-                                    <a href="#"><i class="ti-youtube"></i></a>
-                                    <a href="#"><i class="ti-facebook"></i></a>
-                                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="footer-bottom-inner">
-                                <p class="footer-bottom-copy-right">© Copyright 2022 by <a href="#">DuruThemes.com</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    </footer>
+    @include('partials.footer')
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
