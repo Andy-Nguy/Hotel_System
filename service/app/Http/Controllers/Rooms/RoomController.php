@@ -30,9 +30,12 @@ class RoomController extends Controller
         if (!$this->validateDates($checkIn, $checkOut)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ngày nhận phòng phải trước ngày trả phòng.',
+                'message' => 'Ngày nhận phòng phải trước ngày trả phòng hoặc không hợp lệ.',
             ], 400);
         }
+
+        $checkIn = $this->normalizeDateFormat($checkIn);
+        $checkOut = $this->normalizeDateFormat($checkOut);
 
         $rooms = $this->executeRoomQuery($checkIn, $checkOut);
 
@@ -40,7 +43,7 @@ class RoomController extends Controller
             'status' => 'success',
             'data' => $rooms,
             'message' => $rooms->isEmpty()
-                ? 'Không tìm thấy phòng trống nào.'
+                ? 'Không tìm thấy phòng trống nào trong khoảng thời gian này.'
                 : '',
         ]);
     }
@@ -55,14 +58,8 @@ class RoomController extends Controller
     {
         $checkIn = $request->query('check_in');
         $checkOut = $request->query('check_out');
-        $roomTypeId = $request->query('room_type_id');
-
-        if (!$this->validateDates($checkIn, $checkOut)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Ngày nhận phòng phải trước ngày trả phòng.',
-            ], 400);
-        }
+        // accept alternative param names from various frontends
+        $roomTypeId = $request->query('room_type_id') ?? $request->query('room_type') ?? $request->query('type_id');
 
         if (empty($roomTypeId)) {
             return response()->json([
@@ -71,13 +68,23 @@ class RoomController extends Controller
             ], 400);
         }
 
-        $rooms = $this->executeRoomQuery($checkIn, $checkOut, $roomTypeId);
+        if (!$this->validateDates($checkIn, $checkOut)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ngày nhận phòng phải trước ngày trả phòng hoặc không hợp lệ.',
+            ], 400);
+        }
+
+        $checkIn = $this->normalizeDateFormat($checkIn);
+        $checkOut = $this->normalizeDateFormat($checkOut);
+
+    $rooms = $this->executeRoomQuery($checkIn, $checkOut, $this->coerceId($roomTypeId));
 
         return response()->json([
             'status' => 'success',
             'data' => $rooms,
             'message' => $rooms->isEmpty()
-                ? 'Không tìm thấy phòng trống thuộc loại này.'
+                ? 'Không tìm thấy phòng trống thuộc loại này trong thời gian đã chọn.'
                 : '',
         ]);
     }
@@ -92,7 +99,8 @@ class RoomController extends Controller
     {
         $checkIn = $request->query('check_in');
         $checkOut = $request->query('check_out');
-        $roomId = $request->query('id');
+        // frontends sometimes send 'room' instead of 'id'
+        $roomId = $request->query('id') ?? $request->query('room');
 
         if (empty($roomId)) {
             return response()->json([
@@ -104,16 +112,19 @@ class RoomController extends Controller
         if (!$this->validateDates($checkIn, $checkOut)) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Ngày nhận phòng phải trước ngày trả phòng.',
+                'message' => 'Ngày nhận phòng phải trước ngày trả phòng hoặc không hợp lệ.',
             ], 400);
         }
 
-        $room = $this->roomRepository->findSingleAvailableRoom($checkIn, $checkOut, $roomId);
+        $checkIn = $this->normalizeDateFormat($checkIn);
+        $checkOut = $this->normalizeDateFormat($checkOut);
+
+    $room = $this->roomRepository->findSingleAvailableRoom($checkIn, $checkOut, $this->coerceId($roomId));
 
         if (!$room) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Phòng không trống hoặc đang được đặt.',
+                'message' => 'Phòng không trống hoặc đang được đặt trong thời gian này.',
             ], 404);
         }
 
@@ -125,47 +136,119 @@ class RoomController extends Controller
 
     /**
      * ============================================
-     * Hàm chung truy vấn phòng trống
+     * Hàm truy vấn phòng trống (dùng chung)
      * ============================================
      */
-    private function executeRoomQuery(string $checkIn, string $checkOut, ?string $roomTypeId = null)
-    {
-        $query = DB::table('Phong as P')
-            ->join('LoaiPhong as LP', 'P.IDLoaiPhong', '=', 'LP.IDLoaiPhong')
-            ->where('P.TrangThai', 'Trống')
-            // ->where('P.IsActive', true) // nếu có cột này
-            ->whereNotExists(function ($sub) {
-                $sub->from('DatPhong as DP')
-                    ->whereColumn('DP.IDPhong', 'P.IDPhong')
-                    ->whereIn('DP.TrangThai', [1, 2, 3]); // Chờ xác nhận, Đã xác nhận, Đang sử dụng
+   private function executeRoomQuery(string $checkIn, string $checkOut, ?string $roomTypeId = null)
+{
+    $checkIn = $this->normalizeDateFormat($checkIn);
+    $checkOut = $this->normalizeDateFormat($checkOut);
+
+    $query = DB::table('Phong as P')
+        ->join('LoaiPhong as LP', 'P.IDLoaiPhong', '=', 'LP.IDLoaiPhong')
+        ->where('P.TrangThai', 'Trống')
+        ->whereNotExists(function ($sub) use ($checkIn, $checkOut) {
+            $sub->from('DatPhong as DP')
+                ->whereColumn('DP.IDPhong', 'P.IDPhong')
+                ->whereIn('DP.TrangThai', [1, 2, 3]) // Chờ, xác nhận, đang sử dụng
+                ->where(function ($w) use ($checkIn, $checkOut) {
+                    $w->whereRaw('DATE(DP.NgayNhanPhong) < DATE(?)', [$checkOut])
+                      ->whereRaw('DATE(DP.NgayTraPhong) > DATE(?)', [$checkIn]);
+                });
+        });
+
+    if ($roomTypeId) {
+        // defensive: allow numeric IDs or string codes
+        if (is_numeric($roomTypeId)) {
+            $query->where('P.IDLoaiPhong', (int)$roomTypeId);
+        } else {
+            // if frontends pass a code (e.g. 'DELUXE'), try matching against LoaiPhong code or name
+            $query->where(function($q) use ($roomTypeId) {
+                $q->where('P.IDLoaiPhong', $roomTypeId)
+                  ->orWhere('LP.TenLoaiPhong', 'like', '%' . $roomTypeId . '%');
             });
-
-        if ($roomTypeId) {
-            $query->where('P.IDLoaiPhong', $roomTypeId);
         }
-
-        return $query
-            ->select(
-                'P.IDPhong',
-                'P.SoPhong',
-                'P.MoTa',
-                'P.UrlAnhPhong',
-                'LP.TenLoaiPhong',
-                'P.SoNguoiToiDa'
-            )
-            ->orderBy('P.SoPhong')
-            ->get();
     }
+
+    return $query
+        ->select(
+            'P.IDPhong',
+            'P.SoPhong',
+            'P.MoTa',
+            'P.UrlAnhPhong',
+            'LP.TenLoaiPhong',
+            'P.SoNguoiToiDa'
+        )
+        ->orderBy('P.SoPhong')
+        ->get();
+}
+
 
     /**
      * ============================================
-     * Hàm kiểm tra tính hợp lệ của ngày
+     * Kiểm tra hợp lệ ngày
      * ============================================
      */
     private function validateDates(?string $checkIn, ?string $checkOut): bool
     {
-        return !empty($checkIn)
-            && !empty($checkOut)
-            && strtotime($checkIn) < strtotime($checkOut);
+        if (empty($checkIn) || empty($checkOut)) {
+            return false;
+        }
+
+        $normIn = $this->normalizeDateFormat($checkIn);
+        $normOut = $this->normalizeDateFormat($checkOut);
+
+        if (!$normIn || !$normOut) {
+            return false;
+        }
+
+        $timeIn = strtotime($normIn);
+        $timeOut = strtotime($normOut);
+
+        return ($timeIn && $timeOut && $timeIn < $timeOut);
+    }
+
+    /**
+     * ============================================
+     * Chuẩn hóa định dạng ngày
+     * ============================================
+     * Hỗ trợ:
+     *  - dd/mm/yyyy
+     *  - mm/dd/yyyy
+     *  - yyyy-mm-dd
+     */
+    private function normalizeDateFormat(string $date): string
+{
+    if (strpos($date, '/') !== false) {
+        $parts = explode('/', $date);
+        if (count($parts) === 3) {
+            [$a, $b, $c] = $parts;
+
+            // Nếu $a <= 12 và $b <= 31 → giả định định dạng Mỹ (MM/DD/YYYY)
+            if ((int)$a <= 12 && (int)$b <= 31) {
+                return sprintf('%04d-%02d-%02d', $c, $a, $b);
+            }
+
+            // Nếu $a > 12 → định dạng Việt (DD/MM/YYYY)
+            if ((int)$a > 12 && (int)$b <= 12) {
+                return sprintf('%04d-%02d-%02d', $c, $b, $a);
+            }
+
+            // Mặc định fallback: dd/mm/yyyy
+            return sprintf('%04d-%02d-%02d', $c, $b, $a);
+        }
+    }
+
+    // Giữ nguyên nếu đã đúng dạng yyyy-mm-dd
+    return $date;
+}
+
+    /**
+     * Try to coerce a provided id value to an integer if numeric
+     */
+    private function coerceId($val)
+    {
+        if (is_numeric($val)) return (int)$val;
+        return $val;
     }
 }
