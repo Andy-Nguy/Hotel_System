@@ -1111,41 +1111,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === backdrop) hideAvailabilityModal();
     });
 
-    // Inject small scoped CSS and helper formatters for enhanced cards
-    (function(){
-        const css = `
-        .availability-grid{display:flex;flex-wrap:wrap;gap:16px}
-        .availability-card{border-radius:8px;overflow:hidden;border:1px solid #eee;background:#fff;display:flex;flex-direction:column;height:100%;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-        .availability-img{height:160px;background-size:cover;background-position:center}
-        .availability-body{padding:12px;flex:1;display:flex;flex-direction:column}
-        .availability-title{font-size:1.05rem;margin:0 0 6px}
-        .availability-desc{font-size:0.9rem;color:#666;margin-bottom:8px}
-        .availability-meta{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
-        .availability-actions{display:flex;gap:8px;margin-top:10px}
-        .badge-price{background:#ff6b6b;color:#fff;padding:6px 10px;border-radius:6px;font-weight:700}
-        @media (max-width:767px){.availability-img{height:120px}}
-        `;
-        const s = document.createElement('style'); s.type='text/css'; s.appendChild(document.createTextNode(css));
-        document.head.appendChild(s);
-    })();
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-
-    function formatPriceRaw(v) {
-        if (v === null || typeof v === 'undefined' || v === '') return '';
-        const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[^0-9.-]+/g, ''));
-        if (isNaN(n)) return String(v);
-        return n.toLocaleString('vi-VN') + ' ₫';
-    }
-
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         const inputCheckIn = form.querySelector('#check_in') || form.querySelector('input[name="check_in"]') || form.querySelectorAll('.datepicker')[0];
@@ -1201,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Friendly Vietnamese message when no rooms are available
                 modalBody.innerHTML = '<div class="col-12 text-center py-4">Không có phòng phù hợp cho ngày bạn chọn. Vui lòng thử chọn ngày khác hoặc liên hệ khách sạn để hỗ trợ.</div>';
             } else {
-                modalBody.innerHTML = '<div class="availability-grid">' + rooms.map(room => {
+                modalBody.innerHTML = rooms.map(room => {
                     const id = room.id || room.MaPhong || room.IDPhong || '';
                     const title = room.name || room.TenPhong || room.Ten || room.ten || 'Room';
                     const desc = room.description || room.MoTa || room.mo_ta || '';
@@ -1209,27 +1174,26 @@ document.addEventListener('DOMContentLoaded', function() {
                     const img = (Array.isArray(images) && images.length) ? images[0] : (room.image || room.AnhDaiDien || 'HomePage/img/rooms/1.jpg');
                     const capacity = room.capacity || room.SucChua || room.SoNguoi || room.SoNguoiToiDa || '';
                     const price = room.price || room.Gia || room.gia || '';
-                    const priceLabel = price ? formatPriceRaw(price) : '';
 
                     return `\
-                        <div style="flex:1 1 48%;min-width:260px;">\
-                            <div class="availability-card">\
-                                <div class="availability-img" style="background-image:url('${String(img).replace(/'/g, "\\'")}')"></div>\
-                                <div class="availability-body">\
-                                    <h5 class="availability-title">${escapeHtml(title)} ${id ? ('<small class="text-muted">#'+escapeHtml(id)+'</small>') : ''}</h5>\
-                                    ${desc ? ('<div class="availability-desc">'+escapeHtml(desc)+'</div>') : ''}\
-                                    <div class="availability-meta">\
-                                        <div class="text-muted small">Sức chứa: ${escapeHtml(capacity || '')}</div>\
-                                        <div class="badge-price">${escapeHtml(priceLabel)}</div>\
-                                    </div>\
-                                    <div class="availability-actions">\
-                                        <a class="btn btn-outline-primary btn-sm" href="/roomdetails?id=${encodeURIComponent(id)}">Chi tiết</a>\
-                                        <a class="btn btn-primary btn-sm" href="/booking?room=${encodeURIComponent(id)}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}">Đặt ngay</a>\
-                                    </div>\
+                        <div class="col-md-6 mb-3">\
+                            <div class="card">\
+                                <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">\
+                                    <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">\
+                                </div>\
+                                <div class="card-body">\
+                                    <h5 class="card-title">${title} ${id?('<small class="text-muted">#'+id+'</small>'):''}</h5>\
+                                    ${desc?('<p class="card-text">'+desc+'</p>') : ''}\
+                                    <p class="mb-1"><small class="text-muted">Capacity: ${capacity}</small></p>\
+                                    ${price?('<p class="mb-0"><strong>'+price+'</strong></p>'):''}\
+                                </div>\
+                                <div class="card-footer">\
+                                    <a href="/roomdetails?id=${id}" class="btn btn-sm btn-outline-primary">Details</a>\
+                                    <a href="/booking?room=${id}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}" class="btn btn-sm btn-primary">Book Now</a>\
                                 </div>\
                             </div>\
                         </div>`;
-                }).join('\n') + '</div>';
+                }).join('\n');
             }
 
             // Show modal (uses Bootstrap if available, otherwise fallback)

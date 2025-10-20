@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Payment - The Cappa Luxury Hotel</title>
     <link rel="icon" href="HomePage/img/favicon.png" type="image/png" sizes="32x32">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -913,6 +914,7 @@
                 bookingData.subtotal = (bookingData.pricePerNight || 0) * (bookingData.nights || 1);
                 bookingData.taxes = pending.taxes ?? bookingData.taxes;
                 bookingData.total = pending.total || bookingData.total || bookingData.subtotal + (bookingData.taxes || 0);
+                bookingData.roomId = pending.roomId || bookingData.roomId; // Add roomId
             } catch (e) {
                 console.warn('Failed to load pendingBooking', e);
             }
@@ -931,6 +933,7 @@
             
             if (params.get('room')) {
                 bookingData.room = decodeURIComponent(params.get('room'));
+                bookingData.roomId = decodeURIComponent(params.get('room')); // Add roomId
             }
             if (params.get('total')) {
                 bookingData.total = parseFloat(params.get('total'));
@@ -1093,8 +1096,7 @@
                 completeBooking('pending');
             } else if (selectedMethod === 'payathotel') {
                 // pay at hotel chosen in-page
-                completeBooking('pending');
-                showConfirmation();
+                submitPayAtHotelToServer();
             }
         }
 
@@ -1189,16 +1191,93 @@
                         checkIn: bookingData.checkIn,
                         checkOut: bookingData.checkOut,
                         nights: bookingData.nights || 1,
-                        total: bookingData.total || bookingData.subtotal || 0
+                        total: bookingData.total || bookingData.subtotal || 0,
+                        IDPhong: raw ? JSON.parse(raw).roomId : bookingData.roomId || 'P003', // Use from pending or bookingData
                     };
                     localStorage.setItem('pendingBooking', JSON.stringify(pending));
                 }
             } catch (e) {
                 console.warn('Unable to persist pendingBooking before pay-at-hotel', e);
             }
-            // Instead of navigating away, complete booking in-page as "pending"
-            completeBooking('pending');
-            showConfirmation();
+            // Call API to save booking
+            submitPayAtHotelToServer();
+        }
+
+        // Submit pay at hotel to server API
+        async function submitPayAtHotelToServer() {
+            try {
+                // Require login: if no userId or email in localStorage, redirect to login and save redirect
+                const userId = localStorage.getItem('userId');
+                const userEmail = localStorage.getItem('email');
+                if (!userId || !userEmail) {
+                    // Save current path to return after login
+                    localStorage.setItem('redirect_after_login', window.location.pathname + window.location.search);
+                    alert('Vui lòng đăng nhập để hoàn tất đặt phòng. Bạn sẽ được chuyển tới trang đăng nhập.');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                // Build payload for API
+                const payload = {
+                    IDKhachHang: parseInt(userId) || 1,
+                    IDPhong: bookingData.roomId ,
+                    Email: userEmail || null,
+                    NgayNhanPhong: bookingData.checkIn,
+                    NgayTraPhong: bookingData.checkOut,
+                    GiaPhong: bookingData.pricePerNight,
+                    SoDem: bookingData.nights,
+                    TongTien: bookingData.total
+                };
+
+                showLoading();
+
+                const response = await fetch('/api/datphong', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    // Save to localStorage as backup
+                    const booking = {
+                        confirmationNumber: result.confirmation,
+                        status: 'confirmed',
+                        paymentMethod: 'payathotel',
+                        ...bookingData,
+                        bookedAt: new Date().toISOString()
+                    };
+                    const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                    bookings.push(booking);
+                    localStorage.setItem('bookings', JSON.stringify(bookings));
+
+                    // Redirect to confirmation page
+                    window.location.href = `confirmation?confirmation=${result.confirmation}`;
+                } else {
+                    throw new Error(result.message || 'Lỗi khi lưu đặt phòng');
+                }
+            } catch (error) {
+                console.error('API call failed:', error);
+                // Fallback: save locally and redirect
+                const booking = {
+                    confirmationNumber: 'OFFLINE-' + Date.now(),
+                    status: 'offline',
+                    paymentMethod: 'payathotel',
+                    ...bookingData,
+                    bookedAt: new Date().toISOString()
+                };
+                const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+                bookings.push(booking);
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                alert('Không thể lưu lên server, đặt phòng đã được lưu cục bộ. Bạn sẽ nhận được xác nhận khi hệ thống phục hồi.');
+                window.location.href = `confirmation?confirmation=OFFLINE-${Date.now()}&offline=true`;
+            } finally {
+                hideLoading();
+            }
         }
 
         // Show the inline confirmation and update booking steps UI

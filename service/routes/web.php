@@ -191,4 +191,12 @@ Route::get('/payment.php', function (Request $request) {
     return view('payment');
 });
 
+// Confirmation page routes (support both /confirmation and /confirmation.php links)
+Route::get('/confirmation', function (Request $request) {
+    return view('confirmation');
+});
+Route::get('/confirmation.php', function (Request $request) {
+    return view('confirmation');
+});
+
 // Note: Pay-at-hotel is handled inline on the payment page (no separate route)

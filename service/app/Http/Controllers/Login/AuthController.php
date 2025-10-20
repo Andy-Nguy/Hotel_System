@@ -154,7 +154,7 @@ class AuthController extends Controller
             $user = DB::table('KhachHang')
                 ->join('TaiKhoanNguoiDung', 'KhachHang.IDKhachHang', '=', 'TaiKhoanNguoiDung.IDKhachHang')
                 ->where('KhachHang.Email', $email)
-                ->select('KhachHang.HoTen', 'TaiKhoanNguoiDung.MatKhau', 'TaiKhoanNguoiDung.VaiTro')
+                ->select('KhachHang.IDKhachHang', 'KhachHang.HoTen', 'TaiKhoanNguoiDung.MatKhau', 'TaiKhoanNguoiDung.VaiTro')
                 ->first();
 
             if (!$user || !Hash::check($password, $user->MatKhau)) {
@@ -163,6 +163,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'message' => 'Đăng nhập thành công!',
+                'user_id' => $user->IDKhachHang,
                 'role' => $user->VaiTro,
                 'hoTen' => $user->HoTen
             ], 200);

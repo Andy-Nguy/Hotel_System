@@ -9,6 +9,7 @@ use App\Http\Controllers\Amenties\TienNghiController;
 use App\Http\Controllers\Amenties\PhongController;
 use App\Http\Controllers\Amenties\LoaiPhongController;
 use App\Http\Controllers\Rooms\RoomController;
+use App\Http\Controllers\Booking\BookingController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -63,3 +64,6 @@ Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
 Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
 Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
 // Explicit route: use index1 for listing phongs
+
+// Booking API
+Route::post('/datphong', [BookingController::class, 'store']);

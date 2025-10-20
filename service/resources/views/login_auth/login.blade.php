@@ -83,15 +83,44 @@
           msg.innerText = data.message || "";
 
           if (res.ok) {
+            // Normalize role to a number in case API returns a string
+            const roleNum = Number(data.role);
             localStorage.setItem("userName", data.hoTen);
-            localStorage.setItem("role", data.role);
+            localStorage.setItem("role", roleNum);
             localStorage.setItem("email", Email);
+            localStorage.setItem("userId", data.user_id);
 
-            console.log("Role:", data.role); // Debug: Kiểm tra role
-            if (data.role === 2) {
+            console.log("Role (raw):", data.role, "-> normalized:", roleNum); // Debug: Kiểm tra role
+            // If a redirect_after_login was set (e.g. booking page saved it), honor it and navigate there.
+            const saved = localStorage.getItem('redirect_after_login');
+            if (saved) {
+              try {
+                // Only allow same-origin or root-relative redirects for safety
+                const origin = window.location.origin;
+                let target = saved;
+                if (target.indexOf(origin) === 0) {
+                  // full origin provided
+                } else if (target.startsWith('/')) {
+                  target = origin + target;
+                } else {
+                  // not safe or unknown format — ignore and fallback to role handling
+                  throw new Error('unsafe redirect');
+                }
+                // Clean up and redirect
+                localStorage.removeItem('redirect_after_login');
+                window.location.href = target;
+                return;
+              } catch (e) {
+                console.warn('Ignored saved redirect_after_login:', saved, e);
+                localStorage.removeItem('redirect_after_login');
+              }
+            }
+
+            // Fallback behavior: role-based redirects (use normalized number)
+            if (roleNum === 2) {
               console.log("Redirecting to /tiennghi");
               window.location.href = "{{ url('/tiennghi') }}"; // Nhân viên
-            } else if (data.role === 1) {
+            } else if (roleNum === 1) {
               console.log("Redirecting to /taikhoan");
               window.location.href = "{{ route('taikhoan') }}?email=" + encodeURIComponent(Email); // Khách hàng
             } else {

@@ -585,10 +585,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-6 col-md-6 cappa-logo-wrap">
-                    <a href="index.html" class="cappa-logo"><img src="HomePage/img/logo.png" alt="Cappa Luxury Hotel"></a>
-                </div>
-                <div class="col-6 col-md-6 text-right">
-                    <a href="index.html" style="font-family: 'Barlow', sans-serif; color: #aa8453; font-weight: 500;">← Back to Home</a>
+                    <a href="./" class="cappa-logo"><img src="HomePage/img/logo.png" alt="Cappa Luxury Hotel"></a>
                 </div>
             </div>
         </div>
@@ -757,7 +754,7 @@
             <div class="action-buttons">
                 <button class="btn btn-primary" onclick="window.print()">🖨️ Print Confirmation</button>
                 <button class="btn btn-secondary" onclick="downloadPDF()">📄 Download PDF</button>
-                <a href="index.html" class="btn btn-outline">🏠 Return to Home</a>
+                <a href="./" class="btn btn-outline">🏠 Return to Home</a>
             </div>
 
             <!-- Contact Support -->
