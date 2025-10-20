@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Login\AuthController;
+use App\Http\Controllers\Login\RegisterChoiceController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,14 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('session')->get('/auth/check-role', [AuthController::class, 'checkRole']);
+
+// === API mới cho 2 lựa chọn đăng ký ===
+// Lựa chọn 1: Tạo tài khoản (có xác nhận OTP)
+Route::post('/register-with-account', [RegisterChoiceController::class, 'registerWithAccount']);
+// Lựa chọn 2: Không tạo tài khoản (chỉ lưu khách hàng)
+Route::post('/register-guest', [RegisterChoiceController::class, 'registerGuest']);
+// Xác nhận OTP và tạo tài khoản (gửi email thông tin)
+Route::post('/verify-otp-account', [RegisterChoiceController::class, 'verifyOtpAndCreateAccount']);
 
 
 // CRUD Tiện nghi
@@ -67,3 +76,10 @@ Route::post('/datphong/{iddatphong}/cancel', [App\Http\Controllers\Amenties\DatP
 
 // Services API
 Route::get('/dichvu', [App\Http\Controllers\Amenties\DichVuController::class, 'index']);
+// Customers
+Route::get('/khachhang', [App\Http\Controllers\Login\KhachHangController::class, 'index']);
+Route::post('/khachhang', [App\Http\Controllers\Login\KhachHangController::class, 'store']);
+Route::put('/khachhang/{id}', [App\Http\Controllers\Login\KhachHangController::class, 'update']);
+
+// Invoices API (hoadon) - supports filtering by date range, status and search
+Route::get('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'index']);

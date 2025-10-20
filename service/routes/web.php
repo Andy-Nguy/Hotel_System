@@ -71,6 +71,7 @@ Route::get('/__debug/request-info', function (Request $request) {
 */
 
 // Trang chính
+/*
 Route::get('/', function (Request $request) use ($callApi) {
     $data = $callApi('/api/loaiphongs') ?: [];
     $rooms = is_array($data) ? $data : [];
@@ -96,9 +97,18 @@ Route::get('/', function (Request $request) use ($callApi) {
 
     return view('welcome', compact('rooms', 'services'));
 });
-
-
+*/
+// khachhang
 /*
+Route::get('/', function () {
+    return view('amenties.khachhang');
+});
+*/
+Route::get('/', function () {
+    return view('statistics.hoadon');
+});
+/*
+
  |-----------------------------------------------------------------------
  | Rooms by type view (rooms2)
  | expects /rooms2?type=LP001
@@ -238,6 +248,12 @@ require __DIR__.'/auth.php';
 Route::get('/tiennghi', function () {
     return view('amenties.tiennghi');
 })->name('tiennghi.index');
+Route::get('/khachhang', function () {
+    return view('statistics.khachhang');
+})->name('khachhang.index');
+Route::get('/hoadon', function () {
+    return view('statistics.hoadon');
+})->name('hoadon.index');
 // Restaurant page (legacy URI: /restaurant.html)
 Route::get('/restaurant', function () {
     return view('Orther_user.restaurant');
