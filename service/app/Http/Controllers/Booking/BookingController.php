@@ -33,8 +33,20 @@ class BookingController extends Controller
         $validated['NgayNhanPhong'] = \Carbon\Carbon::parse($validated['NgayNhanPhong'])->format('Y-m-d');
         $validated['NgayTraPhong'] = \Carbon\Carbon::parse($validated['NgayTraPhong'])->format('Y-m-d');
 
-        // Generate IDDatPhong
-        $idDatPhong = 'DP' . strtoupper(uniqid());
+        // Generate IDDatPhong as sequential DP + zero-padded number (e.g., DP000001)
+        try {
+            $row = DB::table('DatPhong')
+                ->select(DB::raw('MAX(CAST(SUBSTRING(IDDatPhong, 3) AS UNSIGNED)) as max_num'))
+                ->first();
+
+            $maxNum = isset($row->max_num) ? intval($row->max_num) : 0;
+            $next = $maxNum + 1;
+            $idDatPhong = 'DP' . str_pad($next, 6, '0', STR_PAD_LEFT);
+        } catch (\Exception $ex) {
+            // Fallback to timestamp-based ID if anything goes wrong
+            Log::warning('Failed to generate sequential IDDatPhong, falling back to timestamp: ' . $ex->getMessage());
+            $idDatPhong = 'DP' . date('YmdHis') . rand(100, 999);
+        }
 
         // Prepare data for insert
         $data = [
@@ -62,7 +74,7 @@ class BookingController extends Controller
 
             if (!$recipientEmail) {
                 $khachHang = DB::table('KhachHang')
-                    ->where('IDKhachHang', $validated['IDKhachHang'])
+                ->where('IDKhachHang', $validated['IDKhachHang'])
                     ->select('HoTen', 'Email')
                     ->first();
 
@@ -112,3 +124,5 @@ class BookingController extends Controller
         }
     }
 }
+
+?>

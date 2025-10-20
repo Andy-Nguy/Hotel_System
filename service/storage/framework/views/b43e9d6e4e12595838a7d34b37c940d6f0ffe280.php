@@ -14,7 +14,7 @@
                             <div class="owl-carousel owl-theme">
                                 <div class="item">
                                     <span class="quote"><img src="HomePage/img/quot.png" alt=""></span>
-                                    <p>Khách sạn thật tuyệt vời, dịch vụ thân thiện. Mọi thứ từ sảnh đón tiếp đến phòng nghỉ đều được chuẩn bị chu đáo, khiến tôi có một kỳ nghỉ thư giãn và đáng nhớ. Tôi chắc chắn sẽ giới thiệu nơi này đến bạn bè..</p>
+                                    <p>Khách sạn thật tuyệt vời, dịch vụ thân thiện. Mọi thứ từ sảnh đón tiếp đến phòng nghỉ đều được chuẩn bị chu đáo, khiến tôi có một kỳ nghỉ thư giãn và đáng nhớ. Tôi chắc chắn sẽ giới thiệu nơi này đến bạn bè.</p>
                                     <div class="info">
                                         <div class="author-img"> <img src="HomePage/img/team/4.jpg" alt=""> </div>
                                         <div class="cont"> <span><i class="star-rating"></i><i
@@ -32,7 +32,7 @@
                                         <div class="cont"> <span><i class="star-rating"></i><i
                                                     class="star-rating"></i><i class="star-rating"></i><i
                                                     class="star-rating"></i><i class="star-rating"></i></span>
-                                            <h6>Trần Thu Hà</h6> <span>Đánh giá của khách</span>
+                                            <h6>Phạm Văn Chung</h6> <span>Đánh giá của khách</span>
                                         </div>
                                     </div>
                                 </div>

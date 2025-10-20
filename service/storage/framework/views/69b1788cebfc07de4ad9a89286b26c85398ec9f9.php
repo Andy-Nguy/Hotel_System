@@ -81,7 +81,7 @@ if (!function_exists('safe_text')) {
         </svg>
     </div>
     <!-- Simplified Menu (rooms-only) -->
-    @include('partials.menu')
+    <?php echo $__env->make('partials.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -354,11 +354,11 @@ if (!function_exists('safe_text')) {
         </div>
     </section>
     <!-- Pricing -->
-    {{-- @include('partials.pricing', ['services' => $services ?? []]) --}}
+    
     <!-- Reservation & Booking Form -->
-    @include('partials.reservation')
+    <?php echo $__env->make('partials.reservation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Footer -->
-    @include('partials.footer')
+    <?php echo $__env->make('partials.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -384,3 +384,4 @@ if (!function_exists('safe_text')) {
 </html>
 
 
+<?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/roomdetails.blade.php ENDPATH**/ ?>

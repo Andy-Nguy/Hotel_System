@@ -34,18 +34,7 @@
     <!-- Menu -->
     <?php echo $__env->make('partials.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Logo & Menu Burger -->
-    <header class="cappa-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <!-- Logo -->
-                <div class="col-6 col-md-6 cappa-logo-wrap">
-                    <a href="/" class="cappa-logo"><img src="/HomePage/img/logo.png" alt=""></a>
-                </div>
-                <!-- Menu Burger -->
-                <div class="col-6 col-md-6 text-right cappa-wrap-burger-wrap"> <a href="#" class="cappa-nav-toggle cappa-js-cappa-nav-toggle"><i></i></a> </div>
-            </div>
-        </div>
-    </header>
+    <?php echo $__env->make('partials.logo&menuburger', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Restaurant Slider -->
     <header class="header slider">
         <div class="owl-carousel owl-theme">

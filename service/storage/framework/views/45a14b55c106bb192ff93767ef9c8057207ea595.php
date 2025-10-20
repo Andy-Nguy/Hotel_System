@@ -42,7 +42,7 @@
         </svg>
     </div>
     <!-- Simplified Menu (rooms-only) -->
-    @include('partials.menu')
+    <?php echo $__env->make('partials.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -269,11 +269,11 @@
             </div>
     </section> 
     <!-- Pricing -->
-    @include('partials.pricing', ['services' => $services ?? []])
+    <?php echo $__env->make('partials.pricing', ['services' => $services ?? []], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Reservation & Booking Form -->
-    @include('partials.reservation')
+    <?php echo $__env->make('partials.reservation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Footer -->
-    @include('partials.footer')
+    <?php echo $__env->make('partials.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -491,4 +491,4 @@
 </body>
 
 <!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/rooms2.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:17 GMT -->
-</html>
+</html><?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/rooms2.blade.php ENDPATH**/ ?>
