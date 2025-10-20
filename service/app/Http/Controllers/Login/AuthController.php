@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class AuthController extends Controller
@@ -198,5 +199,106 @@ class AuthController extends Controller
 
         // Trả về view taikhoan với thông tin người dùng
         return view('taikhoan', ['user' => $user]);
+    }
+
+    // --- [5] Cập nhật thông tin tài khoản (POST /taikhoan) ---
+    public function updateProfile(Request $request)
+    {
+        // Debug: log session and CSRF related info to help diagnose 419 Page Expired
+        try {
+            $sid = session()->getId();
+            $sessionToken = session('_token');
+            $requestToken = $request->input('_token') ?? $request->header('X-CSRF-TOKEN');
+            $sessionEmail = session('email');
+            $cookies = $request->cookies->all();
+            Log::info('updateProfile debug', [
+                'session_id' => $sid,
+                'session_token' => $sessionToken,
+                'request_token' => $requestToken,
+                'session_email' => $sessionEmail,
+                'cookies' => $cookies,
+                'headers_csrf' => $request->header('X-CSRF-TOKEN'),
+            ]);
+        } catch (Throwable $e) {
+            // if logging fails, don't break the request
+            Log::warning('updateProfile debug logging failed: ' . $e->getMessage());
+        }
+
+        $email = session('email') ?? $request->input('email');
+        if (!$email) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để truy cập trang tài khoản.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'HoTen' => 'required|string|max:100',
+            'SoDienThoai' => 'nullable|string|max:15',
+            'NgaySinh' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            DB::table('KhachHang')
+                ->where('Email', $email)
+                ->update([
+                    'HoTen' => $request->input('HoTen'),
+                    'SoDienThoai' => $request->input('SoDienThoai'),
+                    'NgaySinh' => $request->input('NgaySinh'),
+                ]);
+
+            // If request expects JSON (AJAX), return JSON with updated data so client JS can update in-place.
+            if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                $updated = [
+                    'HoTen' => $request->input('HoTen'),
+                    'SoDienThoai' => $request->input('SoDienThoai'),
+                    'NgaySinh' => $request->input('NgaySinh'),
+                ];
+                return response()->json(['success' => true, 'data' => $updated]);
+            }
+
+            return redirect()->route('taikhoan')->with('success', 'Cập nhật thông tin thành công.');
+        } catch (Throwable $e) {
+            if ($request->expectsJson() || $request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Lỗi khi cập nhật: ' . $e->getMessage()], 500);
+            }
+            return redirect()->back()->with('error', 'Lỗi khi cập nhật: ' . $e->getMessage());
+        }
+    }
+
+    // API-friendly update (stateless) - POST /api/taikhoan
+    public function updateProfileApi(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'HoTen' => 'required|string|max:100',
+            'SoDienThoai' => 'nullable|string|max:15',
+            'NgaySinh' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Validation failed', 'errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $email = $request->input('email');
+            $exists = DB::table('KhachHang')->where('Email', $email)->exists();
+            if (!$exists) return response()->json(['success' => false, 'message' => 'User not found'], 404);
+
+            DB::table('KhachHang')->where('Email', $email)->update([
+                'HoTen' => $request->input('HoTen'),
+                'SoDienThoai' => $request->input('SoDienThoai'),
+                'NgaySinh' => $request->input('NgaySinh'),
+            ]);
+
+            return response()->json(['success' => true, 'data' => [
+                'HoTen' => $request->input('HoTen'),
+                'SoDienThoai' => $request->input('SoDienThoai'),
+                'NgaySinh' => $request->input('NgaySinh'),
+            ]]);
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

@@ -62,12 +62,10 @@
         </svg>
     </div>
     <!-- Menu -->
-    @include('partials.menu')
+    <?php echo $__env->make('partials.menu', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <!-- Logo & Menu Burger -->
-
-    @include('partials.logo&menuburger')
-
+    <?php echo $__env->make('partials.logo&menuburger', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Slider -->
     <header class="header slider-fade">
         <div class="owl-carousel owl-theme">
@@ -138,7 +136,7 @@
         </div>
     </header>
     <!-- About -->
-    @include('partials.about')
+    <?php echo $__env->make('partials.about', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Rooms -->
     <section class="rooms1 section-padding bg-cream" data-scroll-index="1">
         <div class="container">
@@ -194,19 +192,8 @@
                                             $detailsId = isset($room['first_phong_id']) && $room['first_phong_id'] ? $room['first_phong_id'] : $idLoai;
                                             ?>
                                             <div class="permalink">
-                                                <?php
-                                                // Prefer explicit APP_URL from environment (so links use e.g. http://127.0.0.1:8000)
-                                                $envAppUrl = trim(env('APP_URL', ''), "/ ");
-                                                if ($envAppUrl) {
-                                                    $appUrl = $envAppUrl;
-                                                } else {
-                                                    $appUrl = config('app.url') ?: ((isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] . '://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? '127.0.0.1:8000'));
-                                                }
-                                                // ensure no trailing slash
-                                                $roomdetailsBase = rtrim($appUrl, '/') . '/roomdetails';
-                                                $detailsUrl = $roomdetailsBase . '?id=' . urlencode($detailsId);
-                                                ?>
-                                                <a href="<?php echo htmlspecialchars($detailsUrl, ENT_QUOTES, 'UTF-8'); ?>">Details <i class="ti-arrow-right"></i></a>
+                                                <a href="<?php echo url('/roomdetails', [], false) . '?id=' . urlencode($detailsId); ?>">Details <i
+                                                        class="ti-arrow-right"></i></a>
                                             </div>
                                         </div>
                                     </div>
@@ -223,7 +210,7 @@
         </div>
     </section>
     <!-- Pricing -->
-    @include('partials.pricing', ['services' => $services ?? []])
+    <?php echo $__env->make('partials.pricing', ['services' => $services ?? []], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Promo Video -->
     <section class="video-wrapper video section-padding bg-img bg-fixed" data-overlay-dark="3"
         data-background="HomePage/img/slider/2.jpg">
@@ -251,7 +238,7 @@
         </div>
     </section>
     <!-- Facilities -->
-    @include('partials.facilities')
+    <?php echo $__env->make('partials.facilities', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Booking Search -->
     <section class="section-padding bg-cream">
         <div class="container">
@@ -323,16 +310,16 @@
         </div>
     </section>
     <!-- Testimonials -->
-    @include('partials.testiominals')
+    <?php echo $__env->make('partials.testiominals', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Services -->
-    @include('partials.services')
+    <?php echo $__env->make('partials.services', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- News -->
-    @include('partials.news')
+    <?php echo $__env->make('partials.news', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- Reservation & Clients-->
-    @include('partials.reservation')
+    <?php echo $__env->make('partials.reservation', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     
     <!-- Footer -->
-    @include('partials.footer')
+    <?php echo $__env->make('partials.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -351,11 +338,12 @@
     <script src="HomePage/js/select2.js"></script>
     <script src="HomePage/js/datepicker.js"></script>
     <script src="HomePage/js/smooth-scroll.min.js"></script>
-
     <script src="HomePage/js/custom.js"></script>
 <!-- Navigation scripts moved to partial: resources/views/partials/menu.blade.php -->
-<!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:06 GMT -->
 </body>
+
+<!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:06 GMT -->
+
 </html>
 <script>
 console.log("📂 [AuthCheck] Script bắt đầu chạy...");
@@ -398,176 +386,6 @@ function logout() {
   localStorage.clear(); // Xóa token, userName, role, email, v.v.
   
   // Chuyển về trang chủ (sử dụng URL tương đối để giữ host:port)
-  window.location.href = '{!! url('/', [], false) !!}';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
+  window.location.href = '<?php echo url('/', [], false); ?>';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
 }
-
-
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('.booking-inner .form1') || document.getElementById('availability-form');
-    if (!form) return;
-
-    // Helper: robust modal show/hide that works with or without Bootstrap's jQuery plugin
-    function showAvailabilityModal() {
-        const modalEl = document.getElementById('availabilityModal');
-        if (!modalEl) return;
-
-        // If Bootstrap's modal is available, use it for correct behavior/backdrop handling
-        if (window.jQuery && typeof window.jQuery('#availabilityModal').modal === 'function') {
-            window.jQuery('#availabilityModal').modal('show');
-            return;
-        }
-
-        // Fallback: manually show modal and backdrop and wire up dismiss buttons
-        modalEl.classList.add('show');
-        modalEl.style.display = 'block';
-        modalEl.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
-
-        // Ensure single backdrop
-        let backdrop = document.querySelector('.modal-backdrop');
-        if (!backdrop) {
-            backdrop = document.createElement('div');
-            backdrop.className = 'modal-backdrop fade show';
-            document.body.appendChild(backdrop);
-        } else {
-            backdrop.classList.add('show');
-        }
-
-        // Wire up any elements with data-dismiss="modal" inside this modal
-        const dismissEls = modalEl.querySelectorAll('[data-dismiss="modal"]');
-        dismissEls.forEach(el => {
-            // Avoid adding multiple listeners
-            if (!el._availabilityDismissHandler) {
-                el._availabilityDismissHandler = function(evt) {
-                    evt && evt.preventDefault();
-                    hideAvailabilityModal();
-                };
-                el.addEventListener('click', el._availabilityDismissHandler);
-            }
-        });
-    }
-
-    function hideAvailabilityModal() {
-        const modalEl = document.getElementById('availabilityModal');
-        if (!modalEl) return;
-
-        if (window.jQuery && typeof window.jQuery('#availabilityModal').modal === 'function') {
-            window.jQuery('#availabilityModal').modal('hide');
-            return;
-        }
-
-        modalEl.classList.remove('show');
-        modalEl.style.display = 'none';
-        modalEl.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('modal-open');
-
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.parentNode.removeChild(backdrop);
-    }
-
-    // Close modal when clicking backdrop (fallback)
-    document.addEventListener('click', function(e) {
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (!backdrop) return;
-        if (e.target === backdrop) hideAvailabilityModal();
-    });
-
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const inputCheckIn = form.querySelector('#check_in') || form.querySelector('input[name="check_in"]') || form.querySelectorAll('.datepicker')[0];
-        const inputCheckOut = form.querySelector('#check_out') || form.querySelector('input[name="check_out"]') || form.querySelectorAll('.datepicker')[1];
-        const checkIn = inputCheckIn ? inputCheckIn.value : '';
-        const checkOut = inputCheckOut ? inputCheckOut.value : '';
-
-        // Small robust date parser to handle common formats (ISO or dd/mm/yyyy)
-        function parseDateFlexible(s) {
-            if (!s) return null;
-            // If format contains '/', assume dd/mm/yyyy or d/m/yyyy
-            if (s.indexOf('/') !== -1) {
-                const parts = s.split('/').map(p => p.trim());
-                if (parts.length === 3) {
-                    // parts[0]=dd, parts[1]=mm, parts[2]=yyyy
-                    return new Date(parts[2] + '-' + parts[1] + '-' + parts[0]);
-                }
-            }
-            // Otherwise try direct Date parsing (ISO yyyy-mm-dd, or browser locale)
-            const d = new Date(s);
-            return isNaN(d.getTime()) ? null : d;
-        }
-
-        // Validate same-day or invalid range: disallow check-in == check-out or check_in > check_out
-        const inDate = parseDateFlexible(checkIn);
-        const outDate = parseDateFlexible(checkOut);
-        if (inDate && outDate) {
-            // Normalize times to midnight for comparison
-            const inTime = new Date(inDate.getFullYear(), inDate.getMonth(), inDate.getDate()).getTime();
-            const outTime = new Date(outDate.getFullYear(), outDate.getMonth(), outDate.getDate()).getTime();
-            if (inTime >= outTime) {
-                const modalBody = document.getElementById('availabilityModalBody');
-                modalBody.innerHTML = '<div class="col-12 text-center py-4 text-warning">Không thể check-in và check-out cùng một ngày. Vui lòng chọn ngày check-out ít nhất 1 ngày sau check-in.</div>';
-                showAvailabilityModal();
-                return;
-            }
-        }
-
-        const modalBody = document.getElementById('availabilityModalBody');
-        modalBody.innerHTML = '<div class="col-12 text-center py-4">Loading...</div>';
-
-        try {
-            const url = new URL('/api/rooms/available', window.location.origin);
-            if (checkIn) url.searchParams.set('check_in', checkIn);
-            if (checkOut) url.searchParams.set('check_out', checkOut);
-
-            const res = await fetch(url.toString(), { credentials: 'same-origin' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            const rooms = Array.isArray(data) ? data : (data.rooms || data.data || []);
-
-            if (!rooms || rooms.length === 0) {
-                // Friendly Vietnamese message when no rooms are available
-                modalBody.innerHTML = '<div class="col-12 text-center py-4">Không có phòng phù hợp cho ngày bạn chọn. Vui lòng thử chọn ngày khác hoặc liên hệ khách sạn để hỗ trợ.</div>';
-            } else {
-                modalBody.innerHTML = rooms.map(room => {
-                    const id = room.id || room.MaPhong || room.IDPhong || '';
-                    const title = room.name || room.TenPhong || room.Ten || room.ten || 'Room';
-                    const desc = room.description || room.MoTa || room.mo_ta || '';
-                    const images = room.images || room.HinhAnh || room.hinh_anh || [];
-                    const img = (Array.isArray(images) && images.length) ? images[0] : (room.image || room.AnhDaiDien || 'HomePage/img/rooms/1.jpg');
-                    const capacity = room.capacity || room.SucChua || room.SoNguoi || room.SoNguoiToiDa || '';
-                    const price = room.price || room.Gia || room.gia || '';
-
-                    return `\
-                        <div class="col-md-6 mb-3">\
-                            <div class="card">\
-                                <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">\
-                                    <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">\
-                                </div>\
-                                <div class="card-body">\
-                                    <h5 class="card-title">${title} ${id?('<small class="text-muted">#'+id+'</small>'):''}</h5>\
-                                    ${desc?('<p class="card-text">'+desc+'</p>') : ''}\
-                                    <p class="mb-1"><small class="text-muted">Capacity: ${capacity}</small></p>\
-                                    ${price?('<p class="mb-0"><strong>'+price+'</strong></p>'):''}\
-                                </div>\
-                                <div class="card-footer">\
-                                    <a href="/roomdetails?id=${id}" class="btn btn-sm btn-outline-primary">Details</a>\
-                                    <a href="/booking?room=${id}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}" class="btn btn-sm btn-primary">Book Now</a>\
-                                </div>\
-                            </div>\
-                        </div>`;
-                }).join('\n');
-            }
-
-            // Show modal (uses Bootstrap if available, otherwise fallback)
-            showAvailabilityModal();
-
-        } catch (err) {
-            console.error('Error fetching availability', err);
-            // Friendly Vietnamese error message and guidance
-            modalBody.innerHTML = '<div class="col-12 text-center py-4 text-danger">Không thể tải danh sách phòng. Có thể do lỗi mạng hoặc không có phòng cho ngày đã chọn. Vui lòng thử lại sau hoặc liên hệ chúng tôi để được hỗ trợ.</div>';
-            showAvailabilityModal();
-        }
-    });
-});
-</script>
+</script><?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/welcome.blade.php ENDPATH**/ ?>

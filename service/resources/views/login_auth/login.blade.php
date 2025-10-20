@@ -122,7 +122,8 @@
               window.location.href = "{{ url('/tiennghi') }}"; // Nhân viên
             } else if (roleNum === 1) {
               console.log("Redirecting to /taikhoan");
-              window.location.href = "{{ route('taikhoan') }}?email=" + encodeURIComponent(Email); // Khách hàng
+              // Use relative route path to avoid embedding host/port in the generated URL
+              window.location.href = "{{ route('taikhoan', [], false) }}?email=" + encodeURIComponent(Email); // Khách hàng
             } else {
               msg.innerText = "Vai trò không hợp lệ!";
               console.log("Invalid role:", data.role);

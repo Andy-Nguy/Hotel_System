@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\Login\AuthController;
+use App\Http\Controllers\Login\RegisterChoiceController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,14 @@ Route::prefix('rooms')->group(function () {
     Route::get('/available/by_room', [RoomController::class, 'getAvailableRoomById']);
 });
 
+// === API mới cho 2 lựa chọn đăng ký ===
+// Lựa chọn 1: Tạo tài khoản (có xác nhận OTP)
+Route::post('/register-with-account', [RegisterChoiceController::class, 'registerWithAccount']);
+// Lựa chọn 2: Không tạo tài khoản (chỉ lưu khách hàng)
+Route::post('/register-guest', [RegisterChoiceController::class, 'registerGuest']);
+// Xác nhận OTP và tạo tài khoản (gửi email thông tin)
+Route::post('/verify-otp-account', [RegisterChoiceController::class, 'verifyOtpAndCreateAccount']);
+
 
 
 // CRUD Tiện nghi
@@ -63,7 +72,28 @@ Route::apiResource('phongs', PhongController::class)->except(['index']);
 Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
 Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
 Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
+// Update profile via API (ajax-friendly, stateless)
+Route::post('/taikhoan', [AuthController::class, 'updateProfileApi']);
 // Explicit route: use index1 for listing phongs
+
 
 // Booking API
 Route::post('/datphong', [BookingController::class, 'store']);
+
+// Booking API: fetch bookings by email or idkhachhang
+Route::get('/datphong', [App\Http\Controllers\Amenties\DatPhongController::class, 'index']);
+// Booking details: include HoaDon and used services
+Route::get('/datphong/{iddatphong}', [App\Http\Controllers\Amenties\DatPhongController::class, 'show']);
+// Cancel a booking (set TrangThai = 0)
+Route::post('/datphong/{iddatphong}/cancel', [App\Http\Controllers\Amenties\DatPhongController::class, 'cancel']);
+
+// Services API
+Route::get('/dichvu', [App\Http\Controllers\Amenties\DichVuController::class, 'index']);
+// Customers
+Route::get('/khachhang', [App\Http\Controllers\Login\KhachHangController::class, 'index']);
+Route::post('/khachhang', [App\Http\Controllers\Login\KhachHangController::class, 'store']);
+Route::put('/khachhang/{id}', [App\Http\Controllers\Login\KhachHangController::class, 'update']);
+
+// Invoices API (hoadon) - supports filtering by date range, status and search
+Route::get('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'index']);
+

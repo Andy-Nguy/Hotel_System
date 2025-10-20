@@ -81,29 +81,7 @@ if (!function_exists('safe_text')) {
         </svg>
     </div>
     <!-- Simplified Menu (rooms-only) -->
-    <div class="cappa-wrap">
-        <div class="cappa-wrap-inner">
-            <nav class="cappa-menu">
-                <ul>
-                    <li><a href="rooms.html">Rooms</a></li>
-                    <li><a href="rooms2.html">Rooms 2</a></li>
-                    <li><a href="rooms3.html">Rooms 3</a></li>
-                    <li><a href="room-details.html" class="active">Room Details</a></li>
-                    <li><a href="#" class="reservation-link">Reservation: <strong>855 100 4444</strong></a></li>
-                </ul>
-            </nav>
-            <div class="cappa-menu-footer">
-                <div class="reservation">
-                    <a href="tel:8551004444">
-                        <div class="icon d-flex justify-content-center align-items-center">
-                            <i class="flaticon-call"></i>
-                        </div>
-                        <div class="call">Reservation<br><span>855 100 4444</span></div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('partials.menu')
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -143,13 +121,55 @@ if (!function_exists('safe_text')) {
                                 $class = $s <= $rating ? 'star-rating' : 'star-rating star-empty';
                                 echo '<i class="' . $class . '"></i>';
                             }
+                            $priceNumber = isset($room['GiaCoBanMotDem']) ? number_format($room['GiaCoBanMotDem']) : null;
+                            $maxPeople = isset($room['SoNguoiToiDa']) && $room['SoNguoiToiDa'] !== '' ? (int) $room['SoNguoiToiDa'] : null;
+                            $displayPrice = $priceNumber !== null ? $priceNumber . '₫ ' : '';
                         ?>
                     </span>
-                    <div class="section-subtitle"><?php echo safe_text($room['SoPhong'] ?? ''); ?></div>
+                    <div class="section-subtitle">
+                        <?php 
+                            $soPhong = safe_text($room['SoPhong'] ?? '');
+                            echo $soPhong;
+
+                            if ($displayPrice) {
+                                echo ' - <strong>' . $displayPrice . '</strong>';
+                            }
+                        ?>
+                    </div>
                     <div class="section-title"><?php echo safe_text($room['TenPhong'] ?? 'Room Details'); ?></div>
                 </div>
                 <div class="col-md-8">
-                    <p class="mb-30"><?php echo safe_text($room['MoTa'] ?? 'Hotel non lorem ac erat suscipit bibendum nulla facilisi.'); ?></p>
+                    <?php if ($maxPeople !== null): ?>
+                                        <p class="text-muted h6 fw-bold mb-2">
+                                            <i class="flaticon-group" aria-hidden="true" style="margin-right:8px"></i>
+                                            Tối đa: <?php echo $maxPeople; ?> người
+                                        </p>
+                                    <?php endif; ?>
+                    <p class="mb-30">
+                        <?php
+                            $mota = $room['MoTa'] ?? 'Hotel non lorem ac erat suscipit bibendum nulla facilisi.';
+
+                            // Loại bỏ các <br> cũ để tránh bị lỗi
+                            $mota = strip_tags($mota);
+
+                            // Tách câu
+                            $sentences = preg_split('/(?<=[.?!])\s+/', $mota);
+                            
+                            $formatted = '';
+                            foreach ($sentences as $index => $sentence) {
+                                if (trim($sentence) === '') continue;
+                                $formatted .= trim($sentence) . ' ';
+                                if (($index + 1) % 3 == 0) {
+                                    // Thêm 2 thẻ <br> để có khoảng cách dòng (cách đoạn)
+                                    $formatted .= '<br><br>'; 
+                                }
+                            }
+
+                            echo $formatted;
+                        ?>
+                    </p>
+
+
                     <div class="row">
                         <div class="col-md-6">
                             <h6>Nhận phòng (Check-in)</h6>
@@ -203,28 +223,28 @@ if (!function_exists('safe_text')) {
                     <div class="col-md-3 offset-md-1">
                     <h6>Tiện ích</h6>
                     <ul class="list-unstyled page-list mb-30">
-<?php
-    // chuẩn hoá nguồn tiện nghi từ $room (hỗ trợ nhiều tên trường)
-    $amenities = [];
-    if (is_array($room)) {
-        if (!empty($room['tien_nghis']) && is_array($room['tien_nghis'])) {
-            $amenities = $room['tien_nghis'];
-        } elseif (!empty($room['tienNghis']) && is_array($room['tienNghis'])) {
-            $amenities = $room['tienNghis'];
-        } elseif (!empty($room['tien_nghi']) && is_array($room['tien_nghi'])) {
-            $amenities = $room['tien_nghi'];
-        }
-    }
+            <?php
+                // chuẩn hoá nguồn tiện nghi từ $room (hỗ trợ nhiều tên trường)
+                $amenities = [];
+                if (is_array($room)) {
+                    if (!empty($room['tien_nghis']) && is_array($room['tien_nghis'])) {
+                        $amenities = $room['tien_nghis'];
+                    } elseif (!empty($room['tienNghis']) && is_array($room['tienNghis'])) {
+                        $amenities = $room['tienNghis'];
+                    } elseif (!empty($room['tien_nghi']) && is_array($room['tien_nghi'])) {
+                        $amenities = $room['tien_nghi'];
+                    }
+                }
 
-    if (!empty($amenities)) :
-        foreach ($amenities as $amen) :
-            $label = '';
-            if (is_array($amen)) {
-                $label = $amen['TenTienNghi'] ?? $amen['ten'] ?? $amen['name'] ?? '';
-            } else {
-                $label = (string)$amen;
-            }
-?>
+                if (!empty($amenities)) :
+                    foreach ($amenities as $amen) :
+                        $label = '';
+                        if (is_array($amen)) {
+                            $label = $amen['TenTienNghi'] ?? $amen['ten'] ?? $amen['name'] ?? '';
+                        } else {
+                            $label = (string)$amen;
+                        }
+            ?>
         <li>
             <div class="page-list-icon"> <span class="ti-check"></span> </div>
             <div class="page-list-text">
@@ -233,17 +253,8 @@ if (!function_exists('safe_text')) {
         </li>
     <?php
         endforeach;
-    else:
-        // fallback nếu không có dữ liệu từ API
+    else: 
     ?>
-        <li>
-            <div class="page-list-icon"> <span class="flaticon-group"></span> </div>
-            <div class="page-list-text"><p>1-2 Persons</p></div>
-        </li>
-        <li>
-            <div class="page-list-icon"> <span class="flaticon-wifi"></span> </div>
-            <div class="page-list-text"><p>Free Wifi</p></div>
-        </li>
     <?php endif; ?>
 </ul>
                 </div>
@@ -278,14 +289,14 @@ if (!function_exists('safe_text')) {
                                     }
 
                                     $idLoai = $room['IDLoaiPhong'] ?? '';
-                                    $priceRaw = $room['GiaCoBanMotDem'] ?? '';
-                                    $displayPrice = $priceRaw !== '' ? number_format((float)$priceRaw, 0, '.', ',') . '₫ ' : '';
+                                    
                                     $name = $room['TenLoaiPhong'] ?? '';
                                     // details link: prefer first_phong_id if provided by API, otherwise use type id
                                     // If first_phong_id is missing or null, fall back to the type id
                                     $detailsId = $room['first_phong_id'] ?? $idLoai;
                                     $bookUrl = '/rooms2?type=' . rawurlencode($idLoai);
                                     $detailsUrl = '/roomdetails.php?id=' . rawurlencode($detailsId);
+                                   
                                 ?>
                                 <div class="item">
                                     <div class="position-re o-hidden">
@@ -343,76 +354,7 @@ if (!function_exists('safe_text')) {
         </div>
     </section>
     <!-- Pricing -->
-    <section class="pricing section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="section-subtitle"><span>Best Prices</span></div>
-                    <div class="section-title">Extra Services</div>
-                    <p>The best prices for your relaxing vacation. The utanislen quam nestibulum ac quame odion elementum sceisue the aucan.</p>
-                    <p>Orci varius natoque penatibus et magnis disney parturient monte nascete ridiculus mus nellen etesque habitant morbine.</p>
-                    <div class="reservations mb-30">
-                        <div class="icon"><span class="flaticon-call"></span></div>
-                        <div class="text">
-                            <p>For information</p> <a href="tel:855-100-4444">855 100 4444</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="owl-carousel owl-theme">
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/1.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room cleaning</div>
-                                <div class="amount">$50<span>/ month</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/2.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Drinks included</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/3.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room Breakfast</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/4.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Safe & Secure</div>
-                                <div class="amount">$15<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    {{-- @include('partials.pricing', ['services' => $services ?? []]) --}}
     <!-- Reservation & Booking Form -->
     <section class="testimonials">
         <div class="background bg-img bg-fixed section-padding pb-0" data-background="HomePage/img/slider/2.jpg" data-overlay-dark="2">
@@ -526,68 +468,7 @@ if (!function_exists('safe_text')) {
         </div>
     </section>
     <!-- Footer -->
-    <footer class="footer">
-            <div class="footer-top">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="footer-column footer-about">
-                                <h3 class="footer-title">About Hotel</h3>
-                                <p class="footer-about-text">Welcome to the best five-star deluxe hotel in New York. Hotel elementum sesue the aucan vestibulum aliquam justo in sapien rutrum volutpat.</p>
-                                
-                                <div class="footer-language"> <i class="lni ti-world"></i>
-                                    <select onchange="location = this.value;">
-                                        <option value="#0">English</option>
-                                        <option value="#0">German</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 offset-md-1">
-                            <div class="footer-column footer-explore clearfix">
-                                <h3 class="footer-title">Explore</h3>
-                                <ul class="footer-explore-list list-unstyled">
-                                    <li><a href="index.html">Home</a></li>
-                                    <li><a href="rooms.html">Rooms & Suites</a></li>
-                                    <li><a href="restaurant.html">Restaurant</a></li>
-                                    <li><a href="spa-wellness.html">Spa & Wellness</a></li>
-                                    <li><a href="about.html">About Hotel</a></li>
-                                    <li><a href="contact.html">Contact</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="footer-column footer-contact">
-                                <h3 class="footer-title">Contact</h3>
-                                <p class="footer-contact-text">1616 Broadway NY, New York 10001<br>United States of America</p>
-                                <div class="footer-contact-info">
-                                        <p class="footer-contact-phone"><span class="flaticon-call"></span> 855 100 4444</p>
-                                        <p class="footer-contact-mail">info@luxuryhotel.com</p>
-                                </div>
-                                <div class="footer-about-social-list">
-                                    <a href="#"><i class="ti-instagram"></i></a>
-                                    <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
-                                    <a href="#"><i class="ti-youtube"></i></a>
-                                    <a href="#"><i class="ti-facebook"></i></a>
-                                    <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="footer-bottom-inner">
-                                <p class="footer-bottom-copy-right">© Copyright 2022 by <a href="#">DuruThemes.com</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    </footer>
+    @include('partials.footer')
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>

@@ -18,8 +18,6 @@ class LoaiPhong extends Model
         'IDLoaiPhong',
         'TenLoaiPhong',
         'MoTa',
-        'SoNguoiToiDa',
-        'GiaCoBanMotDem',
         'UrlAnhLoaiPhong',
         'UuTienChinh'
     ];

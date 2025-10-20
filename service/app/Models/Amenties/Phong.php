@@ -18,10 +18,11 @@ class Phong extends Model
         'TenPhong',
         'SoPhong',
         'MoTa',
-        'UuTienChinh',
         'XepHangSao',
         'TrangThai',
-        'UrlAnhPhong'
+        'UrlAnhPhong',
+        'SoNguoiToiDa',
+        'GiaCoBanMotDem'
     ];
 
     public function loaiPhong()
