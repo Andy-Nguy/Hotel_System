@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quản lý Đặt Phòng - Adminlite</title>
 
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/fonts/bootstrap/bootstrap-icons.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/main.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/overlay-scroll/OverlayScrollbars.min.css') }}" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="shortcut icon" href="<?php echo e(asset('assets/images/favicon.svg')); ?>" />
+    <link rel="stylesheet" href="<?php echo e(asset('assets/fonts/bootstrap/bootstrap-icons.css')); ?>" />
+    <link rel="stylesheet" href="<?php echo e(asset('assets/css/main.min.css')); ?>" />
+    <link rel="stylesheet" href="<?php echo e(asset('assets/vendor/overlay-scroll/OverlayScrollbars.min.css')); ?>" />
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <style>
         .cursor-pointer {
             cursor: pointer
@@ -62,14 +62,14 @@
             <!-- Sidebar -->
             <nav id="sidebar" class="sidebar-wrapper">
                 <div class="app-brand p-3 mb-3">
-                    <a href="{{ route('datphong.index') }}">
-                        <img src="{{ asset('assets/images/logo.svg') }}" class="logo" alt="AdminLite" />
+                    <a href="<?php echo e(route('datphong.index')); ?>">
+                        <img src="<?php echo e(asset('assets/images/logo.svg')); ?>" class="logo" alt="AdminLite" />
                     </a>
                 </div>
                 <div class="sidebarMenuScroll">
                     <ul class="sidebar-menu">
                         <li class="active current-page">
-                            <a href="{{ route('datphong.index') }}">
+                            <a href="<?php echo e(route('datphong.index')); ?>">
                                 <i class="bi bi-box"></i>
                                 <span class="menu-text">Đặt phòng</span>
                             </a>
@@ -97,8 +97,8 @@
                         <h5 class="m-0">Quản lý Hoá đơn</h5>
                     </div>
                     <div class="app-brand-sm d-lg-none d-flex ms-auto">
-                        <a href="{{ route('datphong.index') }}">
-                            <img src="{{ asset('assets/images/logo-sm.svg') }}" class="logo" alt="AdminLite" />
+                        <a href="<?php echo e(route('datphong.index')); ?>">
+                            <img src="<?php echo e(asset('assets/images/logo-sm.svg')); ?>" class="logo" alt="AdminLite" />
                         </a>
                     </div>
                     <div class="header-actions">
@@ -113,32 +113,32 @@
 
                 <!-- Body -->
                 <div class="app-body p-3">
-                    <form id="datphong-filter-form" method="GET" action="{{ route('datphong.index') }}">
+                    <form id="datphong-filter-form" method="GET" action="<?php echo e(route('datphong.index')); ?>">
                         <div class="row g-3 align-items-end filter-controls">
                             <div class="col-md-2">
                                 <label class="form-label">Từ ngày</label>
-                                <input type="date" name="from" class="form-control" value="{{ request()->get('from', date('Y-m-01')) }}">
+                                <input type="date" name="from" class="form-control" value="<?php echo e(request()->get('from', date('Y-m-01'))); ?>">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Đến ngày</label>
-                                <input type="date" name="to" class="form-control" value="{{ request()->get('to', date('Y-m-d')) }}">
+                                <input type="date" name="to" class="form-control" value="<?php echo e(request()->get('to', date('Y-m-d'))); ?>">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label">Trạng thái</label>
                                 <select name="status" class="form-select">
-                                    {{-- default to 2 (Đã thanh toán) when no status provided --}}
-                                    <option value="0" {{ request()->get('status', '2') === '0' ? 'selected' : '' }}>Đã huỷ</option>
-                                    <option value="1" {{ request()->get('status', '2') == '1' ? 'selected' : '' }}>Chờ xác nhận</option>
-                                    <option value="2" {{ request()->get('status', '2') == '2' ? 'selected' : '' }}>Đã xác nhận</option>
-                                    <option value="3" {{ request()->get('status', '2') == '3' ? 'selected' : '' }}>Đang sử dụng</option>
-                                    <option value="4" {{ request()->get('status', '2') == '4' ? 'selected' : '' }}>Đã hoàn thành</option>
-                                    <option value="-1" {{ request()->get('status', '2') == '-1' ? 'selected' : '' }}>Tất cả</option>
+                                    
+                                    <option value="0" <?php echo e(request()->get('status', '2') === '0' ? 'selected' : ''); ?>>Đã huỷ</option>
+                                    <option value="1" <?php echo e(request()->get('status', '2') == '1' ? 'selected' : ''); ?>>Chờ xác nhận</option>
+                                    <option value="2" <?php echo e(request()->get('status', '2') == '2' ? 'selected' : ''); ?>>Đã xác nhận</option>
+                                    <option value="3" <?php echo e(request()->get('status', '2') == '3' ? 'selected' : ''); ?>>Đang sử dụng</option>
+                                    <option value="4" <?php echo e(request()->get('status', '2') == '4' ? 'selected' : ''); ?>>Đã hoàn thành</option>
+                                    <option value="-1" <?php echo e(request()->get('status', '2') == '-1' ? 'selected' : ''); ?>>Tất cả</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Tìm kiếm</label>
                                 <div class="input-group">
-                                    <input type="text" name="q" class="form-control" placeholder="Số CT/Ghi chú" value="{{ request()->get('q') }}">
+                                    <input type="text" name="q" class="form-control" placeholder="Số CT/Ghi chú" value="<?php echo e(request()->get('q')); ?>">
                                     <button class="btn btn-primary" type="submit">Lọc</button>
                                     <button id="btn-print-list" type="button" class="btn btn-outline-secondary ms-2">In</button>
                                     <button id="btn-csv-export" type="button" class="btn btn-outline-success ms-2">Xuất CSV</button>
@@ -194,9 +194,9 @@
                                         <div>
                                             <div>Tổng số lượng: <span id="print-count"></span></div>
                                             <div>Tổng tiền cọc: <span id="print-deposit"></span></div>
-                                            <div>Bằng chữ (Tổng tiền cọc): <span id="print-deposit-words"></span></div>
                                             <div>Tổng tiền: <span id="print-sum"></span></div>
                                             <div>Bằng chữ (Tổng tiền): <span id="print-sum-words"></span></div>
+                                            <div>Bằng chữ (Tổng tiền cọc): <span id="print-deposit-words"></span></div>
                                         </div>
                                         <div style="text-align:center;">
                                             <div>Người lập</div>
@@ -215,12 +215,12 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/moment.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/overlay-scroll/jquery.overlayScrollbars.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/overlay-scroll/custom-scrollbar.js') }}"></script>
-    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <script src="<?php echo e(asset('assets/js/jquery.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('assets/js/bootstrap.bundle.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('assets/js/moment.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('assets/vendor/overlay-scroll/jquery.overlayScrollbars.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('assets/vendor/overlay-scroll/custom-scrollbar.js')); ?>"></script>
+    <script src="<?php echo e(asset('assets/js/custom.js')); ?>"></script>
     <script>
     (function($){
         function fmtMoney(v){
@@ -520,4 +520,4 @@
     </script>
     
     </body>
-    </html>
+    </html><?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/statistics/datphong.blade.php ENDPATH**/ ?>

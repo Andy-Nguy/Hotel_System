@@ -175,6 +175,7 @@
                                 <div>
                                     <div>Tổng số lượng: <span id="print-count"></span></div>
                                     <div>Tổng tiền: <span id="print-sum"></span></div>
+                                    <div>Bằng chữ: <span id="print-sum-words"></span></div>
                                 </div>
                                 <div style="text-align:center;">
                                     <div>Người lập</div>
@@ -212,6 +213,52 @@
             if (v === 1) return 'Chưa thanh toán';
             if (v === 2) return 'Đã thanh toán';
             return '';
+        }
+
+        // number to Vietnamese words (simple, for VND integers)
+        function numberToVietnameseWords(n){
+            n = Math.round(Math.abs(parseFloat(n)||0));
+            if (n === 0) return 'không đồng';
+            var units = ['','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+            var scales = ['','nghìn','triệu','tỷ','nghìn tỷ','triệu tỷ'];
+
+            function threeDigitsToWords(num){
+                var hundred = Math.floor(num/100);
+                var tenUnit = num % 100;
+                var ten = Math.floor(tenUnit/10);
+                var unit = tenUnit%10;
+                var parts = [];
+                if (hundred>0) parts.push(units[hundred] + ' trăm');
+                if (ten>1){
+                    parts.push(units[ten] + ' mươi');
+                    if (unit===1) parts.push('mốt');
+                    else if (unit===5) parts.push('lăm');
+                    else if (unit>0) parts.push(units[unit]);
+                } else if (ten===1){
+                    parts.push('mười');
+                    if (unit===5) parts.push('lăm');
+                    else if (unit>0) parts.push(units[unit]);
+                } else if (ten===0 && unit>0){
+                    if (hundred>0) parts.push('lẻ');
+                    parts.push(units[unit]);
+                }
+                return parts.join(' ');
+            }
+
+            var words = [];
+            var scaleIndex = 0;
+            while (n>0){
+                var chunk = n % 1000;
+                if (chunk>0){
+                    var chunkWords = threeDigitsToWords(chunk);
+                    if (scaleIndex>0) chunkWords = chunkWords + (scales[scaleIndex] ? ' ' + scales[scaleIndex] : '');
+                    words.unshift(chunkWords);
+                }
+                n = Math.floor(n/1000);
+                scaleIndex += 1;
+            }
+            var result = words.join(' ').replace(/\s+/g,' ').trim();
+            return result.charAt(0).toUpperCase() + result.slice(1) + ' đồng';
         }
 
         function renderInvoices(data){
@@ -371,6 +418,7 @@
                         $('#print-meta').html(metaHtml);
                         $('#print-count').text(count);
                         $('#print-sum').text(fmtMoney(totalSum));
+                        try{ $('#print-sum-words').text(numberToVietnameseWords(totalSum)); }catch(e){ $('#print-sum-words').text(''); }
 
                         // open print window
                         var content = $('#print-area').html();

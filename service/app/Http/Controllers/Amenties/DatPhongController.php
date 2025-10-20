@@ -221,4 +221,87 @@ class DatPhongController extends Controller
 
         return response()->json(['message' => 'Cancelled', 'IDDatPhong' => $dp->IDDatPhong, 'TrangThai' => $dp->TrangThai]);
     }
+
+    /**
+     * Admin list endpoint: supports filtering by NgayDatPhong (from/to), TrangThai, q (IDDatPhong or TenPhong), pagination
+     * GET /api/datphong/list?from=YYYY-MM-DD&to=YYYY-MM-DD&status=&q=&page=&per_page=
+     */
+    public function adminIndex(Request $request)
+    {
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $status = $request->query('status');
+        $q = $request->query('q');
+        $perPage = intval($request->query('per_page', 10)) ?: 10;
+
+        $query = DatPhong::query()->join('Phong as p', 'DatPhong.IDPhong', '=', 'p.IDPhong')
+            ->select([
+                'DatPhong.IDDatPhong as IDDatPhong',
+                'p.SoPhong as SoPhong',
+                'p.TenPhong as TenPhong',
+                'DatPhong.NgayDatPhong',
+                'DatPhong.NgayNhanPhong',
+                'DatPhong.NgayTraPhong',
+                'DatPhong.TongTien',
+                'DatPhong.TienCoc',
+                'DatPhong.TrangThai',
+                'DatPhong.TrangThaiThanhToan',
+            ]);
+
+        if ($from) {
+            $query->whereDate('DatPhong.NgayDatPhong', '>=', $from);
+        }
+        if ($to) {
+            // include whole day
+            $query->whereDate('DatPhong.NgayDatPhong', '<=', $to);
+        }
+
+        if ($status !== null && $status !== '') {
+            // allow status = -1 to mean all
+            if (strval($status) !== '-1') {
+                $query->where('DatPhong.TrangThai', $status);
+            }
+        }
+
+        if ($q) {
+            $query->where(function($qq) use ($q) {
+                $qq->where('DatPhong.IDDatPhong', 'like', '%' . $q . '%')
+                   ->orWhere('p.TenPhong', 'like', '%' . $q . '%');
+            });
+        }
+
+        $query->orderByDesc('DatPhong.NgayDatPhong');
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json($paginated);
+    }
+
+    /**
+     * Return top booked rooms (exclude TrangThai = 0) aggregated by count of bookings.
+     * GET /api/datphong/top-rooms?limit=3
+     */
+    public function topRooms(Request $request)
+    {
+        $limit = intval($request->query('limit', 3));
+        // count bookings per room, exclude cancelled (TrangThai = 0)
+        $rows = DatPhong::query()
+            ->where('DatPhong.TrangThai', '!=', 0)
+            ->join('Phong as p', 'DatPhong.IDPhong', '=', 'p.IDPhong')
+            ->selectRaw('p.TenPhong as TenPhong, COUNT(*) as bookings')
+            ->groupBy('p.TenPhong')
+            ->orderByDesc('bookings')
+            ->get();
+
+        $total = $rows->sum('bookings');
+        $top = $rows->take($limit);
+        $othersCount = max(0, $total - $top->sum('bookings'));
+
+        $data = $top->map(function($r){ return ['label' => $r->TenPhong, 'value' => (int)$r->bookings]; })->values()->toArray();
+        if ($othersCount > 0) {
+            $data[] = ['label' => 'Khác', 'value' => (int)$othersCount];
+        }
+
+        return response()->json(['data' => $data, 'total' => (int)$total]);
+    }
 }

@@ -82,6 +82,10 @@ Route::post('/datphong', [BookingController::class, 'store']);
 
 // Booking API: fetch bookings by email or idkhachhang
 Route::get('/datphong', [App\Http\Controllers\Amenties\DatPhongController::class, 'index']);
+// Admin booking list with filters (from, to on NgayDatPhong; status on TrangThai; q search)
+Route::get('/datphong/list', [App\Http\Controllers\Amenties\DatPhongController::class, 'adminIndex']);
+// Top booked rooms (exclude cancelled)
+Route::get('/datphong/top-rooms', [App\Http\Controllers\Amenties\DatPhongController::class, 'topRooms']);
 // Booking details: include HoaDon and used services
 Route::get('/datphong/{iddatphong}', [App\Http\Controllers\Amenties\DatPhongController::class, 'show']);
 // Cancel a booking (set TrangThai = 0)
@@ -89,6 +93,8 @@ Route::post('/datphong/{iddatphong}/cancel', [App\Http\Controllers\Amenties\DatP
 
 // Services API
 Route::get('/dichvu', [App\Http\Controllers\Amenties\DichVuController::class, 'index']);
+// Top used services (from CTHDDV)
+Route::get('/dichvu/top-used', [App\Http\Controllers\Amenties\DichVuController::class, 'topUsed']);
 // Customers
 Route::get('/khachhang', [App\Http\Controllers\Login\KhachHangController::class, 'index']);
 Route::post('/khachhang', [App\Http\Controllers\Login\KhachHangController::class, 'store']);
@@ -96,4 +102,6 @@ Route::put('/khachhang/{id}', [App\Http\Controllers\Login\KhachHangController::c
 
 // Invoices API (hoadon) - supports filtering by date range, status and search
 Route::get('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'index']);
+// Invoice stats: weekly/monthly aggregates for reporting
+Route::get('/hoadon/stats', [App\Http\Controllers\Amenties\HoaDonController::class, 'stats']);
 

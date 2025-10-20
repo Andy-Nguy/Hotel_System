@@ -44,6 +44,7 @@ $callApi = function(string $endpoint, int $timeout = 5) use ($apiPrefix) {
         return null;
     }
 };
+
 // Temporary debug endpoint: exposes what Laravel sees for a request
 Route::get('/__debug/request-info', function (Request $request) {
     try {
@@ -71,7 +72,7 @@ Route::get('/__debug/request-info', function (Request $request) {
 */
 
 // Trang chính
-
+/*
 Route::get('/', function (Request $request) use ($callApi) {
     $data = $callApi('/api/loaiphongs') ?: [];
     $rooms = is_array($data) ? $data : [];
@@ -97,13 +98,13 @@ Route::get('/', function (Request $request) use ($callApi) {
 
     return view('welcome', compact('rooms', 'services'));
 });
-
-// khachhang
-/*
-Route::get('/', function () {
-    return view('amenties.khachhang');
-});
 */
+// khachhang
+
+Route::get('/', function () {
+    return view('statistics.admin');
+});
+
 /*Route::get('/', function () {
     return view('statistics.hoadon');
 });*/
@@ -285,6 +286,14 @@ Route::get('/khachhang', function () {
 Route::get('/hoadon', function () {
     return view('statistics.hoadon');
 })->name('hoadon.index');
+Route::get('/datphong', function () {
+    return view('statistics.datphong');
+})->name('datphong.index');
+Route::get('/admin', function () {
+    return view('statistics.admin');
+})->name('admin.index');
+
+
 // Restaurant page (legacy URI: /restaurant.html)
 Route::get('/restaurant', function () {
     return view('Orther_user.restaurant');
