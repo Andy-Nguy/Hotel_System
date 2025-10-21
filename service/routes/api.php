@@ -7,8 +7,11 @@ use Illuminate\Support\Facades\Log;
 
 use App\Http\Controllers\Amenties\PhongTienNghiController;
 use App\Http\Controllers\Amenties\TienNghiController;
-use App\Http\Controllers\Room\PhongController;
-use App\Http\Controllers\Room\LoaiPhongController;
+use App\Http\Controllers\Amenties\PhongController;
+use App\Http\Controllers\Amenties\LoaiPhongController;
+use App\Http\Controllers\User\KhachHangController;
+use App\Http\Controllers\Room\Phong2Controller;
+use App\Http\Controllers\Room\UploadController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -60,3 +63,15 @@ use App\Http\Controllers\Services\DichVuController;
 
 Route::resource('dichvu.chitiet', TTDichVuController::class)->except(['create', 'edit']);
 Route::resource('dichvu', DichVuController::class)->except(['create', 'edit']);
+
+Route::get('/khach-hang/search', [KhachHangController::class, 'search'])->name('api.khachhang.search');
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+// --- CỤM ROUTE CHO TRANG QUẢN LÝ PHÒNG (Room Management Page) ---
+Route::get('/phongs', [Phong2Controller::class, 'index1']);
+Route::match(['put', 'patch'], '/phongs/{key}', [Phong2Controller::class, 'update']);
+Route::post('/upload', [UploadController::class, 'store'])->name('api.upload');
+Route::get('/phong', [Phong2Controller::class, 'index']);

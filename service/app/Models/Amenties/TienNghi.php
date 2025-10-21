@@ -4,7 +4,7 @@ namespace App\Models\Amenties;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use App\Models\Room\Phong; // added
+use App\Models\Amenties\Phong; // added
 
 class TienNghi extends Model
 {

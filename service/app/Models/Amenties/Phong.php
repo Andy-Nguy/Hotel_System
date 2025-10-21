@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models\Room;
-use App\Models\Amenties\TienNghi;
+namespace App\Models\Amenties;
+
+use app\Models\Amenties\TienNghi;
 use Illuminate\Database\Eloquent\Model;
 
 class Phong extends Model
@@ -11,25 +12,10 @@ class Phong extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
-    protected $appends = ['TenLoaiPhong'];
-
-    public function getTenLoaiPhongAttribute()
-    {
-        // tự động gắn TenLoaiPhong
-        return $this->loaiPhong ? $this->loaiPhong->TenLoaiPhong : null;
-    }
 
     // Thêm các fillable nếu cần
     protected $fillable = [
-        'IDPhong',
-        'SoPhong',
-        'TenPhong',
-        'TenLoaiPhong ',
-        'GiaCoBanMotDem',
-        'SoNguoiToiDa',
-        'TrangThai',
-        'MoTa',
-        'UrlAnhPhong'
+        'IDPhong', 'SoPhong', 'IDLoaiPhong', 'XepHangSao', 'TrangThai', 'MoTa', 'UrlAnhPhong'
     ];
 
     // Quan hệ với LoaiPhong
@@ -39,8 +25,8 @@ class Phong extends Model
     }
 
     // Nếu có quan hệ với tienNghis
-    public function tienNghis()
-    {
+     public function tienNghis()
+     {
         return $this->belongsToMany(TienNghi::class, 'Phong_TienNghi', 'IDPhong', 'IDTienNghi');
     }
 }

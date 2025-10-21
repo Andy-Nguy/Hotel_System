@@ -72,16 +72,16 @@
                                 <span class="menu-text">Dịch Vụ</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="contracts.html">
-                                <i class="bi bi-shop-window"></i>
-                                <span class="menu-text">Contracts</span>
+                        <li class="{{ request()->routeIs('datphong.truc_tiep.create') ? 'active current-page' : '' }}">
+                            <a href="{{ route('datphong.truc_tiep.create') }}">
+                                <i class="bi bi-calendar-plus"></i>
+                                <span class="menu-text">Đặt phòng trực tiếp</span>
                             </a>
                         </li>
-                        <li>
-                            <a href="projects.html">
-                                <i class="bi bi-terminal-split"></i>
-                                <span class="menu-text">Projects</span>
+                        <li class="{{ request()->routeIs('datphong.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('datphong.index') }}">
+                                <i class="bi bi-journal-text"></i>
+                                <span class="menu-text">Đặt phòng</span>
                             </a>
                         </li>
                         <li>
