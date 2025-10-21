@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Book Your Stay - The Cappa Luxury Hotel</title>
+    <title>Đặt phòng - The Cappa Luxury Hotel</title>
     <link rel="icon" href="HomePage/img/favicon.png" type="image/png" sizes="32x32">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
@@ -432,27 +432,27 @@
         <div class="booking-container">
             <!-- Header -->
             <div class="booking-header">
-                <h1>Complete Your Reservation</h1>
-                <p>Review your booking details and proceed to payment</p>
+                    <h1>Hoàn tất đặt phòng</h1>
+                    <p>Kiểm tra thông tin đặt phòng của bạn và tiến hành thanh toán</p>
             </div>
 
             <!-- Progress Steps -->
             <div class="booking-steps">
                 <div class="step completed" data-step="1">
                     <div class="step-number">✓</div>
-                    <div class="step-label">Booking Details</div>
+                    <div class="step-label">Chi tiết đặt phòng</div>
                 </div>
                 <div class="step active" data-step="2">
                     <div class="step-number">2</div>
-                    <div class="step-label">Guest Information</div>
+                    <div class="step-label">Thông tin khách</div>
                 </div>
                 <div class="step" data-step="3">
                     <div class="step-number">3</div>
-                    <div class="step-label">Payment</div>
+                    <div class="step-label">Thanh toán</div>
                 </div>
                 <div class="step" data-step="4">
                     <div class="step-number">4</div>
-                    <div class="step-label">Confirmation</div>
+                    <div class="step-label">Xác nhận</div>
                 </div>
             </div>
 
@@ -460,13 +460,13 @@
             <div class="booking-content">
                 <!-- Step 1: Review Booking -->
                 <div class="booking-section active" data-section="1">
-                    <h2 class="section-title">Review Your Booking</h2>
+                    <h2 class="section-title">Kiểm tra lại đặt phòng</h2>
                     
                     <div class="booking-grid">
                         <div class="room-details-card">
                             <img id="roomImage" src="HomePage/img/rooms/1.jpg" alt="Room">
                             <div class="room-details-content">
-                                <h3 id="roomName">Deluxe Room</h3>
+                                <h3 id="roomName">Phòng Deluxe</h3>
                                 <div class="room-features">
                                     <div class="feature-item">
                                         <i class="flaticon-bed"></i>
@@ -493,98 +493,77 @@
                         </div>
 
                         <div class="booking-summary-card">
-                            <h3>Booking Summary</h3>
+                            <h3>Tóm tắt đặt phòng</h3>
                             <div class="summary-item">
-                                <span>Check-In Date:</span>
+                                <span>Ngày nhận phòng:</span>
                                 <span id="displayCheckIn">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Check-Out Date:</span>
+                                <span>Ngày trả phòng:</span>
                                 <span id="displayCheckOut">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Number of Nights:</span>
+                                <span>Số đêm:</span>
                                 <span id="displayNights">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Room Type:</span>
+                                <span>Loại phòng:</span>
                                 <span id="displayRoomType">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Price per Night:</span>
+                                <span>Giá mỗi đêm:</span>
                                 <span id="displayPricePerNight">-</span>
                             </div>
                             <div class="summary-item total">
-                                <span>Total Amount:</span>
-                                <span id="displayTotal">$0</span>
+                                <span>Tổng tiền:</span>
+                                <span id="displayTotal">0₫</span>
                             </div>
                         </div>
                     </div>
 
-                    <h2 class="section-title">Guest Information</h2>
+                    <h2 class="section-title">Thông tin khách</h2>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>First Name *</label>
+                            <label>Họ *</label>
                             <input type="text" id="firstName" required>
                         </div>
                         <div class="form-group">
-                            <label>Last Name *</label>
+                            <label>Tên *</label>
                             <input type="text" id="lastName" required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Email Address *</label>
+                            <label>Địa chỉ Email *</label>
                             <input type="email" id="email" required>
                         </div>
                         <div class="form-group">
-                            <label>Phone Number *</label>
+                            <label>Số điện thoại *</label>
                             <input type="tel" id="phone" required>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Number of Adults</label>
-                            <select id="adults">
-                                <option value="1">1 Adult</option>
-                                <option value="2" selected>2 Adults</option>
-                                <option value="3">3 Adults</option>
-                                <option value="4">4 Adults</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Number of Children</label>
-                            <select id="children">
-                                <option value="0" selected>No Children</option>
-                                <option value="1">1 Child</option>
-                                <option value="2">2 Children</option>
-                                <option value="3">3 Children</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <label>Special Requests (Optional)</label>
-                        <textarea id="specialRequests" class="special-requests" placeholder="Please let us know if you have any special requirements (early check-in, late check-out, dietary restrictions, etc.)"></textarea>
+                        <label>Yêu cầu đặc biệt (không bắt buộc)</label>
+                        <textarea id="specialRequests" class="special-requests" placeholder="Vui lòng ghi yêu cầu đặc biệt (nhận phòng sớm, trả phòng muộn, chế độ ăn đặc biệt, v.v.)"></textarea>
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel Booking</button>
-                        <button class="btn btn-primary" onclick="goToPayment()">Continue to Payment</button>
+                        <button class="btn btn-secondary" onclick="window.location.href='/'">Hủy đặt phòng</button>
+                        <button class="btn btn-primary" onclick="goToPayment()">Tiến hành thanh toán</button>
                     </div>
                 </div>
 
                 <!-- Step 2: Payment -->
                 <div class="booking-section" data-section="2">
-                    <h2 class="section-title">Payment Details</h2>
+                    <h2 class="section-title">Thông tin thanh toán</h2>
 
                     <div class="booking-summary-card" style="margin-bottom: 30px;">
-                        <h3>Final Booking Summary</h3>
+                        <h3>Tóm tắt cuối cùng</h3>
                         <div class="summary-item">
-                            <span>Guest Name:</span>
+                            <span>Tên khách:</span>
                             <span id="summaryGuestName">-</span>
                         </div>
                         <div class="summary-item">
@@ -592,7 +571,7 @@
                             <span id="summaryEmail">-</span>
                         </div>
                         <div class="summary-item">
-                            <span>Phone:</span>
+                            <span>Điện thoại:</span>
                             <span id="summaryPhone">-</span>
                         </div>
                         <div class="summary-item">
@@ -604,43 +583,43 @@
                             <span id="summaryCheckOut">-</span>
                         </div>
                         <div class="summary-item">
-                            <span>Room:</span>
+                            <span>Phòng:</span>
                             <span id="summaryRoom">-</span>
                         </div>
                         <div class="summary-item">
-                            <span>Guests:</span>
+                            <span>Khách:</span>
                             <span id="summaryGuests">-</span>
                         </div>
                         <div class="summary-item total">
-                            <span>Total Amount:</span>
-                            <span id="summaryTotal">$0</span>
+                            <span>Tổng tiền:</span>
+                            <span id="summaryTotal">0₫</span>
                         </div>
                     </div>
 
-                    <h3 style="font-family: 'Gilda Display', serif; margin-bottom: 20px; color: #333;">Select Payment Method</h3>
+                    <h3 style="font-family: 'Gilda Display', serif; margin-bottom: 20px; color: #333;">Chọn phương thức thanh toán</h3>
                     <div class="payment-methods">
-                        <div class="payment-method" onclick="selectPayment('credit')">
-                            <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">💳 Credit Card</div>
+                        <div class="payment-method" onclick="selectPayment('credit', this)">
+                            <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">💳 Thẻ tín dụng</div>
                         </div>
-                        <div class="payment-method" onclick="selectPayment('debit')">
-                            <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">💳 Debit Card</div>
+                        <div class="payment-method" onclick="selectPayment('debit', this)">
+                            <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">💳 Thẻ ghi nợ</div>
                         </div>
-                        <div class="payment-method" onclick="selectPayment('paypal')">
+                        <div class="payment-method" onclick="selectPayment('paypal', this)">
                             <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">🅿️ PayPal</div>
                         </div>
-                        <div class="payment-method" onclick="selectPayment('bank')">
-                            <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">🏦 Bank Transfer</div>
+                        <div class="payment-method" onclick="selectPayment('bank', this)">
+                            <div style="font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 16px;">🏦 Chuyển khoản ngân hàng</div>
                         </div>
                     </div>
 
                     <div id="cardDetails" style="display: none;">
                         <div class="form-group">
-                            <label>Card Number *</label>
+                            <label>Số thẻ *</label>
                             <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Expiry Date *</label>
+                                <label>Hạn thẻ (MM/YY) *</label>
                                 <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
                             </div>
                             <div class="form-group">
@@ -649,30 +628,30 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Cardholder Name *</label>
+                            <label>Tên chủ thẻ *</label>
                             <input type="text" id="cardName" placeholder="John Doe">
                         </div>
                     </div>
 
                     <div id="paypalDetails" style="display: none;">
                         <p style="font-family: 'Barlow', sans-serif; color: #666; padding: 20px; background: #f8f5f0; border-radius: 8px;">
-                            You will be redirected to PayPal to complete your payment securely.
+                            Bạn sẽ được chuyển tới PayPal để hoàn tất thanh toán một cách an toàn.
                         </p>
                     </div>
 
                     <div id="bankDetails" style="display: none;">
                         <div style="font-family: 'Barlow', sans-serif; color: #666; padding: 20px; background: #f8f5f0; border-radius: 8px;">
-                            <p style="margin-bottom: 10px;"><strong>Bank Transfer Details:</strong></p>
-                            <p>Bank: International Bank</p>
-                            <p>Account Number: 1234567890</p>
-                            <p>Swift Code: INTLUS33</p>
-                            <p style="margin-top: 15px; color: #aa8453;"><em>Please include your booking reference in the transfer notes.</em></p>
+                            <p style="margin-bottom: 10px;"><strong>Thông tin chuyển khoản:</strong></p>
+                            <p>Ngân hàng: International Bank</p>
+                            <p>Số tài khoản: 1234567890</p>
+                            <p>SWIFT Code: INTLUS33</p>
+                            <p style="margin-top: 15px; color: #aa8453;"><em>Vui lòng ghi mã tham chiếu đặt phòng trong phần ghi chú khi chuyển tiền.</em></p>
                         </div>
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevStep(1)">Back</button>
-                        <button class="btn btn-primary" onclick="completeBooking()">Complete Booking</button>
+                        <button class="btn btn-secondary" onclick="prevStep(1)">Quay lại</button>
+                        <button class="btn btn-primary" onclick="completeBooking()">Hoàn tất đặt phòng</button>
                     </div>
                 </div>
 
@@ -680,46 +659,46 @@
                 <div class="booking-section" data-section="3">
                     <div class="success-message">
                         <div class="success-icon">✓</div>
-                        <h2>Booking Confirmed!</h2>
-                        <p>Thank you for choosing The Cappa Luxury Hotel</p>
+                        <h2>Đặt phòng thành công!</h2>
+                        <p>Cảm ơn bạn đã chọn The Cappa Luxury Hotel</p>
                         
                         <div class="confirmation-details">
                             <div class="summary-item">
-                                <span>Confirmation Number:</span>
+                                <span>Mã xác nhận:</span>
                                 <span id="confirmationNumber" style="color: #aa8453; font-weight: bold;">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Guest Name:</span>
+                                    <span>Tên khách:</span>
                                 <span id="confirmGuestName">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Email:</span>
+                                    <span>Email:</span>
                                 <span id="confirmEmail">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Room Type:</span>
+                                    <span>Loại phòng:</span>
                                 <span id="confirmRoom">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Check-In:</span>
+                                    <span>Ngày nhận phòng:</span>
                                 <span id="confirmCheckIn">-</span>
                             </div>
                             <div class="summary-item">
-                                <span>Check-Out:</span>
+                                    <span>Ngày trả phòng:</span>
                                 <span id="confirmCheckOut">-</span>
                             </div>
                             <div class="summary-item total">
-                                <span>Total Paid:</span>
-                                <span id="confirmTotal">$0</span>
+                                    <span>Tổng đã thanh toán:</span>
+                                    <span id="confirmTotal">0₫</span>
                             </div>
                         </div>
 
-                        <p style="margin-top: 20px;">A confirmation email has been sent to your email address.</p>
-                        <p>We look forward to welcoming you!</p>
+                            <p style="margin-top: 20px;">Một email xác nhận đã được gửi đến địa chỉ email của bạn.</p>
+                            <p>Chúng tôi mong được đón tiếp bạn!</p>
                         
                         <div style="margin-top: 40px;">
-                            <button class="btn btn-primary" onclick="window.location.href='index.html'">Return to Home</button>
-                            <button class="btn btn-secondary" onclick="window.print()" style="margin-left: 15px;">Print Confirmation</button>
+                            <button class="btn btn-primary" onclick="window.location.href='/'">Quay về trang chủ</button>
+                            <button class="btn btn-secondary" onclick="window.print()" style="margin-left: 15px;">In xác nhận</button>
                         </div>
                     </div>
                 </div>
@@ -828,10 +807,10 @@
                     document.getElementById('roomName').textContent = bookingData.roomName;
                     document.getElementById('displayCheckIn').textContent = formatDate(bookingData.checkIn);
                     document.getElementById('displayCheckOut').textContent = formatDate(bookingData.checkOut);
-                    document.getElementById('displayNights').textContent = bookingData.nights + (bookingData.nights === 1 ? ' Night' : ' Nights');
+                    document.getElementById('displayNights').textContent = bookingData.nights + (bookingData.nights === 1 ? ' đêm' : ' đêm');
                     document.getElementById('displayRoomType').textContent = bookingData.roomName;
-                    document.getElementById('displayPricePerNight').textContent = '$' + bookingData.roomPrice;
-                    document.getElementById('displayTotal').textContent = '$' + bookingData.total;
+                    document.getElementById('displayPricePerNight').textContent = formatCurrency(bookingData.roomPrice);
+                    document.getElementById('displayTotal').textContent = formatCurrency(bookingData.total);
                 }
             } catch (err) {
                 console.error('Failed to load room details', err);
@@ -867,9 +846,16 @@
         }
 
         function formatDate(dateString) {
+            if (!dateString) return '-';
             const date = new Date(dateString);
-            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
+            if (isNaN(date.getTime())) return dateString;
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('vi-VN', options);
+        }
+
+        function formatCurrency(amount) {
+            const n = Number(amount) || 0;
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
         }
 
         function nextStep(step) {
@@ -881,14 +867,14 @@
                 const phone = document.getElementById('phone').value.trim();
 
                 if (!firstName || !lastName || !email || !phone) {
-                    alert('Please fill in all required fields');
+                    alert('Vui lòng điền đầy đủ các trường bắt buộc');
                     return;
                 }
 
                 // Email validation
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-                    alert('Please enter a valid email address');
+                    alert('Vui lòng nhập địa chỉ email hợp lệ');
                     return;
                 }
 
@@ -922,13 +908,13 @@
             const phone = phoneEl ? phoneEl.value.trim() : '';
 
             if (!firstName || !lastName || !email || !phone) {
-                alert('Please fill in all required fields');
+                alert('Vui lòng điền đầy đủ các trường bắt buộc');
                 return;
             }
 
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                alert('Please enter a valid email address');
+                alert('Vui lòng nhập địa chỉ email hợp lệ');
                 return;
             }
 
@@ -1009,18 +995,18 @@
             document.getElementById('summaryCheckIn').textContent = formatDate(bookingData.checkIn);
             document.getElementById('summaryCheckOut').textContent = formatDate(bookingData.checkOut);
             document.getElementById('summaryRoom').textContent = bookingData.roomName;
-            document.getElementById('summaryGuests').textContent = `${bookingData.guestInfo.adults} Adult(s), ${bookingData.guestInfo.children} Child(ren)`;
-            document.getElementById('summaryTotal').textContent = '$' + (bookingData.total || 0);
+            document.getElementById('summaryGuests').textContent = `${bookingData.guestInfo.adults} người lớn, ${bookingData.guestInfo.children} trẻ em`;
+            document.getElementById('summaryTotal').textContent = formatCurrency(bookingData.total || 0);
         }
 
-        function selectPayment(method) {
+        function selectPayment(method, el) {
             bookingData.paymentMethod = method;
-            
+
             // Update selected state
             document.querySelectorAll('.payment-method').forEach(pm => {
                 pm.classList.remove('selected');
             });
-            event.currentTarget.classList.add('selected');
+            if (el && el.classList) el.classList.add('selected');
 
             // Hide all payment details
             document.getElementById('cardDetails').style.display = 'none';
@@ -1039,7 +1025,7 @@
 
         function completeBooking() {
             if (!bookingData.paymentMethod) {
-                alert('Please select a payment method');
+                alert('Vui lòng chọn phương thức thanh toán');
                 return;
             }
 
@@ -1051,27 +1037,27 @@
                 const cardName = document.getElementById('cardName').value.trim();
 
                 if (!cardNumber || !expiryDate || !cvv || !cardName) {
-                    alert('Please fill in all card details');
+                    alert('Vui lòng điền đầy đủ thông tin thẻ');
                     return;
                 }
 
                 // Basic card number validation (should be 13-19 digits)
                 const cardNumberClean = cardNumber.replace(/\s/g, '');
                 if (cardNumberClean.length < 13 || cardNumberClean.length > 19) {
-                    alert('Please enter a valid card number');
+                    alert('Vui lòng nhập số thẻ hợp lệ');
                     return;
                 }
 
                 // Basic expiry date validation (MM/YY format)
                 const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
                 if (!expiryRegex.test(expiryDate)) {
-                    alert('Please enter expiry date in MM/YY format');
+                    alert('Vui lòng nhập hạn thẻ theo định dạng MM/YY');
                     return;
                 }
 
                 // CVV validation (3-4 digits)
                 if (cvv.length < 3 || cvv.length > 4) {
-                    alert('Please enter a valid CVV');
+                    alert('Vui lòng nhập mã CVV hợp lệ');
                     return;
                 }
             }
@@ -1086,7 +1072,7 @@
             document.getElementById('confirmRoom').textContent = bookingData.roomName;
             document.getElementById('confirmCheckIn').textContent = formatDate(bookingData.checkIn);
             document.getElementById('confirmCheckOut').textContent = formatDate(bookingData.checkOut);
-            document.getElementById('confirmTotal').textContent = '$' + (bookingData.total || 0);
+            document.getElementById('confirmTotal').textContent = formatCurrency(bookingData.total || 0);
 
             // Show confirmation page
             showStep(3);

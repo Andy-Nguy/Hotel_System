@@ -223,6 +223,33 @@ class DatPhongController extends Controller
     }
 
     /**
+     * Admin confirm booking: set TrangThai = 2 (confirmed)
+     * POST /api/datphong/{iddatphong}/confirm
+     */
+    public function confirm(Request $request, $iddatphong)
+    {
+        $dp = DatPhong::where('IDDatPhong', $iddatphong)->first();
+        if (!$dp) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        // Only update if not already confirmed
+        if ((int) $dp->TrangThai === 2) {
+            return response()->json(['message' => 'Already confirmed', 'IDDatPhong' => $dp->IDDatPhong, 'TrangThai' => $dp->TrangThai]);
+        }
+
+        $dp->TrangThai = 2;
+        try {
+            $dp->save();
+        } catch (\Throwable $e) {
+            logger()->error('Failed to confirm booking ' . $iddatphong . ': ' . $e->getMessage());
+            return response()->json(['error' => 'failed_to_update'], 500);
+        }
+
+        return response()->json(['message' => 'Confirmed', 'IDDatPhong' => $dp->IDDatPhong, 'TrangThai' => $dp->TrangThai]);
+    }
+
+    /**
      * Admin list endpoint: supports filtering by NgayDatPhong (from/to), TrangThai, q (IDDatPhong or TenPhong), pagination
      * GET /api/datphong/list?from=YYYY-MM-DD&to=YYYY-MM-DD&status=&q=&page=&per_page=
      */
@@ -234,7 +261,10 @@ class DatPhongController extends Controller
         $q = $request->query('q');
         $perPage = intval($request->query('per_page', 10)) ?: 10;
 
-        $query = DatPhong::query()->join('Phong as p', 'DatPhong.IDPhong', '=', 'p.IDPhong')
+        // include customer info (left join so we still list bookings without customer)
+        $query = DatPhong::query()
+            ->join('Phong as p', 'DatPhong.IDPhong', '=', 'p.IDPhong')
+            ->leftJoin('KhachHang as k', 'DatPhong.IDKhachHang', '=', 'k.IDKhachHang')
             ->select([
                 'DatPhong.IDDatPhong as IDDatPhong',
                 'p.SoPhong as SoPhong',
@@ -246,6 +276,9 @@ class DatPhongController extends Controller
                 'DatPhong.TienCoc',
                 'DatPhong.TrangThai',
                 'DatPhong.TrangThaiThanhToan',
+                'k.HoTen as KhachHangHoTen',
+                'k.Email as KhachHangEmail',
+                'k.SoDienThoai as KhachHangPhone',
             ]);
 
         if ($from) {

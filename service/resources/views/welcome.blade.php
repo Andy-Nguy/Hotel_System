@@ -164,7 +164,16 @@
                             $price = $room['Gia'];
                         }
                         $displayPrice = ($price !== '' && $price !== null) ? number_format((float) $price, 0, '.', ',') .  '₫' : '';
-                        $imgUrl = '/HomePage/img/rooms/' . rawurlencode($img); // root-relative
+                        // If $img already contains a path or full URL, use it as-is.
+                        if (preg_match('#^https?://#i', $img)) {
+                            $imgUrl = $img;
+                        } elseif (strpos($img, '/') !== false) {
+                            // contains a path fragment; ensure it starts with a single '/'
+                            $imgUrl = (strpos($img, '/') === 0) ? $img : '/' . $img;
+                        } else {
+                            // treat as filename only and encode safely
+                            $imgUrl = '/HomePage/img/rooms/' . rawurlencode(basename($img)); // root-relative
+                        }
                         ?>
                         <div class="<?php echo $colClass; ?>">
                             <div class="item">
@@ -333,6 +342,19 @@
     
     <!-- Footer -->
     @include('partials.footer')
+    <!-- Availability modal for the homepage: used by the Check Now form -->
+    <div class="modal fade" id="availabilityModal" tabindex="-1" role="dialog" aria-labelledby="availabilityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="availabilityModalLabel">Available Rooms</h5>
+                </div>
+                <div class="modal-body">
+                    <div id="availabilityModalBody" class="row"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -516,43 +538,85 @@ document.addEventListener('DOMContentLoaded', function() {
         modalBody.innerHTML = '<div class="col-12 text-center py-4">Loading...</div>';
 
         try {
+            // Read adults/children selects (order in markup: Adults, Children, Rooms)
+            const selectElems = form.querySelectorAll('.select2.select');
+            let adults = 1, children = 0;
+            if (selectElems && selectElems.length >= 2) {
+                adults = parseInt(selectElems[0].value, 10) || adults;
+                children = parseInt(selectElems[1].value, 10) || children;
+            } else {
+                // fallback: try to find selects by label fallback names
+                const aEl = form.querySelector('select[name="adults"]');
+                const cEl = form.querySelector('select[name="children"]');
+                if (aEl) adults = parseInt(aEl.value, 10) || adults;
+                if (cEl) children = parseInt(cEl.value, 10) || children;
+            }
+            const totalGuests = (adults || 0) + (children || 0);
+
             const url = new URL('/api/rooms/available', window.location.origin);
             if (checkIn) url.searchParams.set('check_in', checkIn);
             if (checkOut) url.searchParams.set('check_out', checkOut);
+            // provide guests hint to the API if supported
+            if (totalGuests) url.searchParams.set('guests', totalGuests);
 
             const res = await fetch(url.toString(), { credentials: 'same-origin' });
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
             const rooms = Array.isArray(data) ? data : (data.rooms || data.data || []);
 
-            if (!rooms || rooms.length === 0) {
-                // Friendly Vietnamese message when no rooms are available
-                modalBody.innerHTML = '<div class="col-12 text-center py-4">Không có phòng phù hợp cho ngày bạn chọn. Vui lòng thử chọn ngày khác hoặc liên hệ khách sạn để hỗ trợ.</div>';
-            } else {
-                modalBody.innerHTML = rooms.map(room => {
-                    const id = room.id || room.MaPhong || room.IDPhong || '';
-                    const title = room.name || room.TenPhong || room.Ten || room.ten || 'Room';
-                    const desc = room.description || room.MoTa || room.mo_ta || '';
-                    const images = room.images || room.HinhAnh || room.hinh_anh || [];
-                    const img = (Array.isArray(images) && images.length) ? images[0] : (room.image || room.AnhDaiDien || 'HomePage/img/rooms/1.jpg');
-                    const capacity = room.capacity || room.SucChua || room.SoNguoi || room.SoNguoiToiDa || '';
-                    const price = room.price || room.Gia || room.gia || '';
+            // Client-side filtering by capacity: only show rooms that can fit totalGuests
+            function getRoomCapacity(r) {
+                const raw = r.capacity || r.SucChua || r.SoNguoi || r.SoNguoiToiDa || r.MaxGuests || r.maxGuests || r.SoNguoiToiDa;
+                const n = parseInt(raw, 10);
+                return isNaN(n) ? 0 : n;
+            }
 
-                    return `\
-                        <div class="col-md-6 mb-3">\
-                            <div class="card">\
-                                <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">\
-                                    <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">\
-                                </div>\
+            const filteredRooms = (totalGuests && Array.isArray(rooms)) ? rooms.filter(r => getRoomCapacity(r) >= totalGuests) : rooms;
+
+            if (!filteredRooms || filteredRooms.length === 0) {
+                // Friendly Vietnamese message when no rooms are available
+                modalBody.innerHTML = '<div class="col-12 text-center py-4">Không có phòng phù hợp cho ngày và số lượng khách bạn chọn. Vui lòng thử chọn ngày khác hoặc thay đổi số lượng khách, hoặc liên hệ khách sạn để hỗ trợ.</div>';
+            } else {
+                modalBody.innerHTML = filteredRooms.map(room => {
+                    // Prefer DB field names from `Phong` table: IDPhong, TenPhong, SoPhong, MoTa (not shown), SoNguoiToiDa, GiaCoBanMotDem, UrlAnhPhong
+                    const id = room.IDPhong || room.id || room.MaPhong || room.SoPhong || '';
+                    const roomName=room.SoPhong
+                    const title = room.TenPhong || room.TenLoaiPhong || room.name || room.Ten || room.ten || ('Room ' + (room.SoPhong || room.IDPhong || ''));
+                    // Do NOT show description (MoTa) per request
+                    const images = room.UrlAnhPhong ? [room.UrlAnhPhong] : (room.images || room.HinhAnh || room.hinh_anh || []);
+                    const img = (Array.isArray(images) && images.length) ? images[0] : (room.image || room.AnhDaiDien || 'HomePage/img/rooms/1.jpg');
+                    const capacity = (room.SoNguoiToiDa !== undefined && room.SoNguoiToiDa !== null) ? room.SoNguoiToiDa : (room.capacity || room.SucChua || room.SoNguoi || '');
+
+                    // Extract price: prefer GiaCoBanMotDem, then Gia, then any price-like fields
+                    const priceRaw = (room.GiaCoBanMotDem !== undefined && room.GiaCoBanMotDem !== null)
+                        ? room.GiaCoBanMotDem
+                        : (room.Gia !== undefined && room.Gia !== null ? room.Gia : (room.price || room.gia || ''));
+
+                    // Format price as Vietnamese Dong (VND). Accept numeric strings and numbers.
+                    let displayPrice = '';
+                    if (priceRaw !== '' && priceRaw !== null && priceRaw !== undefined) {
+                        const n = (typeof priceRaw === 'number') ? priceRaw : Number(String(priceRaw).replace(/[^0-9.-]+/g, ''));
+                        if (!isNaN(n)) {
+                            displayPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
+                        } else {
+                            displayPrice = String(priceRaw);
+                        }
+                    }
+
+                    return `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+                                    <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">
+                                </div>
                                 <div class="card-body">\
-                                    <h5 class="card-title">${title} ${id?('<small class="text-muted">#'+id+'</small>'):''}</h5>\
-                                    ${desc?('<p class="card-text">'+desc+'</p>') : ''}\
-                                    <p class="mb-1"><small class="text-muted">Capacity: ${capacity}</small></p>\
-                                    ${price?('<p class="mb-0"><strong>'+price+'</strong></p>'):''}\
+                                    <h5 class="card-title">${title} ${roomName?('<small class="text-muted">'+roomName+'</small>'):''}</h5>\
+                                    <p class="mb-1"><small class="text-muted">Số người: ${capacity}</small></p>\
+                                    ${displayPrice?('<p class="mb-0"><strong>'+displayPrice+'</strong></p>'):''}\
                                 </div>\
                                 <div class="card-footer">\
-                                    <a href="/roomdetails?id=${id}" class="btn btn-sm btn-outline-primary">Details</a>\
-                                    <a href="/booking?room=${id}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}" class="btn btn-sm btn-primary">Book Now</a>\
+                                    <a href="/roomdetails?id=${id}" class="btn btn-sm btn-outline-primary">Chi tiết</a>\
+                                    <a href="/booking?room=${id}&check_in=${encodeURIComponent(checkIn)}&check_out=${encodeURIComponent(checkOut)}" class="btn btn-sm btn-primary">Đặt ngay</a>\
                                 </div>\
                             </div>\
                         </div>`;

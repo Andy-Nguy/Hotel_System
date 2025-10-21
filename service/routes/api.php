@@ -90,6 +90,8 @@ Route::get('/datphong/top-rooms', [App\Http\Controllers\Amenties\DatPhongControl
 Route::get('/datphong/{iddatphong}', [App\Http\Controllers\Amenties\DatPhongController::class, 'show']);
 // Cancel a booking (set TrangThai = 0)
 Route::post('/datphong/{iddatphong}/cancel', [App\Http\Controllers\Amenties\DatPhongController::class, 'cancel']);
+// Confirm a booking (set TrangThai = 2)
+Route::post('/datphong/{iddatphong}/confirm', [App\Http\Controllers\Amenties\DatPhongController::class, 'confirm']);
 
 // Services API
 Route::get('/dichvu', [App\Http\Controllers\Amenties\DichVuController::class, 'index']);

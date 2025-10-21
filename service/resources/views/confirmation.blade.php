@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>Booking Confirmation - The Cappa Luxury Hotel</title>
+    <title>Xác nhận đặt phòng - The Cappa Luxury Hotel</title>
     <link rel="icon" href="HomePage/img/favicon.png" type="image/png" sizes="32x32">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
@@ -598,56 +598,56 @@
             <div class="booking-steps">
                 <div class="step completed" data-step="1">
                     <div class="step-number">✓</div>
-                    <div class="step-label">Booking Details</div>
+                    <div class="step-label">Chi tiết đặt phòng</div>
                 </div>
                 <div class="step completed" data-step="2">
                     <div class="step-number">✓</div>
-                    <div class="step-label">Guest Information</div>
+                    <div class="step-label">Thông tin khách</div>
                 </div>
                 <div class="step completed" data-step="3">
                     <div class="step-number">✓</div>
-                    <div class="step-label">Payment</div>
+                    <div class="step-label">Thanh toán</div>
                 </div>
                 <div class="step completed" data-step="4">
                     <div class="step-number">✓</div>
-                    <div class="step-label">Confirmation</div>
+                    <div class="step-label">Xác nhận</div>
                 </div>
             </div>
 
             <!-- Success Header -->
             <div class="success-header">
                 <div class="success-icon">✓</div>
-                <h1>Booking Confirmed!</h1>
-                <p>Thank you for choosing The Cappa Luxury Hotel</p>
-                <p>Your reservation has been successfully confirmed</p>
+                <h1>Đặt phòng thành công!</h1>
+                <p>Cảm ơn bạn đã chọn The Cappa Luxury Hotel</p>
+                <p>Đặt phòng của bạn đã được xác nhận</p>
                 <div class="confirmation-number" id="confirmationNumber">CPL12345678</div>
             </div>
 
             <!-- Booking Details -->
             <div class="confirmation-content">
-                <h2 class="section-title">Booking Details</h2>
+                <h2 class="section-title">Chi tiết đặt phòng</h2>
                 
                 <div class="booking-details-grid">
                     <div class="detail-card">
-                        <h3>Check-In</h3>
-                        <p id="checkInDate">Monday, Dec 20, 2024</p>
+                        <h3>Ngày nhận phòng</h3>
+                        <p id="checkInDate">-</p>
                         <p style="font-size: 14px; color: #999; font-weight: normal;">After 3:00 PM</p>
                     </div>
                     
                     <div class="detail-card">
-                        <h3>Check-Out</h3>
-                        <p id="checkOutDate">Wednesday, Dec 22, 2024</p>
+                        <h3>Ngày trả phòng</h3>
+                        <p id="checkOutDate">-</p>
                         <p style="font-size: 14px; color: #999; font-weight: normal;">Before 11:00 AM</p>
                     </div>
                     
                     <div class="detail-card">
-                        <h3>Guest Name</h3>
-                        <p id="guestName">John Doe</p>
+                        <h3>Tên khách</h3>
+                        <p id="guestName">-</p>
                     </div>
                     
                     <div class="detail-card">
-                        <h3>Guests</h3>
-                        <p id="guestCount">2 Adults, 0 Children</p>
+                        <h3>Khách</h3>
+                        <p id="guestCount">-</p>
                     </div>
                 </div>
 
@@ -663,46 +663,46 @@
                         </div>
                         <div class="price-summary">
                             <div class="price-row">
-                                <span>Room Rate</span>
-                                <span id="roomRate">$250 × 2 nights</span>
+                                <span>Giá phòng</span>
+                                <span id="roomRate">-</span>
                             </div>
                             <div class="price-row">
-                                <span>Subtotal</span>
-                                <span id="subtotal">$500</span>
+                                <span>Tạm tính</span>
+                                <span id="subtotal">-</span>
                             </div>
                             <div class="price-row">
-                                <span>Taxes & Fees</span>
-                                <span id="taxes">$75</span>
+                                <span>Thuế & Phí</span>
+                                <span id="taxes">-</span>
                             </div>
                             <div class="price-total">
-                                <span>Total Paid</span>
-                                <span id="totalPaid">$575</span>
+                                <span>Tổng dự tính</span>
+                                <span id="totalPaid">-</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <h2 class="section-title">Guest Information</h2>
+                <h2 class="section-title">Thông tin khách</h2>
                 
                 <div class="booking-details-grid">
                     <div class="detail-card">
-                        <h3>Email Address</h3>
-                        <p id="guestEmail">john.doe@example.com</p>
+                        <h3>Email</h3>
+                        <p id="guestEmail">-</p>
                     </div>
                     
                     <div class="detail-card">
-                        <h3>Phone Number</h3>
-                        <p id="guestPhone">+1 (555) 123-4567</p>
+                        <h3>Điện thoại</h3>
+                        <p id="guestPhone">-</p>
                     </div>
                     
                     <div class="detail-card">
-                        <h3>Payment Method</h3>
-                        <p id="paymentMethod">Credit Card (****1234)</p>
+                        <h3>Phương thức thanh toán</h3>
+                        <p id="paymentMethod">-</p>
                     </div>
                     
                     <div class="detail-card">
-                        <h3>Booking Status</h3>
-                        <p id="bookingStatus" style="color: #4CAF50;">Confirmed</p>
+                        <h3>Trạng thái đặt phòng</h3>
+                        <p id="bookingStatus" style="color: #4CAF50;">Đã xác nhận</p>
                     </div>
                 </div>
             </div>
@@ -710,41 +710,41 @@
             <!-- Important Information -->
             <div class="info-boxes">
                 <div class="info-box success">
-                    <h4>✓ Confirmation Email Sent</h4>
-                    <p>A confirmation email has been sent to your email address with all the booking details and important information.</p>
+                    <h4>✓ Đã gửi email xác nhận</h4>
+                    <p>Đã gửi email xác nhận đến địa chỉ email của bạn với đầy đủ thông tin đặt phòng và hướng dẫn quan trọng.</p>
                 </div>
                 
                 <div class="info-box info">
-                    <h4>ℹ️ Cancellation Policy</h4>
-                    <p>Free cancellation up to 24 hours before check-in. Cancel before Dec 19, 2024 to receive a full refund.</p>
+                    <h4>ℹ️ Chính sách hủy</h4>
+                    <p>Miễn phí hủy trước 24 giờ so với thời gian nhận phòng. Hủy trước ngày quy định để được hoàn tiền đầy đủ.</p>
                 </div>
             </div>
 
             <!-- Next Steps -->
             <div class="next-steps">
-                <h3>What's Next?</h3>
+                <h3>Bước tiếp theo</h3>
                 <div class="next-steps-list">
                     <div class="next-step-item">
                         <div class="next-step-number">1</div>
                         <div class="next-step-content">
-                            <h4>Check Your Email</h4>
-                            <p>You'll receive a confirmation email with your booking details and a copy of this confirmation.</p>
+                            <h4>Kiểm tra email</h4>
+                            <p>Bạn sẽ nhận được email xác nhận chứa chi tiết đặt phòng và bản sao xác nhận này.</p>
                         </div>
                     </div>
                     
                     <div class="next-step-item">
                         <div class="next-step-number">2</div>
                         <div class="next-step-content">
-                            <h4>Prepare for Your Stay</h4>
-                            <p>Review our hotel policies and amenities. Feel free to contact us if you have any special requests.</p>
+                            <h4>Chuẩn bị cho kỳ nghỉ</h4>
+                            <p>Xin xem chính sách và tiện nghi khách sạn. Liên hệ chúng tôi nếu bạn có yêu cầu đặc biệt.</p>
                         </div>
                     </div>
                     
                     <div class="next-step-item">
                         <div class="next-step-number">3</div>
                         <div class="next-step-content">
-                            <h4>Arrive and Enjoy</h4>
-                            <p>Check-in starts at 3:00 PM. Present your confirmation number at the front desk.</p>
+                            <h4>Đến và tận hưởng</h4>
+                            <p>Nhận phòng bắt đầu từ 15:00. Vui lòng xuất trình mã xác nhận tại quầy lễ tân.</p>
                         </div>
                     </div>
                 </div>
@@ -752,9 +752,9 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="window.print()">🖨️ Print Confirmation</button>
-                <button class="btn btn-secondary" onclick="downloadPDF()">📄 Download PDF</button>
-                <a href="./" class="btn btn-outline">🏠 Return to Home</a>
+                <button class="btn btn-primary" onclick="window.print()">🖨️ In xác nhận</button>
+                <button class="btn btn-secondary" onclick="downloadPDF()">📄 Tải PDF</button>
+                <a href="/" class="btn btn-outline">🏠 Quay về trang chủ</a>
             </div>
 
             <!-- Contact Support -->
@@ -801,7 +801,7 @@
                 statusElement.textContent = 'Pending Payment';
                 statusElement.style.color = '#ffc107';
             } else {
-                statusElement.textContent = 'Confirmed';
+                statusElement.textContent = 'Pending';
                 statusElement.style.color = '#4CAF50';
             }
 
@@ -1146,85 +1146,7 @@
             observer.observe(el);
         });
 
-        // Add social sharing buttons (optional)
-        function createSocialShareButtons() {
-            const shareContainer = document.createElement('div');
-            shareContainer.style.cssText = `
-                text-align: center;
-                margin-top: 20px;
-                padding: 20px;
-            `;
-            shareContainer.innerHTML = `
-                <p style="color: #666; margin-bottom: 15px;">Share your excitement!</p>
-                <div style="display: flex; justify-content: center; gap: 15px;">
-                    <button onclick="shareToFacebook()" style="padding: 10px 20px; background: #1877f2; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                        📘 Facebook
-                    </button>
-                    <button onclick="shareToTwitter()" style="padding: 10px 20px; background: #1da1f2; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                        🐦 Twitter
-                    </button>
-                    <button onclick="addToCalendar()" style="padding: 10px 20px; background: #34a853; color: white; border: none; border-radius: 6px; cursor: pointer;">
-                        📅 Add to Calendar
-                    </button>
-                </div>
-            `;
-            
-            const actionButtons = document.querySelector('.action-buttons');
-            if (actionButtons) {
-                actionButtons.parentNode.insertBefore(shareContainer, actionButtons.nextSibling);
-            }
-        }
-
-        function shareToFacebook() {
-            const url = encodeURIComponent(window.location.href);
-            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
-        }
-
-        function shareToTwitter() {
-            const text = encodeURIComponent('Just booked my stay at The Cappa Luxury Hotel! 🏨✨');
-            const url = encodeURIComponent(window.location.href);
-            window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
-        }
-
-        // Create social share buttons after page load
-        window.addEventListener('load', function() {
-            setTimeout(createSocialShareButtons, 1500);
-        });
-
-        // Email confirmation preview
-        function previewEmailConfirmation() {
-            const emailWindow = window.open('', '_blank', 'width=600,height=800');
-            emailWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Email Confirmation Preview</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-                        .email-container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
-                        h1 { color: #aa8453; }
-                        .highlight { background: #f8f5f0; padding: 15px; border-radius: 6px; margin: 15px 0; }
-                    </style>
-                </head>
-                <body>
-                    <div class="email-container">
-                        <h1>Booking Confirmation</h1>
-                        <p>Dear ${document.getElementById('guestName').textContent},</p>
-                        <p>Thank you for booking with The Cappa Luxury Hotel!</p>
-                        <div class="highlight">
-                            <strong>Confirmation Number:</strong> ${document.getElementById('confirmationNumber').textContent}<br>
-                            <strong>Room:</strong> ${document.getElementById('roomName').textContent}<br>
-                            <strong>Check-in:</strong> ${document.getElementById('checkInDate').textContent}<br>
-                            <strong>Check-out:</strong> ${document.getElementById('checkOutDate').textContent}<br>
-                            <strong>Total:</strong> ${document.getElementById('totalPaid').textContent}
-                        </div>
-                        <p>We look forward to welcoming you!</p>
-                        <p>Best regards,<br>The Cappa Luxury Hotel Team</p>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
+       
     </script>
 </body>
 </html>

@@ -175,6 +175,7 @@ class RoomController extends Controller
             'P.IDPhong',
             'P.SoPhong',
             'P.MoTa',
+            'P.GiaCoBanMotDem',
             'P.UrlAnhPhong',
             'LP.TenLoaiPhong',
             'P.SoNguoiToiDa'

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Payment - The Cappa Luxury Hotel</title>
+    <title>Thanh toán - The Cappa Luxury Hotel</title>
     <link rel="icon" href="HomePage/img/favicon.png" type="image/png" sizes="32x32">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
@@ -578,9 +578,6 @@
                 <div class="col-6 col-md-6 cappa-logo-wrap">
                     <a href="index.html" class="cappa-logo"><img src="HomePage/img/logo.png" alt="Cappa Luxury Hotel"></a>
                 </div>
-                <div class="col-6 col-md-6 text-right">
-                    <a href="booking.html" style="font-family: 'Barlow', sans-serif; color: #aa8453; font-weight: 500;">← Back to Booking</a>
-                </div>
             </div>
         </div>
     </header>
@@ -590,25 +587,25 @@
         <div class="payment-container">
             <!-- Header -->
             <div class="payment-header">
-                <h1>Secure Payment</h1>
-                <p>Complete your reservation with a secure payment</p>
+                <h1>Thanh toán an toàn</h1>
+                <p>Hoàn tất đặt phòng bằng phương thức thanh toán an toàn</p>
                 <!-- Progress Steps -->
                 <div class="booking-steps" style="max-width:900px; margin:12px auto 0;">
                     <div class="step completed" data-step="1">
                         <div class="step-number">✓</div>
-                        <div class="step-label">Booking Details</div>
+                        <div class="step-label">Chi tiết đặt phòng</div>
                     </div>
                     <div class="step completed" data-step="2">
                         <div class="step-number">2</div>
-                        <div class="step-label">Guest Information</div>
+                        <div class="step-label">Thông tin khách</div>
                     </div>
                     <div class="step active" data-step="3">
                         <div class="step-number">3</div>
-                        <div class="step-label">Payment</div>
+                        <div class="step-label">Thanh toán</div>
                     </div>
                     <div class="step" data-step="4">
                         <div class="step-number">4</div>
-                        <div class="step-label">Confirmation</div>
+                        <div class="step-label">Xác nhận</div>
                     </div>
                 </div>
             </div>
@@ -618,45 +615,45 @@
             <div class="payment-layout">
                 <!-- Main Payment Section -->
                 <div class="payment-main">
-                    <h2 class="section-title">Select Payment Method</h2>
+                    <h2 class="section-title">Phương Thức Thanh Toán</h2>
                     
                     <div class="payment-methods">
                         <!-- Credit/Debit Card -->
-                        <div class="payment-method-card active" onclick="selectPaymentMethod('card')">
+                        <div class="payment-method-card active" onclick="selectPaymentMethod('card', this)">
                             <div class="payment-method-icon">💳</div>
                             <div class="payment-method-info">
-                                <h4>Credit / Debit Card</h4>
+                                <h4>Thẻ tín dụng / Ghi nợ</h4>
                                 <p>Visa, Mastercard, Amex, Discover</p>
                             </div>
                             <div class="payment-method-radio"></div>
                         </div>
 
                         <!-- PayPal -->
-                        <div class="payment-method-card" onclick="selectPaymentMethod('paypal')">
+                        <div class="payment-method-card" onclick="selectPaymentMethod('paypal', this)">
                             <div class="payment-method-icon">🅿️</div>
                             <div class="payment-method-info">
                                 <h4>PayPal</h4>
-                                <p>Fast and secure PayPal checkout</p>
+                                <p>Thanh toán nhanh và bảo mật qua PayPal</p>
                             </div>
                             <div class="payment-method-radio"></div>
                         </div>
 
                         <!-- Bank Transfer -->
-                        <div class="payment-method-card" onclick="selectPaymentMethod('bank')">
+                        <div class="payment-method-card" onclick="selectPaymentMethod('bank', this)">
                             <div class="payment-method-icon">🏦</div>
                             <div class="payment-method-info">
-                                <h4>Bank Transfer</h4>
-                                <p>Direct bank transfer payment</p>
+                                <h4>Chuyển khoản ngân hàng</h4>
+                                <p>Thanh toán qua chuyển khoản ngân hàng</p>
                             </div>
                             <div class="payment-method-radio"></div>
                         </div>
 
                         <!-- Pay at Hotel -->
-                        <div class="payment-method-card" onclick="selectPaymentMethod('payathotel')">
+                        <div class="payment-method-card" onclick="selectPaymentMethod('payathotel', this)">
                             <div class="payment-method-icon">🏨</div>
                             <div class="payment-method-info">
-                                <h4>Pay at Hotel</h4>
-                                <p>Reserve now and pay at the hotel upon arrival</p>
+                                <h4>Thanh toán tại khách sạn</h4>
+                                <p>Đặt trước, thanh toán khi đến khách sạn</p>
                             </div>
                             <div class="payment-method-radio"></div>
                         </div>
@@ -736,7 +733,6 @@
 
                     <!-- Billing Address -->
                     <div id="billingAddress" style="margin-top: 30px;">
-                        <h3 class="section-title">Billing Address</h3>
                         
                         <div class="form-group">
                             <label>
@@ -831,7 +827,7 @@
 
                 <!-- Sidebar: Order Summary -->
                 <div class="payment-sidebar">
-                    <h3 class="section-title">Order Summary</h3>
+                    <h3 class="section-title">Tóm Tắt</h3>
                     
                     <div class="order-summary">
                         <div class="room-preview">
@@ -843,17 +839,10 @@
                         </div>
 
                         <div class="summary-row">
-                            <span>Room Rate</span>
+                            <span>Giá phòng</span>
                             <span id="summaryRoomRate">$250 × 2 nights</span>
                         </div>
-                        <div class="summary-row">
-                            <span>Subtotal</span>
-                            <span id="summarySubtotal">$500</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Taxes & Fees</span>
-                            <span id="summaryTaxes">$75</span>
-                        </div>
+                        <!-- Subtotal and Taxes removed per request; only show total below -->
                         <div class="summary-row" id="discountRow" style="display: none;">
                             <span style="color: #4CAF50;">Discount</span>
                             <span id="summaryDiscount" style="color: #4CAF50;">-$50</span>
@@ -862,19 +851,11 @@
                         <div class="summary-divider"></div>
 
                         <div class="summary-total">
-                            <span>Total</span>
-                            <span id="summaryTotalAmount">$575</span>
+                            <span>Tổng cộng</span>
+                            <span id="summaryTotalAmount">$0</span>
                         </div>
                     </div>
-
-                    <div class="promo-code">
-                        <input type="text" id="promoInput" placeholder="Promo code">
-                        <button onclick="applyPromo()">Apply</button>
-                    </div>
-
-                    <div class="security-info" style="margin-top: 20px;">
-                        All prices are in USD and include applicable taxes.
-                    </div>
+      
                 </div>
             </div>
         </div>
@@ -889,11 +870,12 @@
             checkIn: '2024-12-20',
             checkOut: '2024-12-22',
             nights: 2,
-            pricePerNight: 250,
-            subtotal: 500,
-            taxes: 75,
+            // amounts are in VND
+            pricePerNight: 250000,
+            subtotal: 500000,
+            taxes: 75000,
             discount: 0,
-            total: 575
+            total: 575000
         };
 
         // Load pending booking saved by booking page (localStorage) and apply to bookingData
@@ -946,25 +928,51 @@
             document.getElementById('summaryRoomImage').src = bookingData.roomImage;
             document.getElementById('summaryRoomName').textContent = bookingData.room;
             document.getElementById('summaryDates').textContent = formatDateRange(bookingData.checkIn, bookingData.checkOut);
-            document.getElementById('summaryRoomRate').textContent = `$${bookingData.pricePerNight} × ${bookingData.nights} nights`;
-            document.getElementById('summarySubtotal').textContent = `$${bookingData.subtotal}`;
-            document.getElementById('summaryTaxes').textContent = `$${bookingData.taxes}`;
-            document.getElementById('summaryTotalAmount').textContent = `${bookingData.total}`;
-            
-            if (bookingData.discount > 0) {
-                document.getElementById('discountRow').style.display = 'flex';
-                document.getElementById('summaryDiscount').textContent = `-${bookingData.discount}`;
+            // Room rate shown as: "<price> × <nights> đêm"
+            document.getElementById('summaryRoomRate').textContent = formatCurrency(bookingData.pricePerNight) + ' × ' + (bookingData.nights || 1) + ' đêm';
+
+            // Ensure total is computed: subtotal + taxes - discount
+            if (!Number.isFinite(bookingData.subtotal)) {
+                bookingData.subtotal = (bookingData.pricePerNight || 0) * (bookingData.nights || 1);
             }
+            if (!Number.isFinite(bookingData.taxes)) {
+                bookingData.taxes = bookingData.taxes || 0;
+            }
+            if (!Number.isFinite(bookingData.discount)) {
+                bookingData.discount = bookingData.discount || 0;
+            }
+            if (!Number.isFinite(bookingData.total)) {
+                bookingData.total = bookingData.subtotal + (bookingData.taxes || 0) - (bookingData.discount || 0);
+            }
+
+            // Update discount row (only show when discount > 0)
+            const discountRow = document.getElementById('discountRow');
+            if (bookingData.discount > 0 && discountRow) {
+                discountRow.style.display = 'flex';
+                const d = document.getElementById('summaryDiscount');
+                if (d) d.textContent = '-' + formatCurrency(bookingData.discount);
+            } else if (discountRow) {
+                discountRow.style.display = 'none';
+            }
+
+            // Only display total in the sidebar (subtotal/taxes rows were removed)
+            const totalEl = document.getElementById('summaryTotalAmount');
+            if (totalEl) totalEl.textContent = formatCurrency(bookingData.total);
 
             // Generate booking reference
             document.getElementById('bookingRef').textContent = 'CPL' + Date.now().toString().slice(-8);
         }
 
         function formatDateRange(start, end) {
-            const options = { month: 'short', day: 'numeric', year: 'numeric' };
-            const startDate = new Date(start).toLocaleDateString('en-US', options);
-            const endDate = new Date(end).toLocaleDateString('en-US', options);
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const startDate = new Date(start).toLocaleDateString('vi-VN', options);
+            const endDate = new Date(end).toLocaleDateString('vi-VN', options);
             return `${startDate} - ${endDate}`;
+        }
+
+        function formatCurrency(amount) {
+            const n = Number(amount) || 0;
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n);
         }
 
         function selectPaymentMethod(method) {
@@ -1017,7 +1025,6 @@
                 alert('Please enter a promo code');
                 return;
             }
-
             // Example promo codes
             const promoCodes = {
                 'WELCOME10': 10,

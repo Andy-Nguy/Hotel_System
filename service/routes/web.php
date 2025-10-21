@@ -72,7 +72,7 @@ Route::get('/__debug/request-info', function (Request $request) {
 */
 
 // Trang chính
-/*
+
 Route::get('/', function (Request $request) use ($callApi) {
     $data = $callApi('/api/loaiphongs') ?: [];
     $rooms = is_array($data) ? $data : [];
@@ -83,7 +83,7 @@ Route::get('/', function (Request $request) use ($callApi) {
         if (!empty($r['IDLoaiPhong'])) {
             $list = $callApi('/api/phongs/loai/' . urlencode($r['IDLoaiPhong']));
             if (is_array($list) && count($list) > 0) {
-                // list may be associative or numeric-indexed; retrieve first item
+                // list may be associative or numeric-indexed; retrieve first item 
                 $first = array_values($list)[0] ?? null;
                 if (is_array($first) && !empty($first['IDPhong'])) {
                     $rooms[$i]['first_phong_id'] = $first['IDPhong'];
@@ -98,12 +98,12 @@ Route::get('/', function (Request $request) use ($callApi) {
 
     return view('welcome', compact('rooms', 'services'));
 });
-*/
+
 // khachhang
 
-Route::get('/', function () {
-    return view('statistics.admin');
-});
+// Route::get('/', function () {
+//     return view('statistics.admin');
+// });
 
 /*Route::get('/', function () {
     return view('statistics.hoadon');
@@ -289,6 +289,16 @@ Route::get('/hoadon', function () {
 Route::get('/datphong', function () {
     return view('statistics.datphong');
 })->name('datphong.index');
+
+// Staff booking confirmation page (list + actions)
+Route::get('/xac-nhan-dat-phong', function () {
+    return view('statistics.xacnhan');
+})->name('datphong.confirm');
+
+// Short route: serve the staff confirm page directly at /xacnhan (preferred short URL)
+Route::get('/xacnhan', function () {
+    return view('statistics.xacnhan');
+})->name('datphong.confirm_short');
 Route::get('/admin', function () {
     return view('statistics.admin');
 })->name('admin.index');
