@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Amenties\DatPhong;
 use App\Models\Login\KhachHang;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookingConfirmation;
 
 class DatPhongController extends Controller
 {
@@ -214,6 +216,31 @@ class DatPhongController extends Controller
         $dp->TrangThai = 0;
         try {
             $dp->save();
+            // send notification email to customer if we have email
+            try {
+                // reload with relations to get phong and khachHang
+                $dpFull = DatPhong::with(['phong', 'khachHang'])->where('IDDatPhong', $dp->IDDatPhong)->first();
+                $kh = $dpFull->khachHang ?? null;
+                $recipientEmail = $kh->Email ?? null;
+                $recipientName = $kh->HoTen ?? null;
+                if ($recipientEmail) {
+                    $mailData = [
+                        'IDDatPhong' => $dpFull->IDDatPhong,
+                        'IDPhong' => $dpFull->IDPhong,
+                        'TenPhong' => $dpFull->phong->TenPhong ?? null,
+                        'NgayNhanPhong' => $dpFull->NgayNhanPhong ? $dpFull->NgayNhanPhong->format('Y-m-d') : null,
+                        'NgayTraPhong' => $dpFull->NgayTraPhong ? $dpFull->NgayTraPhong->format('Y-m-d') : null,
+                        'SoDem' => $dpFull->SoDem,
+                        'GiaPhong' => (float) $dpFull->GiaPhong,
+                        'TongTien' => (float) $dpFull->TongTien,
+                        'TrangThai' => $dpFull->TrangThai,
+                        'Message' => 'Yêu cầu hủy đặt phòng của bạn đã được xử lý.'
+                    ];
+                    Mail::to($recipientEmail)->send((new BookingConfirmation($mailData, ['HoTen' => $recipientName, 'Email' => $recipientEmail]))->subject('Hủy đặt phòng - ' . $dpFull->IDDatPhong));
+                }
+            } catch (\Throwable $mailEx) {
+                logger()->error('Failed to send cancel email for booking ' . $iddatphong . ': ' . $mailEx->getMessage());
+            }
         } catch (\Throwable $e) {
             logger()->error('Failed to cancel booking ' . $iddatphong . ': ' . $e->getMessage());
             return response()->json(['error' => 'failed_to_update'], 500);
@@ -241,6 +268,31 @@ class DatPhongController extends Controller
         $dp->TrangThai = 2;
         try {
             $dp->save();
+            // send notification email to customer if we have email
+            try {
+                // reload with relations to get phong and khachHang
+                $dpFull = DatPhong::with(['phong', 'khachHang'])->where('IDDatPhong', $dp->IDDatPhong)->first();
+                $kh = $dpFull->khachHang ?? null;
+                $recipientEmail = $kh->Email ?? null;
+                $recipientName = $kh->HoTen ?? null;
+                if ($recipientEmail) {
+                    $mailData = [
+                        'IDDatPhong' => $dpFull->IDDatPhong,
+                        'IDPhong' => $dpFull->IDPhong,
+                        'TenPhong' => $dpFull->phong->TenPhong ?? null,
+                        'NgayNhanPhong' => $dpFull->NgayNhanPhong ? $dpFull->NgayNhanPhong->format('Y-m-d') : null,
+                        'NgayTraPhong' => $dpFull->NgayTraPhong ? $dpFull->NgayTraPhong->format('Y-m-d') : null,
+                        'SoDem' => $dpFull->SoDem,
+                        'GiaPhong' => (float) $dpFull->GiaPhong,
+                        'TongTien' => (float) $dpFull->TongTien,
+                        'TrangThai' => $dpFull->TrangThai,
+                        'Message' => 'Đặt phòng của bạn đã được xác nhận.'
+                    ];
+                    Mail::to($recipientEmail)->send((new BookingConfirmation($mailData, ['HoTen' => $recipientName, 'Email' => $recipientEmail]))->subject('Xác nhận đặt phòng - ' . $dpFull->IDDatPhong));
+                }
+            } catch (\Throwable $mailEx) {
+                logger()->error('Failed to send confirm email for booking ' . $iddatphong . ': ' . $mailEx->getMessage());
+            }
         } catch (\Throwable $e) {
             logger()->error('Failed to confirm booking ' . $iddatphong . ': ' . $e->getMessage());
             return response()->json(['error' => 'failed_to_update'], 500);

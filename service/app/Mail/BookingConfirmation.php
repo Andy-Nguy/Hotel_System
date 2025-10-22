@@ -30,8 +30,13 @@ class BookingConfirmation extends Mailable
 
     public function content(): Content
     {
+        $view = 'emails.booking_confirmation';
+        if (isset($this->bookingData['TrangThai']) && intval($this->bookingData['TrangThai']) === 0) {
+            $view = 'emails.booking_cancelled';
+        }
+
         return new Content(
-            view: 'emails.booking_confirmation',
+            view: $view,
             with: [
                 'bookingData' => $this->bookingData,
                 'customerData' => $this->customerData,

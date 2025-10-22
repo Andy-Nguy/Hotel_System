@@ -11,9 +11,9 @@
 
     <ul>
         <li><strong>Mã đặt phòng:</strong> {{ $bookingData['IDDatPhong'] ?? '' }}</li>
-        <li><strong>Phòng:</strong> {{ $bookingData['IDPhong'] ?? '' }}</li>
-        <li><strong>Ngày nhận phòng:</strong> {{ $bookingData['NgayNhanPhong'] ?? '' }}</li>
-        <li><strong>Ngày trả phòng:</strong> {{ $bookingData['NgayTraPhong'] ?? '' }}</li>
+        <li><strong>Phòng:</strong> {{ $bookingData['TenPhong'] ?? $bookingData['IDPhong'] ?? '' }}</li>
+    <li><strong>Ngày nhận phòng:</strong> {{ isset($bookingData['NgayNhanPhong']) ? \Carbon\Carbon::parse($bookingData['NgayNhanPhong'])->format('d/m/Y') : '' }}</li>
+    <li><strong>Ngày trả phòng:</strong> {{ isset($bookingData['NgayTraPhong']) ? \Carbon\Carbon::parse($bookingData['NgayTraPhong'])->format('d/m/Y') : '' }}</li>
         <li><strong>Số đêm:</strong> {{ $bookingData['SoDem'] ?? '' }}</li>
         <li><strong>Giá mỗi đêm:</strong> {{ number_format($bookingData['GiaPhong'] ?? 0, 0, ',', '.') }} VND</li>
         <li><strong>Tổng tiền:</strong> {{ number_format($bookingData['TongTien'] ?? 0, 0, ',', '.') }} VND</li>

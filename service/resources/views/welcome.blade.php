@@ -607,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-md-6 mb-3">
                             <div class="card">
                                 <div style="height:180px;overflow:hidden;display:flex;align-items:center;justify-content:center">
-                                    <img src="${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">
+                         <img src="${'/HomePage/img/slider/'}${img}" alt="${title}" style="width:100%;height:100%;object-fit:cover">\
                                 </div>
                                 <div class="card-body">\
                                     <h5 class="card-title">${title} ${roomName?('<small class="text-muted">'+roomName+'</small>'):''}</h5>\

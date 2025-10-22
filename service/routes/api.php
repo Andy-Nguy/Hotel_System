@@ -106,4 +106,6 @@ Route::put('/khachhang/{id}', [App\Http\Controllers\Login\KhachHangController::c
 Route::get('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'index']);
 // Invoice stats: weekly/monthly aggregates for reporting
 Route::get('/hoadon/stats', [App\Http\Controllers\Amenties\HoaDonController::class, 'stats']);
+// Create invoice for a booking (with optional services)
+Route::post('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'store']);
 
