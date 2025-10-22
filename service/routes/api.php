@@ -74,11 +74,11 @@ Route::delete('/phong/{phong}', [PhongController::class, 'destroy']);
 Route::get('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'show']);
 Route::put('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'update']);
 
-// Route::get('/phongs', [PhongController::class, 'index1']);
-// Route::apiResource('phongs', PhongController::class)->except(['index']);
-// Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
-// Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
-// Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
+Route::get('/phongs', [PhongController::class, 'index1']);
+Route::apiResource('phongs', PhongController::class)->except(['index']);
+Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
+Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
+Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
 
 // Update profile via API (ajax-friendly, stateless)
 Route::post('/taikhoan', [AuthController::class, 'updateProfileApi']);
