@@ -7,6 +7,7 @@ use App\Models\Amenties\TienNghi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class TienNghiController extends Controller
 {
@@ -54,6 +55,24 @@ class TienNghiController extends Controller
             ], 422);
         }
 
+        // Check whether any room that has this amenity is currently not empty.
+        $inUse = DB::table('TienNghiPhong as tnp')
+            ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
+            ->where('tnp.IDTienNghi', $tienNghi->IDTienNghi)
+            ->where(function ($q) {
+                // consider room 'in use' when TrangThai is not 'Trống' (string)
+                $q->whereNotNull('p.TrangThai')
+                  ->where('p.TrangThai', '<>', 'Trống');
+            })
+            ->exists();
+
+        if ($inUse) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể chỉnh sửa tiện nghi này vì đang có phòng sử dụng. Vui lòng gỡ tiện nghi khỏi các phòng (hoặc chờ phòng trống) trước khi chỉnh sửa.'
+            ], 400);
+        }
+
         $tienNghi->update($validator->validated());
         return response()->json(['success' => true, 'data' => $tienNghi]);
     }
@@ -61,6 +80,24 @@ class TienNghiController extends Controller
     // DELETE /api/tien-nghi/{id}
     public function destroy(TienNghi $tienNghi)
     {
+        // Prevent deletion if any assigned room is not empty
+        $inUse = DB::table('TienNghiPhong as tnp')
+            ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
+            ->where('tnp.IDTienNghi', $tienNghi->IDTienNghi)
+            ->where(function ($q) {
+                $q->whereNotNull('p.TrangThai')
+                  ->where('p.TrangThai', '<>', 'Trống');
+            })
+            ->exists();
+
+        if ($inUse) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa tiện nghi này vì đang có phòng sử dụng. Vui lòng gỡ tiện nghi khỏi các phòng (hoặc chờ phòng trống) trước khi xóa.'
+            ], 400);
+        }
+
+        // Safe to detach and delete
         $tienNghi->phongs()->detach();
         $tienNghi->delete();
 

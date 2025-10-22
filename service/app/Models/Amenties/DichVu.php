@@ -32,4 +32,10 @@ class DichVu extends Model
     {
         return $this->hasMany(TTDichVu::class, 'IDDichVu', 'IDDichVu');
     }
+
+    // Backwards-compatible alias used by some controllers: chiTiet()
+    public function chiTiet()
+    {
+        return $this->thongTin();
+    }
 }

@@ -28,10 +28,10 @@ class KhachHangController extends Controller
         $query = KhachHang::query();
 
         if ($q) {
-            $query->where(function($qr) use ($q) {
+            $query->where(function ($qr) use ($q) {
                 $qr->where('HoTen', 'like', "%{$q}%")
-                   ->orWhere('Email', 'like', "%{$q}%")
-                   ->orWhere('SoDienThoai', 'like', "%{$q}%");
+                    ->orWhere('Email', 'like', "%{$q}%")
+                    ->orWhere('SoDienThoai', 'like', "%{$q}%");
             });
         }
         if ($email) {
@@ -68,7 +68,7 @@ class KhachHangController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->only(['HoTen','NgaySinh','SoDienThoai','Email','NgayDangKy','TichDiem']);
+        $data = $request->only(['HoTen', 'NgaySinh', 'SoDienThoai', 'Email', 'NgayDangKy', 'TichDiem']);
 
         $rules = [
             'HoTen' => 'required|string|max:255',
@@ -79,7 +79,7 @@ class KhachHangController extends Controller
             'TichDiem' => 'nullable|integer|min:0',
         ];
 
-    $validator = Validator::make($data, $rules);
+        $validator = Validator::make($data, $rules);
         if ($validator->fails()) {
             return response()->json(['error' => 'validation', 'messages' => $validator->errors()], 422);
         }
@@ -108,7 +108,7 @@ class KhachHangController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $data = $request->only(['HoTen','NgaySinh','SoDienThoai','Email','TichDiem']);
+        $data = $request->only(['HoTen', 'NgaySinh', 'SoDienThoai', 'Email', 'TichDiem']);
 
         $rules = [
             'HoTen' => 'required|string|max:255',
@@ -138,5 +138,39 @@ class KhachHangController extends Controller
         $kh->save();
 
         return response()->json(['data' => $kh], 200);
+    }
+
+
+
+    // Tìm kiếm khách hàng (cho form đặt phòng trực tiếp)
+    public function search(Request $request)
+    {
+        $sdt = $request->query('sdt');
+        if (!$sdt) {
+            return response()->json(['success' => false, 'data' => [], 'message' => 'Vui lòng cung cấp SĐT.'], 400);
+        }
+
+        try {
+            // Tìm kiếm chính xác SĐT
+            $khachHang = KhachHang::where('SoDienThoai', $sdt)->get();
+
+            if ($khachHang->isEmpty()) {
+                // Vẫn trả về success:true và data rỗng, đúng như JS mong đợi
+                return response()->json(['success' => true, 'data' => []]);
+            }
+
+            // Trả về theo định dạng JS mong đợi
+            return response()->json(['success' => true, 'data' => $khachHang]);
+        } catch (\Exception $e) {
+            // Ghi log lỗi để bạn có thể kiểm tra (storage/logs/laravel.log)
+            logger()->error('Lỗi API KhachHang@search: ' . $e->getMessage());
+
+            // Trả về 500 với thông báo lỗi
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi máy chủ nội bộ khi tìm kiếm.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -1,13 +1,16 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Login\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Amenties\DichVuController;
+
 $apiBaseEnv = trim(env('API_URL', ''), "/"); // set API_URL in .env if remote, e.g. http://127.0.0.1:8001
 // final API prefix used by helpers - falls back to local dispatch via /api
 $apiPrefix = $apiBaseEnv ? ($apiBaseEnv . '/api') : '/api';
 
-$callApi = function(string $endpoint, int $timeout = 5) use ($apiPrefix) {
+$callApi = function (string $endpoint, int $timeout = 5) use ($apiPrefix) {
     try {
         // if caller passed a full URL, use it
         if (preg_match('#^https?://#i', $endpoint)) {
@@ -83,7 +86,7 @@ Route::get('/', function (Request $request) use ($callApi) {
         if (!empty($r['IDLoaiPhong'])) {
             $list = $callApi('/api/phongs/loai/' . urlencode($r['IDLoaiPhong']));
             if (is_array($list) && count($list) > 0) {
-                // list may be associative or numeric-indexed; retrieve first item 
+                // list may be associative or numeric-indexed; retrieve first item
                 $first = array_values($list)[0] ?? null;
                 if (is_array($first) && !empty($first['IDPhong'])) {
                     $rooms[$i]['first_phong_id'] = $first['IDPhong'];
@@ -93,7 +96,7 @@ Route::get('/', function (Request $request) use ($callApi) {
     }
 
     // Fetch services to render on the homepage (server-side)
-    $svcData = $callApi('/api/dichvu') ?: [];
+    $svcData = $callApi('/api/public-services') ?: [];
     $services = is_array($svcData) ? $svcData : [];
 
     return view('welcome', compact('rooms', 'services'));
@@ -129,7 +132,7 @@ $rooms2Handler = function (Request $request) use ($callApi) {
     $svcData = $callApi('/api/dichvu') ?: [];
     $services = is_array($svcData) ? $svcData : [];
 
-    return view('rooms2', compact('roomsDetail', 'services', 'typeName' ,'type'));
+    return view('rooms2', compact('roomsDetail', 'services', 'typeName', 'type'));
 };
 
 // register both URIs -> same handler
@@ -150,7 +153,7 @@ $roomdetailsHandler = function (Request $request) use ($callApi) {
 
     // Nếu truyền ID phòng (Pxxx) thì lấy chi tiết phòng, nếu truyền ID loại lấy phòng đầu tiên của loại
     if ($rawId) {
-        if (is_string($rawId) && substr($rawId,0,1) === 'P') {
+        if (is_string($rawId) && substr($rawId, 0, 1) === 'P') {
             $room = $callApi('/api/phongs/' . urlencode($rawId)) ?: null;
         } else {
             $list = $callApi('/api/phongs/loai/' . urlencode($rawId));
@@ -209,12 +212,12 @@ $roomdetailsHandler = function (Request $request) use ($callApi) {
 
     // For debugging: return the view with an extra header so we can confirm what rendered
     try {
-        $response = response()->view('roomdetails', compact('id','room','resolvedId','rooms'));
+        $response = response()->view('roomdetails', compact('id', 'room', 'resolvedId', 'rooms'));
         $response->header('X-Rendered-View', 'roomdetails');
         return $response;
     } catch (\Throwable $e) {
         // fallback to plain view if response() helper fails for any reason
-        return view('roomdetails', compact('id','room','resolvedId','rooms'));
+        return view('roomdetails', compact('id', 'room', 'resolvedId', 'rooms'));
     }
 };
 
@@ -243,15 +246,15 @@ Route::get('/login', function () {
 
 // (Bạn có thể thêm route POST cho login ở đây sau)
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 
 Route::get('/tiennghi', function () {
-    return view('amenties.tiennghi');
+    return view('statistics.tiennghi');
 })->name('tiennghi.index');
 
 
-//DuyAnh 
+//DuyAnh
 // Booking page route (support both /booking and /booking.php links)
 Route::get('/booking', function (Request $request) {
     // The booking view reads URL params via client-side JS (room, check_in, check_out)
@@ -289,6 +292,15 @@ Route::get('/hoadon', function () {
 Route::get('/datphong', function () {
     return view('statistics.datphong');
 })->name('datphong.index');
+
+// Show booking details page (used by redirects after creating a booking)
+// Integrate into the existing `statistics.datphong` page so the admin view can
+// open or highlight the newly created booking. We pass the id as a view var.
+Route::get('/datphong/{iddatphong}', function (Request $request, $iddatphong) use ($callApi) {
+    // Render the same datphong listing page (statistics.datphong). Client-side
+    // scripts on that page can read the provided id and show the details.
+    return view('statistics.datphong', ['initialBookingId' => $iddatphong]);
+})->name('datphong.show');
 
 // Staff booking confirmation page (list + actions)
 Route::get('/xac-nhan-dat-phong', function () {
@@ -347,3 +359,29 @@ Route::get('/taikhoan', [AuthController::class, 'taikhoan'])->name('taikhoan');
 // POST route to update profile information (HoTen, SoDienThoai, NgaySinh)
 Route::post('/taikhoan', [AuthController::class, 'updateProfile'])->name('taikhoan.update');
 
+
+
+
+use App\Http\Controllers\Booking\DatPhongTrucTiepController;
+
+// GET /datphong-truc-tiep
+// Hiển thị form đặt phòng, gọi hàm create()
+Route::get('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'create'])
+    ->name('datphong.truc_tiep.create');
+
+// POST /datphong-truc-tiep
+// Xử lý khi nhân viên nhấn submit form, gọi hàm store()
+Route::post('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'store'])
+    ->name('datphong.truc_tiep.store');
+
+// Service routes
+use App\Http\Controllers\Amenties\DichVuController as StaffDichVuController;
+// Public/admin listing (used by layout link `route('dichvu.index')`)
+Route::get('/dichvu', [StaffDichVuController::class, 'index'])
+    ->name('dichvu.index');
+
+// Direct (staff) service creation - mirror pattern used for datphong-truc-tiep
+Route::get('/dichvu/create', [StaffDichVuController::class, 'create'])
+    ->name('dichvu.create');
+Route::post('/dichvu', [StaffDichVuController::class, 'store'])
+    ->name('dichvu.store');

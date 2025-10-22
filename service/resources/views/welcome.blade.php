@@ -36,7 +36,7 @@
             object-fit: cover;
         }
 
-        
+
         @media (max-width: 991px) {
 
             .rooms1 .position-re.small,
@@ -339,7 +339,7 @@
     @include('partials.news')
     <!-- Reservation & Clients-->
     @include('partials.reservation')
-    
+
     <!-- Footer -->
     @include('partials.footer')
     <!-- Availability modal for the homepage: used by the Check Now form -->
@@ -392,6 +392,48 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("🌐 DOM đã load hoàn tất...");
 
   const display = document.querySelector("#userDisplay");
+// --- Auto-refresh services when staff adds new service ---
+(function(){
+    // read last known service id from server by fetching /api/dichvu and taking highest ID number
+    async function fetchLatestServiceId(){
+        try {
+            const resp = await fetch('/api/public-services');
+            if (!resp.ok) return null;
+            const list = await resp.json();
+            if (!Array.isArray(list) || list.length === 0) return null;
+            // extract numeric part and return max
+            let max = 0;
+            list.forEach(dv => {
+                const m = String(dv.IDDichVu||'').match(/(\d+)/);
+                if (m) max = Math.max(max, parseInt(m[1],10));
+            });
+            return 'DV' + String(max).padStart(3,'0');
+        } catch(e){
+            return null;
+        }
+    }
+
+    let lastSeen = null;
+    (async function init(){
+        lastSeen = await fetchLatestServiceId();
+        // poll every 10 seconds
+        setInterval(async function(){
+            try {
+                const url = '/api/public-services/updates' + (lastSeen ? ('?after=' + encodeURIComponent(lastSeen)) : '');
+                const r = await fetch(url);
+                if (!r.ok) return;
+                const body = await r.json();
+                if (body && Array.isArray(body.data) && body.data.length > 0) {
+                    console.log('New service(s) detected, reloading index...');
+                    // reload to let customers see new services
+                    location.reload();
+                }
+            } catch(e) {
+                // ignore polling errors
+            }
+        }, 10000);
+    })();
+})();
   const logoutBtn = document.querySelector("#logoutBtn");
 
   if (token) {
@@ -418,7 +460,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function logout() {
   console.log("🚪 Đăng xuất: xóa localStorage và chuyển về trang chủ");
   localStorage.clear(); // Xóa token, userName, role, email, v.v.
-  
+
   // Chuyển về trang chủ (sử dụng URL tương đối để giữ host:port)
   window.location.href = '{!! url('/', [], false) !!}';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
 }

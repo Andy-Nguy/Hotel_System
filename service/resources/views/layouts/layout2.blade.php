@@ -54,24 +54,62 @@
                 <!-- Sidebar menu starts -->
                 <div class="sidebarMenuScroll">
                     <ul class="sidebar-menu">
-                        <li class="{{ request()->routeIs('tiennghi2.index') ? 'active current-page' : '' }}">
-                            <a href="{{ route('tiennghi2.index') }}">
-                                <i class="bi bi-stars"></i>
-                                <span class="menu-text">Tiện nghi</span>
+                        <li class="{{ request()->routeIs('admin.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('admin.index') }}">
+                                <i class="bi bi-pie-chart"></i> {{-- (hoặc icon bạn muốn) --}}
+                                <span class="menu-text">Biểu đồ</span>
                             </a>
                         </li>
-                        <li class="{{ request()->routeIs('room.index') ? 'active current-page' : '' }}">
-                            <a href="{{ route('room.index') }}">
-                                <i class="bi bi-door-open"></i>
-                                <span class="menu-text">Phòng</span>
+
+                        <li class="{{ request()->routeIs('datphong.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('datphong.index') }}">
+                                <i class="bi bi-calendar-check"></i> {{-- (hoặc icon bạn muốn) --}}
+                                <span class="menu-text">Đặt Phòng</span>
                             </a>
                         </li>
+
+                        <li class="{{ request()->routeIs('datphong.truc_tiep.create') ? 'active current-page' : '' }}">
+                            <a href="{{ route('datphong.truc_tiep.create') }}">
+                                <i class="bi bi-box"></i>
+                                <span class="menu-text">Đặt Phòng Trực Tiếp</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->routeIs('hoadon.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('hoadon.index') }}">
+                                <i class="bi bi-receipt"></i> {{-- (hoặc icon bạn muốn) --}}
+                                <span class="menu-text">Hoá đơn</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->routeIs('khachhang.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('khachhang.index') }}">
+                                <i class="bi bi-people"></i> {{-- (hoặc icon bạn muốn) --}}
+                                <span class="menu-text">Khách hàng</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ request()->is('xacnhan') ? 'active current-page' : '' }}">
+                            <a href="{{ url('/xacnhan') }}">
+                                <i class="bi bi-calendar-check"></i>
+                                <span class="menu-text">Xác nhận Đặt phòng</span>
+                            </a>
+                        </li>
+
                         <li class="{{ request()->routeIs('dichvu.index') ? 'active current-page' : '' }}">
                             <a href="{{ route('dichvu.index') }}">
                                 <i class="bi bi-box"></i>
                                 <span class="menu-text">Dịch Vụ</span>
                             </a>
                         </li>
+
+                        <li class="{{ request()->routeIs('tiennghi.index') ? 'active current-page' : '' }}">
+                            <a href="{{ route('tiennghi.index') }}">
+                                <i class="bi bi-box"></i>
+                                <span class="menu-text">Tiện Nghi</span>
+                            </a>
+                        </li>
+
                         <li>
                             <a href="contracts.html">
                                 <i class="bi bi-shop-window"></i>

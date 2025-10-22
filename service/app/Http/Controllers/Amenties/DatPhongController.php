@@ -6,6 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Amenties\DatPhong;
 use App\Models\Login\KhachHang;
+use App\Models\Amenties\Phong;
+use App\Models\Amenties\HoaDon;
+use App\Models\Amenties\DichVu;
+use App\Models\Amenties\CTHDDV;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class DatPhongController extends Controller
 {
