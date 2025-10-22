@@ -1,1 +1,0 @@
-<?php /**PATH I:\Ky_06_2025_2026\php\New folder\Hotel_System\service\resources\views/Orther_user/gallery.blade.php ENDPATH**/ ?>

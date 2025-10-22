@@ -5,6 +5,10 @@ namespace App\Models\Amenties;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property string $IDTienNghi
+ * @property string $TenTienNghi
+ */
 class TienNghi extends Model
 {
     protected $table = 'TienNghi';

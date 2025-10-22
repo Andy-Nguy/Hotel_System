@@ -385,3 +385,9 @@ Route::get('/dichvu/create', [StaffDichVuController::class, 'create'])
     ->name('dichvu.create');
 Route::post('/dichvu', [StaffDichVuController::class, 'store'])
     ->name('dichvu.store');
+
+
+
+use App\Http\Controllers\Amenties\PhongController;
+Route::get('/quan-ly-phong', [PhongController::class, 'showRoomManagementPage'])
+    ->name('room.index');

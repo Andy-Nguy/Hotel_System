@@ -74,13 +74,12 @@ Route::delete('/phong/{phong}', [PhongController::class, 'destroy']);
 Route::get('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'show']);
 Route::put('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'update']);
 
+// Route::get('/phongs', [PhongController::class, 'index1']);
+// Route::apiResource('phongs', PhongController::class)->except(['index']);
+// Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
+// Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
+// Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
 
-
-Route::get('/phongs', [PhongController::class, 'index1']);
-Route::apiResource('phongs', PhongController::class)->except(['index']);
-Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
-Route::apiResource('loaiphongs', LoaiPhongController::class)->except(['index']);
-Route::get('phongs/loai/{maLoai}', [PhongController::class, 'searchByLoai']);
 // Update profile via API (ajax-friendly, stateless)
 Route::post('/taikhoan', [AuthController::class, 'updateProfileApi']);
 // Explicit route: use index1 for listing phongs
@@ -125,3 +124,10 @@ Route::get('/hoadon/stats', [App\Http\Controllers\Amenties\HoaDonController::cla
 
 use App\Http\Controllers\Login\KhachHangController;
 Route::get('/khach-hang/search', [KhachHangController::class, 'search']);
+
+use App\Http\Controllers\Amenties\UploadController;
+// --- CỤM ROUTE CHO TRANG QUẢN LÝ PHÒNG (Room Management Page) ---
+Route::get('/phongs', [PhongController::class, 'index3']);
+Route::match(['put', 'patch'], '/phongs/{key}', [PhongController::class, 'update1']);
+Route::post('/upload', [UploadController::class, 'store'])->name('api.upload');
+Route::get('/phong', [PhongController::class, 'index2']);
