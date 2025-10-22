@@ -65,7 +65,7 @@
                     <label class="form-label">Trạng thái</label>
                     <select name="status" class="form-select">
                         {{-- default to 2 (Đã thanh toán) when no status provided --}}
-                        <option value="0" {{ request()->get('status', '2') === '0' ? 'selected' : '' }}>Tất cả</option>
+                        <!-- <option value="0" {{ request()->get('status', '2') === '0' ? 'selected' : '' }}>Tất cả</option> -->
                         <option value="1" {{ request()->get('status', '2') == '1' ? 'selected' : '' }}>Chưa thanh toán
                         </option>
                         <option value="2" {{ request()->get('status', '2') == '2' ? 'selected' : '' }}>Đã thanh toán
@@ -437,7 +437,7 @@
                     rows.push(['Danh sách Hoá đơn']);
                     rows.push(['Từ ngày', meta.from || '']);
                     rows.push(['Đến ngày', meta.to || '']);
-                    var statusText = (meta.status == 1 ? 'Chưa thanh toán' : (meta.status == 2 ?
+                    var statusText = (meta.status == 0 ? 'Chưa thanh toán' : (meta.status == 1 ?
                         'Đã thanh toán' : 'Tất cả'));
                     rows.push(['Trạng thái', statusText]);
                     rows.push(['Thời gian xuất', (new Date()).toLocaleString()]);

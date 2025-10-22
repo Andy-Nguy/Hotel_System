@@ -374,6 +374,11 @@ Route::get('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'create'])
 Route::post('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'store'])
     ->name('datphong.truc_tiep.store');
 
+// POST /datphong-truc-tiep/confirm
+// API endpoint to confirm and persist a direct booking (creates DatPhong + HoaDon)
+Route::post('/datphong-truc-tiep/confirm', [DatPhongTrucTiepController::class, 'confirm'])
+    ->name('datphong.truc_tiep.confirm');
+
 // Service routes
 use App\Http\Controllers\Amenties\DichVuController as StaffDichVuController;
 // Public/admin listing (used by layout link `route('dichvu.index')`)

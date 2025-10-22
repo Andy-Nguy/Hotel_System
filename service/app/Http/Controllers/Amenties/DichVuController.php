@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 class DichVuController extends Controller
 {
     // Directory under public/ where service images are stored
-    private const IMAGE_DIR_REL = 'services';
+    private const IMAGE_DIR_REL = 'HomePage/img/pricing';
 
     private function servicesDir(): string
     {
@@ -185,14 +185,15 @@ class DichVuController extends Controller
             }
 
             if ($removeImage) {
-                if (!empty($dichvu->HinhDichVu) && file_exists(public_path($dichvu->HinhDichVu))) {
-                    @unlink(public_path($dichvu->HinhDichVu));
+                $oldPath = $this->imageAbsPath($dichvu->HinhDichVu);
+                if ($oldPath && file_exists($oldPath)) {
+                    @unlink($oldPath);
                 }
                 $dichvu->HinhDichVu = null;
             } elseif ($newPath) {
                 if (!empty($dichvu->HinhDichVu)) {
-                    $oldAbs = realpath(public_path($dichvu->HinhDichVu)) ?: '';
-                    $newAbs = realpath(public_path($newPath)) ?: '';
+                    $oldAbs = $this->imageAbsPath($dichvu->HinhDichVu) ?: '';
+                    $newAbs = $this->imageAbsPath($newPath) ?: '';
                     if ($oldAbs && $newAbs && $oldAbs !== $newAbs && file_exists($oldAbs)) {
                         @unlink($oldAbs);
                     }
@@ -279,8 +280,9 @@ class DichVuController extends Controller
     {
         $dichvu = DichVu::findOrFail($id);
 
-        if (!empty($dichvu->HinhDichVu) && file_exists(public_path($dichvu->HinhDichVu))) {
-            @unlink(public_path($dichvu->HinhDichVu));
+        $old = $this->imageAbsPath($dichvu->HinhDichVu);
+        if ($old && file_exists($old)) {
+            @unlink($old);
         }
 
         // Prevent deletion if the service is currently used in active bookings or associated with occupied rooms
@@ -332,7 +334,7 @@ class DichVuController extends Controller
         $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
         $filename = 'DV_' . Str::slug($tenDichVu, '_') . '_' . time() . '_' . Str::lower(Str::random(6)) . '.' . $ext;
         $file->move($dir, $filename);
-        return self::IMAGE_DIR_REL . '/' . $filename;
+        return $filename;
     }
 
     private function downloadImage(string $url, string $tenDichVu): ?string
@@ -352,7 +354,7 @@ class DichVuController extends Controller
 
             File::put($dir . DIRECTORY_SEPARATOR . $filename, $response->body());
 
-            return self::IMAGE_DIR_REL . '/' . $filename;
+            return $filename;
         } catch (\Throwable $e) {
             return null;
         }
@@ -367,6 +369,33 @@ class DichVuController extends Controller
             'image/webp' => 'webp',
         ];
         return $mime_map[$mime] ?? 'jpg';
+    }
+
+    /**
+     * Given a stored HinhDichVu value (filename, relative path or full relative path),
+     * return the absolute filesystem path to the image under public/ if it exists.
+     * Returns null for external URLs or if file doesn't exist.
+     */
+    private function imageAbsPath(?string $stored): ?string
+    {
+        if (empty($stored)) return null;
+        $s = trim((string) $stored);
+        // External URLs are not deletable locally
+        if (preg_match('#^https?://#i', $s)) return null;
+
+        // Normalize: remove leading slashes
+        $s = preg_replace('#^[\\/]+#', '', $s);
+
+        // If it's a bare filename (no directory), assume services dir
+        if (strpos($s, '/') === false) {
+            $rel = self::IMAGE_DIR_REL . DIRECTORY_SEPARATOR . $s;
+        } else {
+            // otherwise treat it as a path relative to public/
+            $rel = $s;
+        }
+
+        $abs = public_path($rel);
+        return file_exists($abs) ? $abs : null;
     }
 
     public function getChiTiet(Request $request, string $IDDichVu)

@@ -55,37 +55,48 @@
                 <div class="sidebarMenuScroll">
                     <ul class="sidebar-menu">
                         <li class="{{ request()->routeIs('admin.index') ? 'active current-page' : '' }}">
-                            <a href="{{ route('admin.index') }}">
+                            <!-- <a href="{{ route('admin.index') }}">
                                 <i class="bi bi-pie-chart"></i> {{-- (hoặc icon bạn muốn) --}}
                                 <span class="menu-text">Biểu đồ</span>
-                            </a>
+                            </a> -->
                         </li>
 
-                        <li class="{{ request()->routeIs('datphong.index') ? 'active current-page' : '' }}">
-                            <a href="{{ route('datphong.index') }}">
-                                <i class="bi bi-calendar-check"></i> {{-- (hoặc icon bạn muốn) --}}
-                                <span class="menu-text">Đặt Phòng</span>
+                        @php
+                            $statsActive = request()->routeIs('datphong.index') || request()->routeIs('hoadon.index') || request()->routeIs('khachhang.index');
+                        @endphp
+                        <li class="treeview {{ $statsActive ? 'active current-page' : '' }}">
+                            <a href="#!">
+                                <i class="bi bi-stickies"></i>
+                                <span class="menu-text">Thống kê</span>
                             </a>
+                            <ul class="treeview-menu">
+                                <li class="{{ request()->routeIs('datphong.index') ? 'active current-page' : '' }}">
+                                    <a href="{{ route('datphong.index') }}">
+                                        <i class="bi bi-calendar-check"></i> {{-- (hoặc icon bạn muốn) --}}
+                                        <span class="menu-text">Đặt Phòng</span>
+                                    </a>
+                                </li>
+
+                                <li class="{{ request()->routeIs('hoadon.index') ? 'active current-page' : '' }}">
+                                    <a href="{{ route('hoadon.index') }}">
+                                        <i class="bi bi-receipt"></i> {{-- (hoặc icon bạn muốn) --}}
+                                        <span class="menu-text">Hoá đơn</span>
+                                    </a>
+                                </li>
+
+                                <li class="{{ request()->routeIs('khachhang.index') ? 'active current-page' : '' }}">
+                                    <a href="{{ route('khachhang.index') }}">
+                                        <i class="bi bi-people"></i> {{-- (hoặc icon bạn muốn) --}}
+                                        <span class="menu-text">Khách hàng</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <li class="{{ request()->routeIs('datphong.truc_tiep.create') ? 'active current-page' : '' }}">
                             <a href="{{ route('datphong.truc_tiep.create') }}">
                                 <i class="bi bi-box"></i>
                                 <span class="menu-text">Đặt Phòng Trực Tiếp</span>
-                            </a>
-                        </li>
-
-                        <li class="{{ request()->routeIs('hoadon.index') ? 'active current-page' : '' }}">
-                            <a href="{{ route('hoadon.index') }}">
-                                <i class="bi bi-receipt"></i> {{-- (hoặc icon bạn muốn) --}}
-                                <span class="menu-text">Hoá đơn</span>
-                            </a>
-                        </li>
-
-                        <li class="{{ request()->routeIs('khachhang.index') ? 'active current-page' : '' }}">
-                            <a href="{{ route('khachhang.index') }}">
-                                <i class="bi bi-people"></i> {{-- (hoặc icon bạn muốn) --}}
-                                <span class="menu-text">Khách hàng</span>
                             </a>
                         </li>
 

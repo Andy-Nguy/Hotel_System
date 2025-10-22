@@ -371,8 +371,25 @@
     }
     function buildImageSrc(path) {
         if (!path) return '';
-        let base = isExternalUrl(path) ? String(path) : '/' + String(path).replace(/^\/+/, '');
-        return addCacheBuster(base);
+        // If path is an external URL, use it directly.
+        if (isExternalUrl(path)) return addCacheBuster(String(path));
+
+        // Normalize server-side stored values:
+        // - If the value is a bare filename (e.g. DV_...png or 1.jpg) we expect images to live under
+        //   public/HomePage/img/pricing/ (controller saves into that folder). If the value already
+        //   contains a path (starts with HomePage/ or /HomePage/) keep it.
+        let s = String(path || '');
+        // Trim leading slashes
+        s = s.replace(/^\/+/, '');
+
+        if (!s.match(/\//)) {
+            // Bare filename -> prepend the known directory
+            s = 'HomePage/img/pricing/' + encodeURIComponent(s);
+            return addCacheBuster('/' + s);
+        }
+
+        // If path already contains a directory, ensure it starts with '/'
+        return addCacheBuster('/' + s);
     }
 
     // NEW: helpers for sorting
