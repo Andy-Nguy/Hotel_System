@@ -2,165 +2,339 @@
 
 @section('title', 'Phòng')
 
-@section('content')
-    {{-- Các CSS tùy chỉnh từ file index.blade.php cũ --}}
+{{-- (MỚI) Thêm CSS để đồng bộ UI --}}
+@push('styles')
     <style>
-        .table-scroll-y { max-height: 65vh; overflow-y: auto; }
-        table th, table td { vertical-align: middle; }
+        /* === Styles đồng bộ từ Checkout === */
+        .form-label.styled {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1e3a8a;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            font-size: 0.9rem;
+            margin-bottom: 4px; /* Consistent spacing */
+        }
+
+        .form-control.styled,
+        .form-select.styled {
+            border: 1px solid #d1e0ff;
+            background: #ffffff;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            padding: 0.6rem;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Subtle shadow */
+        }
+
+        .form-control.styled:focus,
+        .form-select.styled:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+            outline: none;
+            background: #f9fbff;
+        }
+
+        /* Style cho textarea */
+        textarea.form-control.styled.autosize {
+            overflow: hidden;
+            resize: vertical;
+            min-height: calc(1.5em + 1.2rem + 2px); /* Match input height */
+        }
+
+        .input-group-text.styled {
+            background: #ffffff;
+            border: 1px solid #d1e0ff;
+            color: #60a5fa;
+            transition: all 0.3s ease;
+            border-radius: 10px 0 0 10px;
+            padding: 0.6rem;
+        }
+        .form-control.styled.in-group {
+            border-radius: 0 10px 10px 0;
+            border-left: 0;
+        }
+
+        .btn.styled {
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Subtle shadow */
+        }
+         .btn-sm.styled { /* Adjust padding for small buttons */
+             padding: 0.35rem 0.8rem;
+             font-size: 0.85rem;
+         }
+
+        .btn-primary.styled {
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            border: none;
+            color: #ffffff;
+        }
+        .btn-primary.styled:hover {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-warning.styled { /* Nút Update */
+            background: linear-gradient(90deg, #f97316, #fb923c);
+            border: none;
+            color: #ffffff;
+        }
+        .btn-warning.styled:hover {
+            background: linear-gradient(90deg, #ea580c, #f97316);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+        .btn-warning.styled:disabled {
+             background: linear-gradient(90deg, #fdba74, #fed7aa);
+             opacity: 0.7;
+        }
+
+        .btn-outline-secondary.styled {
+            border: 1px solid #d1e0ff;
+            color: #1e3a8a;
+            background-color: #fff; /* Ensure bg for shadow */
+        }
+        .btn-outline-secondary.styled:hover {
+            background: #e6f0ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+         /* Style nút Sửa trong bảng */
+        .btn-outline-primary.styled {
+            border: 1px solid #60a5fa;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+         .btn-outline-primary.styled:hover {
+            background: #dbeafe;
+             border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+         }
+
+
+        .table-styled {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-collapse: separate; /* Needed for border-radius */
+            border-spacing: 0;
+            /* table-layout: fixed; /* Bỏ fixed để cột tự điều chỉnh */
+        }
+        .table-styled thead {
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            color: #ffffff;
+        }
+        .table-styled th {
+            padding: 0.8rem;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap; /* Ngăn header xuống dòng */
+        }
+        .table-styled tbody td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 0.6rem; /* Giảm padding body */
+        }
+        /* Căn chỉnh cụ thể cho các cột */
+        .table-styled td.text-wrap, .table-styled th.text-wrap { white-space: normal !important; }
+        .table-styled td.break-anywhere, .table-styled th.break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
+        .table-styled td.description-cell {
+            white-space: normal !important;
+            max-width: 320px; /* Giới hạn chiều rộng mô tả */
+            text-align: left !important; /* Căn trái mô tả */
+        }
+         .table-styled th.description-header { text-align: left !important; } /* Căn trái header Mô tả */
+         .table-styled td.text-end, .table-styled th.text-end { text-align: right !important; }
+         .table-styled td.text-start, .table-styled th.text-start { text-align: left !important; }
+
+        /* Style cho nút dropdown trạng thái */
+        .status-dropdown .dropdown-toggle {
+            min-width: 120px; /* Đảm bảo nút đủ rộng */
+             border-radius: 10px !important; /* Ghi đè bo tròn bootstrap */
+             padding: 0.35rem 0.8rem !important; /* Giống btn-sm.styled */
+             font-size: 0.85rem !important;
+             color: white !important; /* Luôn chữ trắng */
+             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        /* Màu nền dựa trên class gốc */
+        .status-dropdown .btn-success { background: linear-gradient(90deg, #22c55e, #4ade80); border:none; }
+        .status-dropdown .btn-success:hover { background: linear-gradient(90deg, #16a34a, #22c55e); }
+        .status-dropdown .btn-danger { background: linear-gradient(90deg, #ef4444, #f87171); border:none; }
+        .status-dropdown .btn-danger:hover { background: linear-gradient(90deg, #dc2626, #ef4444); }
+        .status-dropdown .btn-secondary { background: linear-gradient(90deg, #6b7280, #9ca3af); border:none; }
+        .status-dropdown .btn-secondary:hover { background: linear-gradient(90deg, #4b5563, #6b7280); }
+        .status-dropdown .dropdown-menu { border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+
+
+        /* === End Styles đồng bộ === */
+
+        /* Styles cũ giữ lại */
         .img-preview { width: 100%; max-height: 160px; object-fit: cover; border-radius: 0.5rem; }
-
-        .text-wrap { white-space: normal !important; }
-        .break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
-        .description-cell { white-space: normal !important; max-width: 320px; }
-
-        textarea.form-control.autosize { overflow: hidden; resize: vertical; min-height: 38px; }
     </style>
+@endpush
 
-    {{-- Toàn bộ nội dung trong <div class="app-body"> của file index.blade.php cũ --}}
-    <div id="roomFormWrap" class="collapse">
-        <div class="card border-0 shadow-sm mb-3">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="m-0"><i class="bi bi-pencil-square me-2"></i>UPDATE PHÒNG</h6>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="btnCloseForm">
-                            <i class="bi bi-x-lg me-1"></i>Đóng
-                        </button>
-                    </div>
-                </div>
+@section('content')
+    <div class="p-3"> {{-- Giữ padding wrapper --}}
 
-                <form id="roomForm" class="row g-3" autocomplete="off">
-                    <div class="col-md-3">
-                        <label class="form-label">Mã phòng</label>
-                        <input type="text" name="IDPhong" class="form-control" readonly />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Số phòng</label>
-                        <input type="text" name="SoPhong" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Tên Loại Phòng</label>
-                        <textarea name="TenLoaiPhong" class="form-control autosize" rows="2"></textarea>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Tên phòng</label>
-                        <textarea name="TenPhong" class="form-control autosize" rows="2"></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Mô tả</label>
-                        <textarea name="MoTa" class="form-control autosize" rows="4"></textarea>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Giá phòng</label>
-                        <input type="number" name="GiaCoBanMotDem" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Số người tối đa</label>
-                        <input type="number" name="SoNguoiToiDa" class="form-control" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Ảnh hiện tại</label>
-                        <div class="border rounded p-2 text-center bg-light">
-                            <img id="roomImagePreview" class="img-preview" src="https://picsum.photos/300/200"
-                                alt="Ảnh phòng" onerror="this.src='https://picsum.photos/300/200'">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Chọn ảnh mới</label>
-                        <input type="file" id="roomImageFile" class="form-control" accept="image/*" />
-                        <div class="d-flex gap-2 mt-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnUseOriginalImage">
-                                <i class="bi bi-arrow-counterclockwise me-1"></i>Dùng lại ảnh cũ
+        {{-- Form Cập nhật trong Card --}}
+        <div id="roomFormWrap" class="collapse">
+            <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+                <div class="card-body py-4 px-4" style="position: relative;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="form-label styled m-0" style="font-size: 1.1rem;"><i class="bi bi-pencil-square me-2" style="color: #60a5fa;"></i>CẬP NHẬT PHÒNG</h6>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary styled shadow-sm" id="btnCloseForm">
+                                <i class="bi bi-x-lg me-1"></i>Đóng
                             </button>
                         </div>
                     </div>
-
-                    <div class="col-12 d-flex gap-2 mt-2">
-                        <button type="button" class="btn btn-warning" id="btnUpdateRoom" disabled>
-                            <i class="bi bi-save me-1"></i>Cập nhật phòng
-                        </button>
-                        <button type="reset" class="btn btn-outline-secondary" id="btnResetForm">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-                        </button>
-                    </div>
-
-                    <input type="hidden" id="roomOriginalKey" />
-                    <input type="hidden" id="roomOriginalIDPhong" />
-                    <input type="hidden" id="roomOriginalSoPhong" />
-                    <input type="hidden" id="roomOriginalTenLoaiPhong" />
-                    <input type="hidden" id="roomOriginalUrlAnhPhong" name="UrlAnhPhong" />
-                </form>
+                    <form id="roomForm" class="row g-3" autocomplete="off">
+                        <div class="col-md-3">
+                            <label class="form-label styled">Mã phòng</label>
+                            <input type="text" name="IDPhong" class="form-control styled" readonly style="background-color: #e9ecef;"/>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label styled">Số phòng</label>
+                            <input type="text" name="SoPhong" class="form-control styled" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label styled">Tên Loại Phòng</label>
+                            <textarea name="TenLoaiPhong" class="form-control styled autosize" rows="1"></textarea>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label styled">Tên phòng</label>
+                            <textarea name="TenPhong" class="form-control styled autosize" rows="1"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label styled">Mô tả</label>
+                            <textarea name="MoTa" class="form-control styled autosize" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label styled">Giá phòng (VND)</label>
+                            <input type="number" name="GiaCoBanMotDem" class="form-control styled" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label styled">Số người tối đa</label>
+                            <input type="number" name="SoNguoiToiDa" class="form-control styled" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label styled">Ảnh hiện tại</label>
+                            <div class="border rounded p-2 text-center" style="background: #fff; border-color: #d1e0ff !important;">
+                                <img id="roomImagePreview" class="img-preview" src="https://placehold.co/300x200/e0f2fe/3b82f6?text=Room+Image"
+                                    alt="Ảnh phòng" onerror="this.src='https://placehold.co/300x200/e0f2fe/3b82f6?text=Image+Error'">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label styled">Chọn ảnh mới</label>
+                            <input type="file" id="roomImageFile" class="form-control styled" accept="image/*" />
+                            <div class="d-flex gap-2 mt-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary styled" id="btnUseOriginalImage">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Dùng lại ảnh cũ
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex gap-2 mt-3">
+                            <button type="button" class="btn btn-warning styled shadow-sm" id="btnUpdateRoom" disabled>
+                                <i class="bi bi-save me-1"></i>Cập nhật phòng
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary styled shadow-sm" id="btnResetForm">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                            </button>
+                        </div>
+                        <input type="hidden" id="roomOriginalKey" />
+                        <input type="hidden" id="roomOriginalIDPhong" />
+                        <input type="hidden" id="roomOriginalSoPhong" />
+                        <input type="hidden" id="roomOriginalTenLoaiPhong" />
+                        <input type="hidden" id="roomOriginalUrlAnhPhong" name="UrlAnhPhong" />
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="card border-0 shadow-sm mb-2">
-        <div class="card-body py-2">
-            <div class="row g-2 align-items-center">
-                <div class="col-12 col-md-6 col-lg-5">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input id="roomSearchInput" type="text" class="form-control"
-                            placeholder="Tìm tên phòng, mã phòng, loại phòng, mô tả..." />
+        {{-- Bộ lọc trong Card --}}
+        <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+            <div class="card-body py-4 px-4" style="position: relative;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+                <div class="row g-3 align-items-end">
+                    <div class="col-12 col-md-6 col-lg-5">
+                        <label class="form-label styled">Tìm kiếm</label>
+                        <div class="input-group">
+                            <span class="input-group-text styled"><i class="bi bi-search"></i></span>
+                            <input id="roomSearchInput" type="text" class="form-control styled in-group shadow-sm"
+                                placeholder="Tìm tên phòng, mã phòng, loại phòng, mô tả..." />
+                        </div>
                     </div>
-                </div>
-                <div class="col-6 col-md-3 col-lg-2">
-                    <select id="roomStatusFilter" class="form-select form-select-sm">
-                        <option value="">Tất cả trạng thái</option>
-                        <option value="Phòng trống">Phòng trống</option>
-                        <option value="Phòng hư">Phòng hư</option>
-                        <option value="Đang sử dụng">Đang sử dụng</option>
-                        <option value="Đã đặt">Đã đặt</option>
-                    </select>
-                </div>
-                <div class="col-6 col-md-3 col-lg-2">
-                    <select id="roomStarFilter" class="form-select form-select-sm">
-                        <option value="">Tất cả xếp hạng</option>
-                        <option value="1">1 sao</option>
-                        <option value="2">2 sao</option>
-                        <option value="3">3 sao</option>
-                        <option value="4">4 sao</option>
-                        <option value="5">5 sao</option>
-                    </select>
-                </div>
-                <div class="col-12 col-md-3 col-lg-2 d-flex gap-2">
-                    <button id="roomFilterClear" class="btn btn-outline-secondary btn-sm w-100">
-                        <i class="bi bi-x-circle me-1"></i>Xóa lọc
-                    </button>
+                    <div class="col-6 col-md-3 col-lg-2">
+                         <label class="form-label styled">Trạng thái</label>
+                        <select id="roomStatusFilter" class="form-select styled shadow-sm">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="Phòng trống">Phòng trống</option>
+                            <option value="Phòng hư">Phòng hư</option>
+                            <option value="Đang sử dụng">Đang sử dụng</option>
+                            <option value="Đã đặt">Đã đặt</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3 col-lg-2">
+                         <label class="form-label styled">Xếp hạng</label>
+                        <select id="roomStarFilter" class="form-select styled shadow-sm">
+                            <option value="">Tất cả xếp hạng</option>
+                            <option value="1">1 sao</option>
+                            <option value="2">2 sao</option>
+                            <option value="3">3 sao</option>
+                            <option value="4">4 sao</option>
+                            <option value="5">5 sao</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-3 d-flex">
+                        <button id="roomFilterClear" class="btn btn-outline-secondary styled shadow-sm w-100">
+                            <i class="bi bi-x-circle me-1"></i>Xóa lọc
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="card-body p-3" style="padding-left: 0; padding-right: 0; margin-left: -15px; margin-right: -15px;">
-        <div class="table-responsive mt-4" style="margin-left: -15px; margin-right: -15px;">
-            <table class="table table-striped table-hover table-bordered"
-                style="border-collapse: collapse; width: 100%; border-radius: 0.5rem; overflow: hidden; table-layout: fixed;">
-                <thead class="table-dark">
-                    <tr>
-                        <th class="text-center" style="width:4%;">STT</th>
-                        <th class="text-center" style="width:10%;">Tên Loại Phòng</th>
-                        <th class="text-center" style="width:6%;">Mã phòng</th>
-                        <th class="text-center" style="width:6%;">Số phòng</th>
-                        <th class="text-center" style="width:15%;">Tên phòng</th>
-                        <th class="text-center" style="width:30%;">Mô tả</th>
-                        <th class="text-center" style="width:10%;">Giá</th>
-                        <th class="text-center" style="width:8%;">Số người tối đa</th>
-                        <th class="text-center" style="width:10%;">Xếp hạng</th>
-                        <th class="text-center" style="width:8%;">Ảnh</th>
-                        <th class="text-center" style="width:14%;">Trạng thái</th>
-                        <th class="text-center" style="width:6%;">Hành động</th>
-                    </tr>
-                </thead>
-                <tbody id="roomTableBody"></tbody>
-            </table>
+        {{-- Bảng trong Card --}}
+         <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+            <div class="card-body py-4 px-4" style="position: relative;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+                <div class="table-responsive mt-2">
+                    <table class="table table-striped table-hover table-styled" id="roomTable">
+                        <thead>
+                            <tr>
+                                <th style="width:4%;">STT</th>
+                                <th class="text-start" style="width:10%;">Loại Phòng</th>
+                                <th style="width:6%;">Mã phòng</th>
+                                <th style="width:6%;">Số phòng</th>
+                                <th class="text-start" style="width:15%;">Tên phòng</th>
+                                <th class="description-header" style="width:25%;">Mô tả</th>
+                                <th class="text-end" style="width:8%;">Giá</th>
+                                <th style="width:6%;">Số người</th>
+                                <th style="width:8%;">Hạng</th>
+                                <th style="width:6%;">Ảnh</th>
+                                <th style="width:10%;">Trạng thái</th>
+                                <th style="width:6%;">Sửa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="roomTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    {{-- Thêm Axios vì layout2 không có --}}
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
     <script>
@@ -711,3 +885,4 @@
         });
     </script>
 @endsection
+

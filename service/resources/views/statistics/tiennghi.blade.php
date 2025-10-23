@@ -2,21 +2,494 @@
 
 @section('title', 'Tiện nghi')
 
+{{-- (MỚI) Thêm CSS để đồng bộ UI --}}
+@push('styles')
+<style>
+    /* === Styles đồng bộ từ Checkout === */
+    .form-label.styled {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1e3a8a;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        /* Consistent spacing */
+    }
+
+    .form-control.styled,
+    .form-select.styled {
+        border: 1px solid #d1e0ff;
+        background: #ffffff;
+        color: #1e3a8a;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        padding: 0.6rem;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        /* Subtle shadow */
+    }
+
+    .form-control.styled:focus,
+    .form-select.styled:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+        outline: none;
+        background: #f9fbff;
+    }
+
+    .input-group-text.styled {
+        background: #ffffff;
+        border: 1px solid #d1e0ff;
+        color: #60a5fa;
+        transition: all 0.3s ease;
+        border-radius: 10px 0 0 10px;
+        padding: 0.6rem;
+    }
+
+    .form-control.styled.in-group {
+        border-radius: 0 10px 10px 0;
+        border-left: 0;
+    }
+
+    .form-select.styled.in-group {
+        /* Specific for selects in group */
+        border-radius: 0 10px 10px 0;
+        border-left: 0;
+    }
+
+    .input-group-text.styled.bg-primary {
+        /* Specific for colored icons */
+        background: #60a5fa;
+        border-color: #60a5fa;
+        color: white;
+    }
+
+    .btn.styled {
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        /* Subtle shadow */
+    }
+
+    .btn-sm.styled {
+        /* Adjust padding for small buttons */
+        padding: 0.35rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-primary.styled {
+        background: linear-gradient(90deg, #60a5fa, #93c5fd);
+        border: none;
+        color: #ffffff;
+    }
+
+    .btn-primary.styled:hover {
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary.styled:disabled {
+        background: linear-gradient(90deg, #a5b4fc, #c7d2fe);
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+
+    .btn-outline-secondary.styled,
+    .btn-outline-primary.styled,
+    .btn-outline-dark.styled,
+    .btn-outline-danger.styled {
+        border: 1px solid #d1e0ff;
+        color: #1e3a8a;
+        background-color: #fff;
+        /* Ensure bg for shadow */
+    }
+
+    .btn-outline-secondary.styled:hover,
+    .btn-outline-primary.styled:hover,
+    .btn-outline-dark.styled:hover {
+        background: #e6f0ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-outline-danger.styled {
+        color: #dc3545;
+        border-color: #f8d7da;
+    }
+
+    .btn-outline-danger.styled:hover {
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+    }
+
+    /* Button group styling */
+    .btn-group.styled .btn {
+        border-radius: 10px !important;
+        /* Individual radius, force override */
+        margin-right: 0.25rem;
+        /* Spacing between buttons */
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        /* Subtle shadow */
+    }
+
+    .btn-group.styled .btn:last-child {
+        margin-right: 0;
+    }
+
+    /* (SỬA) Style active cho button group */
+    .btn-group.styled .btn.active {
+        background-color: #60a5fa;
+        color: white;
+        border-color: #60a5fa !important;
+        /* Quan trọng: Ghi đè border */
+        box-shadow: 0 2px 5px rgba(96, 165, 250, 0.3);
+    }
+
+
+    .table-styled {
+        border-radius: 12px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border-collapse: separate;
+        /* Needed for border-radius */
+        border-spacing: 0;
+    }
+
+    .table-styled thead {
+        background: linear-gradient(90deg, #60a5fa, #93c5fd);
+        color: #ffffff;
+    }
+
+    .table-styled th {
+        padding: 0.8rem;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        /* Ngăn header xuống dòng */
+    }
+
+    .table-styled tbody td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.6rem;
+        /* Giảm padding body */
+    }
+
+    .table-styled th.sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    /* (SỬA) Style mũi tên sort rõ ràng hơn */
+    .table-styled th.sortable::after {
+        content: ' ';
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        margin-left: .3em;
+        vertical-align: -.2em;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23a0aec0'%3e%3cpath fill-rule='evenodd' d='M4.646 9.646a.5.5 0 0 1 .708 0L8 12.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708zM8 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5A.5.5 0 0 1 8 4zM4.646 6.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8 3.707 5.354 6.354a.5.5 0 0 1-.708 0z'/%3e%3c/svg%3e");
+        opacity: 0.5;
+    }
+
+    .table-styled th.sortable.asc::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z'/%3e%3c/svg%3e");
+        opacity: 0.9;
+    }
+
+    .table-styled th.sortable.desc::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z'/%3e%3c/svg%3e");
+        opacity: 0.9;
+    }
+
+    .table-styled td.text-start {
+        text-align: left !important;
+    }
+
+    .table-styled th.text-start {
+        text-align: left !important;
+    }
+
+    .table-styled td.text-end {
+        text-align: right !important;
+    }
+
+    .table-styled th.text-end {
+        text-align: right !important;
+    }
+
+    /* Modal Styling */
+    .modal-content.styled {
+        border-radius: 16px;
+        border: none;
+        background: linear-gradient(180deg, #f9fbff, #e6f0ff);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header.styled {
+        border-bottom: 1px solid #d1e0ff;
+        position: relative;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .modal-header.styled .modal-title {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #1e3a8a;
+        font-size: 1.1rem;
+    }
+
+    .modal-header.styled .decorator-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    }
+
+    .modal-footer.styled {
+        border-top: 1px solid #d1e0ff;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .modal-body.styled .form-label {
+        font-family: 'Inter', sans-serif;
+        color: #1e3a8a;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .modal-body.styled .form-control,
+    .modal-body.styled .form-select {
+        border: 1px solid #d1e0ff;
+        background: #ffffff;
+        color: #1e3a8a;
+        border-radius: 10px;
+        padding: 0.6rem;
+    }
+
+    .modal-body.styled .form-control:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+        background: #f9fbff;
+    }
+
+    .modal-footer.styled .btn-danger {
+        /* Nút Xóa trong modal footer */
+        background: linear-gradient(90deg, #ef4444, #f87171);
+        border: none;
+        color: white;
+    }
+
+    .modal-footer.styled .btn-danger:hover {
+        background: linear-gradient(90deg, #dc2626, #ef4444);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+    }
+
+
+    /* === End Styles đồng bộ === */
+
+    /* Tab styling */
+    .nav-pills .nav-link {
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        color: #1e3a8a;
+        margin-right: 0.5rem;
+        background-color: #e0e7ff;
+        /* Lighter inactive */
+        border: 1px solid #c7d2fe;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-pills .nav-link.active,
+    .nav-pills .show>.nav-link {
+        color: #fff;
+        background: linear-gradient(90deg, #60a5fa, #93c5fd);
+        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+        /* Stronger shadow */
+        border: 1px solid transparent;
+        /* Remove border on active */
+        transform: translateY(-1px);
+        /* Slight lift */
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #c7d2fe;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+
+    /* Checkbox list container */
+    .form-check-box-list {
+        max-height: 320px;
+        overflow-y: auto;
+        border: 1px solid #d1e0ff;
+        /* Match input border */
+        border-radius: 10px;
+        /* Match input radius */
+        padding: .75rem;
+        /* Increased padding */
+        background: #fff;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        /* Inner shadow */
+    }
+
+    .form-check-box-list.disabled {
+        pointer-events: none;
+        opacity: .6;
+        background-color: #f8f9fa;
+    }
+
+    .form-check-box-list .form-check:not(:last-child) {
+        margin-bottom: 0.35rem;
+    }
+
+    /* Spacing between checkboxes */
+    .form-check-box-list .form-check-label {
+        cursor: pointer;
+    }
+
+    /* Cursor pointer for labels */
+
+
+    /* Overlay loading */
+    .table-overlay,
+    .assign-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(249, 251, 255, .85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border-radius: 12px;
+        backdrop-filter: blur(2px);
+        /* Blur effect */
+    }
+
+    /* Amenity label clickable filter in rooms table */
+    #tablePhong .amenity-label {
+        display: inline-block;
+        background-color: #e0e7ff;
+        color: #1e3a8a;
+        padding: 3px 10px;
+        border-radius: 12px;
+        margin: 2px;
+        font-size: .8rem;
+        cursor: pointer;
+        border: 1px solid #c7d2fe;
+        transition: all 0.2s ease;
+    }
+
+    #tablePhong .amenity-label:hover {
+        background-color: #c7d2fe;
+        transform: translateY(-1px);
+    }
+
+    /* Toolbar sticky trong khu vực gán */
+    .assign-toolbar {
+        position: sticky;
+        top: -1px;
+        background: rgba(249, 251, 255, 0.9);
+        backdrop-filter: blur(4px);
+        z-index: 5;
+        padding: .65rem 0;
+        border-bottom: 1px solid #d1e0ff;
+        margin-bottom: 0.75rem !important;
+    }
+
+    /* Nâng cấp toolbar */
+
+    /* Chip tiện nghi hiện tại */
+    #currentAssigned .amenity-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        background: linear-gradient(90deg, #60a5fa, #93c5fd);
+        color: #fff;
+        border-radius: 16px;
+        padding: 3px 10px;
+        margin: 3px;
+        font-size: .85rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    #currentAssigned .amenity-chip .remove {
+        cursor: pointer;
+        opacity: .7;
+        font-weight: bold;
+        font-size: 1.1em;
+        line-height: 1;
+    }
+
+    /* Tăng kích thước nút X */
+    #currentAssigned .amenity-chip .remove:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    /* Hiệu ứng hover */
+
+    /* Assign select row styling */
+    .assign-select-row .form-label {
+        font-weight: 600;
+        color: #1e3a8a;
+    }
+
+    /* Use styled color */
+    .assign-select-row .form-select {
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+    }
+
+    /* Larger selects */
+    .assign-select-row .input-group-text i {
+        line-height: 1;
+        font-size: 1.1rem;
+    }
+
+    .form-select:disabled {
+        background-color: #f8f9fa !important;
+        border: 1px solid #d1e0ff;
+        opacity: 1;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid py-3">
     {{-- khu vực hiển thị alert --}}
     <div id="alertArea"></div>
 
     <!-- Tabs điều hướng -->
-    <ul class="nav nav-pills mb-3" id="amenitiesTabs" role="tablist">
+    <ul class="nav nav-pills mb-4" id="amenitiesTabs" role="tablist"> {{-- Tăng mb --}}
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="tab-manage-tab" data-bs-toggle="pill" data-bs-target="#tab-manage" type="button" role="tab">
-                Quản lý & gán tiện nghi
+                <i class="bi bi-gear-fill me-1"></i> Quản lý & gán tiện nghi
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="tab-rooms-tab" data-bs-toggle="pill" data-bs-target="#tab-rooms" type="button" role="tab">
-                Phòng & tiện nghi
+                <i class="bi bi-door-open-fill me-1"></i> Phòng & tiện nghi
             </button>
         </li>
     </ul>
@@ -24,54 +497,58 @@
     <div class="tab-content">
         <!-- Tab 1: Quản lý & gán -->
         <div class="tab-pane fade show active" id="tab-manage" role="tabpanel" aria-labelledby="tab-manage-tab">
-            <div class="row">
-                <div class="col-md-6">
-                    {{-- bảng tiện nghi --}}
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    Danh sách tiện nghi
-                                    <span class="badge bg-secondary ms-2" id="amenitiesCount">0</span>
+            <div class="row g-4"> {{-- Tăng khoảng cách g --}}
+                <div class="col-lg-6">
+                    {{-- (ĐÃ SỬA) Card Danh sách tiện nghi --}}
+                    <div class="card border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+                        <div class="card-body py-4 px-4" style="position: relative;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="form-label styled mb-0" style="font-size: 1.1rem;">
+                                    <i class="bi bi-list-stars me-2" style="color: #60a5fa;"></i> Danh sách tiện nghi
+                                    <span class="badge bg-secondary rounded-pill ms-2 px-2" id="amenitiesCount">0</span> {{-- Rounded pill badge --}}
                                 </h5>
-                                <button id="btnOpenCreate" class="btn btn-primary btn-sm">
+                                <button id="btnOpenCreate" class="btn btn-primary btn-sm styled shadow-sm">
                                     <i class="bi bi-plus-lg me-1"></i> Thêm
                                 </button>
                             </div>
-                        </div>
-                        <div class="card-body">
+
                             <!-- input-group search + clear -->
-                            <div class="input-group mb-2">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input type="text" id="searchTienNghi" class="form-control" placeholder="Tìm tiện nghi...">
-                                <button class="btn btn-outline-secondary" id="clearSearchTienNghi" title="Xóa tìm kiếm">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text styled"><i class="bi bi-search"></i></span>
+                                <input type="text" id="searchTienNghi" class="form-control styled in-group shadow-sm" placeholder="Tìm tiện nghi...">
+                                <button class="btn btn-outline-secondary styled shadow-sm" id="clearSearchTienNghi" title="Xóa tìm kiếm" style="border-radius: 0 10px 10px 0; border-left-width: 0;">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
                             </div>
 
                             <!-- Lọc nhanh + sắp xếp -->
-                            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                                <div class="btn-group btn-group-sm" role="group" aria-label="filters">
-                                    <button class="btn btn-outline-secondary filter-tn active" data-filter="all">Tất cả</button>
-                                    <button class="btn btn-outline-secondary filter-tn" data-filter="selected">Đã chọn</button>
-                                    <button class="btn btn-outline-secondary filter-tn" data-filter="unselected">Chưa chọn</button>
+                            <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                                <div class="btn-group btn-group-sm styled" role="group" aria-label="filters">
+                                    <button class="btn btn-outline-secondary styled active filter-tn" data-filter="all">Tất cả</button>
+                                    <button class="btn btn-outline-secondary styled filter-tn" data-filter="selected">Đã chọn</button>
+                                    <button class="btn btn-outline-secondary styled filter-tn" data-filter="unselected">Chưa chọn</button>
                                 </div>
-                                <div class="ms-auto d-flex align-items-center gap-2">
+                                <div class="ms-md-auto d-flex align-items-center gap-2">
                                     <span class="small text-muted">Sắp xếp:</span>
-                                    <div class="btn-group btn-group-sm" role="group" aria-label="sort">
-                                        <button class="btn btn-outline-secondary sort-tn" data-key="IDTienNghi">ID</button>
-                                        <button class="btn btn-outline-secondary sort-tn" data-key="TenTienNghi">Tên</button>
+                                    {{-- Nút sắp xếp riêng biệt --}}
+                                    <div class="btn-group btn-group-sm styled" role="group" aria-label="sort">
+                                        {{-- (SỬA) Bỏ icon mặc định, JS sẽ thêm icon --}}
+                                        <button class="btn btn-outline-dark styled sort-tn" data-key="IDTienNghi">ID</button>
+                                        <button class="btn btn-outline-dark styled sort-tn active" data-key="TenTienNghi">Tên</button>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="position-relative" id="amenitiesTableWrap">
-                                <table class="table table-striped table-hover align-middle m-0" id="tableTienNghi">
-                                    <thead class="table-light">
+                                {{-- Table style --}}
+                                <table class="table table-hover align-middle m-0 table-styled" id="tableTienNghi">
+                                    <thead>
                                         <tr>
-                                            <th id="thTnId" class="sortable">ID</th>
-                                            <th id="thTnName" class="sortable">Tên tiện nghi</th>
-                                            <th class="text-end">Thao tác</th>
+                                            <th id="thTnId" class="sortable text-start" style="width: 20%;">ID</th>
+                                            <th id="thTnName" class="sortable text-start asc" style="width: 55%;">Tên tiện nghi</th> {{-- Mặc định sort tên --}}
+                                            <th class="text-end" style="width: 25%;">Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -84,122 +561,79 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Modal Create/Edit Tiện nghi -->
-                    <div class="modal fade" id="modalCreateEdit" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="modalTitle">Thêm tiện nghi</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <input type="hidden" id="tnId" />
-                                    <div class="mb-3">
-                                        <label class="form-label">Tên tiện nghi</label>
-                                        <input type="text" id="TenTienNghi" class="form-control" placeholder="VD: Điều hòa, Ấm đun nước..." />
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                                    <button type="button" class="btn btn-primary" id="btnSubmitCreateEdit">Lưu</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Confirm Delete Tiện nghi -->
-                    <div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Xóa tiện nghi</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Bạn chắc chắn muốn xóa tiện nghi: <strong id="deleteName"></strong>?</p>
-                                    <input type="hidden" id="deleteId" />
-                                    <div class="small text-muted">
-                                        Lưu ý: Các gán tiện nghi của phòng sẽ được gỡ tự động.
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    {{-- phần gán tiện nghi --}}
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Gán tiện nghi cho phòng</h5>
-                        </div>
-                        <div class="card-body position-relative">
-                            {{-- Cải thiện UX/UI dropdown: thêm icon, viền nổi bật, hiệu ứng focus --}}
-                            <div class="row g-2 align-items-end mb-2 assign-select-row">
+                <div class="col-lg-6">
+                    {{-- Card Gán tiện nghi --}}
+                    <div class="card border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+                        <div class="card-body py-4 px-4 position-relative">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                            <h5 class="form-label styled mb-3" style="font-size: 1.1rem;"><i class="bi bi-node-plus-fill me-2" style="color: #60a5fa;"></i>Gán tiện nghi cho phòng</h5>
+
+                            <div class="row g-3 align-items-end mb-3 assign-select-row">
                                 <div class="col-md-6">
-                                    <label class="form-label mb-1 text-primary">Loại phòng</label>
+                                    <label class="form-label styled mb-1">Loại phòng</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-building"></i></span>
-                                        <select id="selectLoaiPhongAssign" class="form-select form-select-lg shadow-sm"></select>
+                                        <span class="input-group-text styled bg-primary"><i class="bi bi-building"></i></span>
+                                        {{-- Select style --}}
+                                        <select id="selectLoaiPhongAssign" class="form-select styled in-group shadow-sm"></select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label mb-1 text-primary">Phòng</label>
+                                    <label class="form-label styled mb-1">Phòng</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-primary text-white"><i class="bi bi-door-closed"></i></span>
-                                        <select id="selectPhong" class="form-select form-select-lg shadow-sm" disabled></select>
+                                        <span class="input-group-text styled bg-primary"><i class="bi bi-door-closed"></i></span>
+                                        <select id="selectPhong" class="form-select styled in-group shadow-sm" disabled></select>
                                     </div>
                                 </div>
                             </div>
 
-                            <div id="assignSelectionInfo" class="small text-muted mb-2">
-                                <i class="bi bi-info-circle me-1"></i> Chưa chọn loại phòng/phòng.
+                            {{-- Thông tin chọn lựa style --}}
+                            <div id="assignSelectionInfo" class="alert alert-light border-light-subtle py-2 px-3 small mb-3 shadow-sm" role="alert" style="background-color: #e6f0ff; border-color: #d1e0ff !important;">
+                                <i class="bi bi-info-circle me-1 text-primary"></i> Chưa chọn loại phòng/phòng.
                             </div>
 
-                            <div class="form-check form-switch mb-2">
-                                <input class="form-check-input" type="checkbox" id="applyAllInType" disabled>
-                                <label class="form-check-label" for="applyAllInType" id="applyAllLabel">
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="applyAllInType" disabled style="cursor: pointer; transform: scale(1.1);"> {{-- Scale switch --}}
+                                <label class="form-check-label" for="applyAllInType" id="applyAllLabel" style="cursor: pointer;">
                                     Áp dụng cho tất cả phòng thuộc loại đã chọn
                                 </label>
                             </div>
 
-                            <div class="mb-2">
-                                <input type="text" id="filterCheckbox" class="form-control mb-2" placeholder="Tìm tiện nghi...">
+                            <div class="mb-3">
+                                <input type="text" id="filterCheckbox" class="form-control styled mb-2 shadow-sm" placeholder="Tìm tiện nghi trong danh sách...">
 
-                                <!-- sticky toolbar + selected count + unsaved badge -->
-                                <div class="assign-toolbar d-flex justify-content-between align-items-center mb-2">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <button class="btn btn-outline-primary" id="btnSelectAll">
-                                            <i class="bi bi-check2-square me-1"></i>Chọn tất cả
+                                <!-- sticky toolbar -->
+                                <div class="assign-toolbar d-flex justify-content-between align-items-center">
+                                    <div class="btn-group btn-group-sm styled" role="group">
+                                        <button class="btn btn-outline-primary styled" id="btnSelectAll">
+                                            <i class="bi bi-check2-square me-1"></i>Chọn hết
                                         </button>
-                                        <button class="btn btn-outline-secondary" id="btnClearAll">
-                                            <i class="bi bi-square me-1"></i>Bỏ chọn
+                                        <button class="btn btn-outline-secondary styled" id="btnClearAll">
+                                            <i class="bi bi-square me-1"></i>Bỏ hết
                                         </button>
-                                        <button class="btn btn-outline-dark" id="btnInvert">
+                                        <button class="btn btn-outline-dark styled" id="btnInvert">
                                             <i class="bi bi-shuffle me-1"></i>Đảo chọn
                                         </button>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="small text-muted">Đã chọn: <b id="selectedCount">0</b></span>
-                                        <span id="unsavedBadge" class="badge bg-warning-subtle text-warning-emphasis d-none">Chưa lưu</span>
+                                        <span id="unsavedBadge" class="badge bg-warning text-dark border border-warning-subtle rounded-pill d-none">Chưa lưu</span> {{-- Rounded pill badge --}}
                                     </div>
                                 </div>
 
                                 <div id="checkboxTienNghiList" class="form-check-box-list"></div>
                             </div>
 
-                            <div class="mb-2">
-                                <strong>Tiện nghi hiện tại:</strong>
+                            <div class="mb-3">
+                                <strong class="form-label styled">Tiện nghi hiện tại của phòng:</strong>
                                 <div id="currentAssigned" class="mt-1"></div>
                             </div>
-                            <button id="btnSaveAssign" class="btn btn-primary w-100" disabled>Lưu gán tiện nghi</button>
+                            <button id="btnSaveAssign" class="btn btn-primary styled w-100 shadow-sm" disabled>Lưu gán tiện nghi</button>
 
-                            <!-- overlay loading riêng cho khu vực gán -->
+                            <!-- overlay loading -->
                             <div id="assignOverlay" class="assign-overlay d-none">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -213,31 +647,35 @@
 
         <!-- Tab 2: Phòng & tiện nghi -->
         <div class="tab-pane fade" id="tab-rooms" role="tabpanel" aria-labelledby="tab-rooms-tab">
-            <div class="row mt-3">
+            <div class="row">
                 <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>Bảng phòng</h5>
-                        </div>
-                        <div class="card-body">
-                            <div id="roomFilterChips" class="mb-2"></div>
+                    {{-- Card Bảng phòng --}}
+                    <div class="card border-0 shadow-lg" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+                        <div class="card-body py-4 px-4" style="position: relative;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                            <h5 class="form-label styled mb-3" style="font-size: 1.1rem;"><i class="bi bi-door-open-fill me-2" style="color: #60a5fa;"></i>Danh sách phòng và tiện nghi</h5>
+
+                            {{-- Style chip lọc --}}
+                            <div id="roomFilterChips" class="mb-3"></div>
                             <!-- input-group search + clear -->
-                            <div class="input-group mb-2">
-                                <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                <input type="text" id="searchPhong" class="form-control" placeholder="Tìm phòng...">
-                                <button class="btn btn-outline-secondary" id="clearSearchPhong" title="Xóa tìm kiếm">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text styled"><i class="bi bi-search"></i></span>
+                                <input type="text" id="searchPhong" class="form-control styled in-group shadow-sm" placeholder="Tìm phòng...">
+                                <button class="btn btn-outline-secondary styled shadow-sm" id="clearSearchPhong" title="Xóa tìm kiếm" style="border-radius: 0 10px 10px 0; border-left-width: 0;">
                                     <i class="bi bi-x-lg"></i>
                                 </button>
                             </div>
                             <div class="position-relative" id="roomsTableWrap">
-                                <table class="table table-striped table-hover align-middle m-0" id="tablePhong">
-                                    <thead class="table-light">
+                                {{-- Table style --}}
+                                <table class="table table-hover align-middle m-0 table-styled" id="tablePhong">
+                                    <thead>
                                         <tr>
-                                            <th>ID</th>
-                                            <th>Số phòng</th>
-                                            <th>Loại phòng</th>
-                                            <th>Trạng thái</th>
-                                            <th>Tiện nghi</th>
+                                            <th style="width: 5%;">ID</th>
+                                            <th style="width: 10%;">Số phòng</th>
+                                            <th class="text-start" style="width: 15%;">Loại phòng</th> {{-- Căn trái --}}
+                                            <th style="width: 10%;">Trạng thái</th>
+                                            <th class="text-start" style="width: 60%;">Tiện nghi</th> {{-- Căn trái, rộng hơn --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -256,151 +694,58 @@
     </div><!-- /tab-content -->
 </div>
 
-<style>
-    /* Hover effect for room table rows */
-    #tablePhong tbody tr {
-        transition: all 0.2s ease;
-        position: relative;
-    }
+<!-- (ĐÃ SỬA) Modal Create/Edit Tiện nghi -->
+<div class="modal fade" id="modalCreateEdit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content styled">
+            <div class="modal-header styled">
+                <h5 class="modal-title" id="modalTitle">Thêm tiện nghi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                <div class="decorator-line"></div>
+            </div>
+            <div class="modal-body styled">
+                <input type="hidden" id="tnId" />
+                <div class="mb-3">
+                    <label for="TenTienNghi" class="form-label">Tên tiện nghi</label> {{-- Thêm for --}}
+                    <input type="text" id="TenTienNghi" class="form-control" placeholder="VD: Điều hòa, Ấm đun nước..." required /> {{-- Thêm required --}}
+                </div>
+            </div>
+            <div class="modal-footer styled">
+                <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary styled" id="btnSubmitCreateEdit">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    #tablePhong tbody tr:hover {
-        background-color: #eef2f7;
-        border: 1px solid #d0d7de;
-        transform: translateY(-1px);
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(31, 35, 40, 0.08);
-    }
-
-    /* Style for amenities in room table */
-    #tablePhong .amenity-label {
-        display: inline-block;
-        background-color: #6b7280;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 12px;
-        margin: 2px;
-        font-size: 0.8rem;
-        cursor: pointer;
-    }
-
-    /* Sortable headers */
-    th.sortable {
-        cursor: pointer;
-        user-select: none;
-    }
-
-    th.sortable::after {
-        content: ' ⇅';
-        font-weight: normal;
-        color: #adb5bd;
-        font-size: .8rem;
-    }
-
-    /* Checkbox list container */
-    .form-check-box-list {
-        max-height: 320px;
-        overflow-y: auto;
-        border: 1px solid #e9ecef;
-        border-radius: .375rem;
-        padding: .5rem .75rem;
-        background: #fff;
-    }
-
-    /* Overlay loading for tables */
-    .table-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, .6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2;
-        border-radius: .375rem;
-    }
-
-    /* Amenity label clickable filter in rooms table */
-    #tablePhong .amenity-label {
-        display: inline-block;
-        background-color: #6b7280;
-        color: #fff;
-        padding: 2px 8px;
-        border-radius: 12px;
-        margin: 2px;
-        font-size: .8rem;
-        cursor: pointer;
-    }
-
-    /* Toolbar sticky trong khu vực gán */
-    .assign-toolbar {
-        position: sticky;
-        top: 0;
-        background: #fff;
-        z-index: 1;
-        padding: .25rem 0;
-        border-bottom: 1px dashed #e9ecef;
-    }
-
-    /* Chip tiện nghi hiện tại với nút xóa nhỏ */
-    #currentAssigned .amenity-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: .25rem;
-        background-color: #0d6efd;
-        color: #fff;
-        border-radius: 16px;
-        padding: 2px 8px;
-        margin: 2px;
-        font-size: .8rem;
-    }
-
-    #currentAssigned .amenity-chip .remove {
-        cursor: pointer;
-        opacity: .85;
-    }
-
-    #currentAssigned .amenity-chip .remove:hover {
-        opacity: 1;
-        text-decoration: underline;
-    }
-
-    /* Overlay cho khu vực gán */
-    .assign-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, .6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 5;
-        border-radius: .375rem;
-    }
-
-    /* Làm rõ vùng checkbox khi disabled theo logic (không chọn phòng) */
-    .form-check-box-list.disabled {
-        pointer-events: none;
-        opacity: .6;
-    }
-
-    /* Tinh chỉnh cụm chọn loại/phòng */
-    .assign-select-row .form-label {
-        font-weight: 600;
-    }
-
-    .assign-select-row .input-group-text i {
-        line-height: 1;
-        font-size: 1rem;
-    }
-
-    /* Giữ viền rõ khi select bị disabled */
-    .form-select:disabled {
-        background-color: #f8f9fa;
-        border: 1px solid var(--bs-border-color, #ced4da);
-        opacity: 1;
-    }
-</style>
+<!-- (ĐÃ SỬA) Modal Confirm Delete Tiện nghi -->
+<div class="modal fade" id="modalDelete" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content styled">
+            <div class="modal-header styled">
+                <h5 class="modal-title">Xóa tiện nghi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button> {{-- Thêm aria-label --}}
+                <div class="decorator-line"></div>
+            </div>
+            <div class="modal-body styled">
+                <p>Bạn chắc chắn muốn xóa tiện nghi: <strong id="deleteName"></strong>?</p>
+                <input type="hidden" id="deleteId" />
+                <div class="small text-danger"> {{-- Dùng text-danger --}}
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    Lưu ý: Các gán tiện nghi của phòng sẽ được gỡ tự động.
+                </div>
+            </div>
+            <div class="modal-footer styled">
+                <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger styled" id="btnConfirmDelete">Xóa</button> {{-- Dùng class styled --}}
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
+{{-- (SCRIPT JS GIỮ NGUYÊN) --}}
 <script>
     const API_BASE = '/api';
     let ALL_TIEN_NGHI = [];

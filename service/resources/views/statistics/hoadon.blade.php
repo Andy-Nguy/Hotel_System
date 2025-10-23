@@ -7,7 +7,6 @@
 @section('content')
     {{--
       Thêm các style tùy chỉnh của trang này vào đây
-      (vì layout2 không có chỗ yield riêng cho style)
     --}}
     <style>
         .cursor-pointer {
@@ -24,89 +23,192 @@
             vertical-align: middle;
         }
 
-        /* Unified filter controls */
-        .filter-controls .form-control,
-        .filter-controls .form-select,
-        .filter-controls .btn {
-            height: 44px;
-            padding-top: 6px;
-            padding-bottom: 6px;
-            line-height: 1.2;
-        }
-
+        /* === (ĐÃ SỬA) Đồng bộ Filter Controls với Checkout === */
         .filter-controls .form-label {
-            margin-bottom: 6px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1e3a8a;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
         }
 
-        .filter-controls .input-group .form-control {
-            height: 44px;
+        .filter-controls .form-control,
+        .filter-controls .form-select {
+            border: 1px solid #d1e0ff;
+            background: #ffffff;
+            color: #1e3a8a;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            padding: 0.6rem;
+            font-size: 0.95rem;
+            height: auto; /* Ghi đè height 44px */
+            line-height: 1.5;
+        }
+
+        .filter-controls .form-control:focus,
+        .filter-controls .form-select:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+            outline: none;
+            background: #f9fbff;
         }
 
         .filter-controls .btn {
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            height: auto; /* Ghi đè height 44px */
+            line-height: 1.5;
             display: inline-flex;
             align-items: center;
+        }
+
+        .filter-controls .btn-primary {
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            border: none;
+            color: #ffffff;
+        }
+        .filter-controls .btn-primary:hover {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .filter-controls .btn-outline-secondary,
+        .filter-controls .btn-outline-success {
+            border: 1px solid #d1e0ff;
+            color: #1e3a8a;
+        }
+        .filter-controls .btn-outline-secondary:hover,
+        .filter-controls .btn-outline-success:hover {
+            background: #e6f0ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Fix bo góc cho input group */
+        .filter-controls .input-group .btn {
+            border-radius: 0 10px 10px 0;
+        }
+        .filter-controls .input-group .form-control {
+            border-radius: 10px 0 0 10px;
+        }
+        .filter-controls .input-group .btn.ms-2 {
+            border-radius: 10px; /* Fix cho nút In, CSV */
+        }
+
+        /* === (MỚI) Đồng bộ style Bảng với Checkout === */
+        .table-styled {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .table-styled thead {
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            color: #ffffff;
+        }
+        .table-styled th {
+            padding: 0.8rem;
+            text-align: center; /* Căn giữa header */
+        }
+        .table-styled tbody td {
+            text-align: center; /* Căn giữa nội dung cell */
+        }
+        /* Giữ căn phải cho cột tiền */
+        .table-styled th.text-end,
+        .table-styled td.text-end {
+            text-align: right !important;
         }
     </style>
 
     {{-- Thêm padding p-3 (vì layout2 không có) --}}
     <div class="p-3">
-        <form id="hoadon-filter-form" method="GET" action="{{ route('hoadon.index') }}">
-            <div class="row g-3 align-items-end filter-controls">
-                <div class="col-md-2">
-                    <label class="form-label">Từ ngày</label>
-                    <input type="date" name="from" class="form-control"
-                        value="{{ request()->get('from', date('Y-m-01')) }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Đến ngày</label>
-                    <input type="date" name="to" class="form-control" value="{{ request()->get('to', date('Y-m-d')) }}">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Trạng thái</label>
-                    <select name="status" class="form-select">
-                        {{-- default to 2 (Đã thanh toán) when no status provided --}}
-                        <!-- <option value="0" {{ request()->get('status', '2') === '0' ? 'selected' : '' }}>Tất cả</option> -->
-                        <option value="1" {{ request()->get('status', '2') == '1' ? 'selected' : '' }}>Chưa thanh toán
-                        </option>
-                        <option value="2" {{ request()->get('status', '2') == '2' ? 'selected' : '' }}>Đã thanh toán
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Tìm kiếm</label>
-                    <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="Số CT/Ghi chú"
-                            value="{{ request()->get('q') }}">
-                        <button class="btn btn-primary" type="submit">Lọc</button>
-                        <button id="btn-print-list" type="button" class="btn btn-outline-secondary ms-2">In</button>
-                        <button id="btn-csv-export" type="button" class="btn btn-outline-success ms-2">Xuất CSV</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-        <div class="mt-4">
-            <div id="invoices-loading" class="text-center py-3" style="display:none">Đang tải...</div>
-            <div id="invoices-empty" class="text-center py-3" style="display:none">Không tìm thấy hoá đơn nào.</div>
-            <div class="table-responsive" id="invoices-table-wrap" style="display:none">
-                <table class="table table-striped" id="invoices-table">
-                    <thead>
-                        <tr>
-                            <th>Mã hóa đơn</th>
-                            <th>Ngày lập</th>
-                            <th>Tổng tiền</th>
-                            <th>Tiền thanh toán</th>
-                            <th>Trạng thái</th>
-                            <th>Ghi chú</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
 
-            <nav aria-label="Page navigation" id="invoices-pager" style="display:none">
-                <ul class="pagination justify-content-center"></ul>
-            </nav>
+        {{-- (MỚI) Card cho Bộ lọc --}}
+        <div class="card border-0 shadow-lg mb-4"
+            style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+            <div class="card-body py-4 px-4" style="position: relative;">
+                {{-- Viền trang trí --}}
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                <form id="hoadon-filter-form" method="GET" action="{{ route('hoadon.index') }}">
+                    <div class="row g-3 align-items-end filter-controls">
+                        <div class="col-md-2">
+                            <label class="form-label">Từ ngày</label>
+                            <input type="date" name="from" class="form-control"
+                                value="{{ request()->get('from', date('Y-m-01')) }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Đến ngày</label>
+                            <input type="date" name="to" class="form-control" value="{{ request()->get('to', date('Y-m-d')) }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Trạng thái</label>
+                            <select name="status" class="form-select">
+                                {{-- default to 2 (Đã thanh toán) when no status provided --}}
+                                <option value="1" {{ request()->get('status', '2') == '1' ? 'selected' : '' }}>Chưa thanh toán
+                                </option>
+                                <option value="2" {{ request()->get('status', '2') == '2' ? 'selected' : '' }}>Đã thanh toán
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tìm kiếm</label>
+                            <div class="input-group">
+                                <input type="text" name="q" class="form-control" placeholder="Số CT/Ghi chú"
+                                    value="{{ request()->get('q') }}">
+                                <button class="btn btn-primary" type="submit">Lọc</button>
+                                <button id="btn-print-list" type="button" class="btn btn-outline-secondary ms-2">In</button>
+                                <button id="btn-csv-export" type="button" class="btn btn-outline-success ms-2">Xuất CSV</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
+
+        {{-- (MỚI) Card cho Bảng kết quả --}}
+        <div class="card border-0 shadow-lg mb-4"
+            style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+            <div class="card-body py-4 px-4" style="position: relative;">
+                {{-- Viền trang trí --}}
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                <div class="mt-2">
+                    <div id="invoices-loading" class="text-center py-3" style="display:none">Đang tải...</div>
+                    <div id="invoices-empty" class="text-center py-3" style="display:none">Không tìm thấy hoá đơn nào.</div>
+
+                    {{-- (ĐÃ SỬA) Thêm class .table-styled --}}
+                    <div class="table-responsive" id="invoices-table-wrap" style="display:none">
+                        <table class="table table-striped table-styled" id="invoices-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã hóa đơn</th>
+                                    <th>Ngày lập</th>
+                                    <th class="text-end">Tổng tiền</th>
+                                    <th class="text-end">Tiền thanh toán</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ghi chú</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    {{-- (ĐÃ SỬA) Thêm margin-top cho phân trang --}}
+                    <nav aria-label="Page navigation" id="invoices-pager" style="display:none; margin-top: 1rem;">
+                        <ul class="pagination justify-content-center"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
 
         <div id="print-area" style="display:none">
             <div style="padding:20px; font-family: Arial, Helvetica, sans-serif; color:#000;">
@@ -144,11 +246,7 @@
 
 {{-- Các script dành riêng cho trang này --}}
 @section('scripts')
-    {{--
-      Tất cả các script thư viện (jQuery, Bootstrap, Moment, v.v.)
-      đã được layout2.blade.php tải.
-      Chúng ta chỉ cần đưa logic JS của trang này vào đây.
-    --}}
+    {{-- (SCRIPT JS GIỮ NGUYÊN) --}}
     <script>
         (function($) {
             function fmtMoney(v) {
@@ -233,8 +331,8 @@
                     var tr = '<tr>' +
                         '<td>' + (row.IDHoaDon || '') + '</td>' +
                         '<td>' + (row.NgayLap ? new Date(row.NgayLap).toLocaleString() : '') + '</td>' +
-                        '<td>' + fmtMoney(row.TongTien || row.TongTienHoaDon || 0) + '</td>' +
-                        '<td>' + fmtMoney(row.TienThanhToan || 0) + '</td>' +
+                        '<td class="text-end">' + fmtMoney(row.TongTien || row.TongTienHoaDon || 0) + '</td>' +
+                        '<td class="text-end">' + fmtMoney(row.TienThanhToan || 0) + '</td>' +
                         '<td>' + statusLabel(row.TrangThaiThanhToan) + '</td>' +
                         '<td>' + (row.GhiChu || '') + '</td>' +
                         '</tr>';

@@ -2,6 +2,226 @@
 
 @section('title', 'Quản lý Dịch vụ')
 
+{{-- (MỚI) Thêm CSS để đồng bộ UI với checkout.blade.php --}}
+@push('styles')
+<style>
+    /* === Styles đồng bộ từ Checkout === */
+    .form-label.styled {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        color: #1e3a8a;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        font-size: 0.9rem;
+    }
+
+    .form-control.styled,
+    .form-select.styled {
+        border: 1px solid #d1e0ff;
+        background: #ffffff;
+        color: #1e3a8a;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        padding: 0.6rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control.styled:focus,
+    .form-select.styled:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+        outline: none;
+        background: #f9fbff;
+    }
+
+    .input-group-text.styled {
+      background: #ffffff;
+      border: 1px solid #d1e0ff;
+      color: #60a5fa;
+      transition: all 0.3s ease;
+      border-radius: 10px 0 0 10px;
+      padding: 0.6rem;
+    }
+    .form-control.styled.in-group {
+        border-radius: 0 10px 10px 0;
+        border-left: 0;
+    }
+    .form-control.styled.in-group-right {
+        border-radius: 10px 0 0 10px;
+    }
+    .btn.styled.in-group {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .btn.btn-primary.styled {
+      background: linear-gradient(90deg, #60a5fa, #93c5fd);
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+    }
+    .btn.btn-primary.styled:hover {
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn.btn-success.styled {
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+      border: none;
+      color: #ffffff;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+    }
+    .btn.btn-success.styled:hover {
+       background: linear-gradient(90deg, #16a34a, #22c55e);
+       transform: translateY(-2px);
+       box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn.btn-outline-secondary.styled,
+    .btn.btn-outline-danger.styled {
+      border: 1px solid #d1e0ff;
+      color: #1e3a8a;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.95rem;
+    }
+    .btn.btn-outline-secondary.styled:hover {
+      background: #e6f0ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .btn.btn-outline-danger.styled {
+        color: #dc3545;
+        border-color: #f8d7da;
+    }
+    .btn.btn-outline-danger.styled:hover {
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .table-styled {
+        border-radius: 12px;
+        overflow: hidden;
+        background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    .table-styled thead {
+        background: linear-gradient(90deg, #60a5fa, #93c5fd);
+        color: #ffffff;
+    }
+    .table-styled th {
+        padding: 0.8rem;
+    }
+    /* === Kết thúc Styles đồng bộ === */
+
+
+    #tableDichVu tbody tr {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    #tableDichVu tbody tr.table-active,
+    #tableDichVu tbody tr:hover {
+        background-color: #e0e7ff;
+    }
+    .table-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(249, 251, 255, .7); /* Nền mờ nhạt */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border-radius: 12px; /* Bo tròn theo table */
+    }
+    .empty-state {
+        text-align: center;
+        color: #6c757d;
+    }
+    #dichvuImagePreview, #imagePreview {
+        max-height: 250px;
+        width: auto;
+        object-fit: cover;
+    }
+    .table-img-thumb {
+        width: 60px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: .25rem;
+    }
+    #sortOption {
+        font-size: 0.85rem;
+        padding: 0.3rem 0.6rem;
+        border-radius: 8px;
+    }
+    #sortActivePill { user-select: none; }
+    #sortActivePill .bi { font-size: .95rem; }
+
+    /* (MỚI) Style cho modal giống checkout */
+    .modal-content.styled {
+        border-radius: 16px;
+        border: none;
+        background: linear-gradient(180deg, #f9fbff, #e6f0ff);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+    .modal-header.styled {
+        border-bottom: 1px solid #d1e0ff;
+        position: relative;
+        padding: 0.75rem 1.25rem;
+    }
+    .modal-header.styled .modal-title {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #1e3a8a;
+        font-size: 1.1rem;
+    }
+    .modal-header.styled .decorator-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    }
+    .modal-footer.styled {
+        border-top: 1px solid #d1e0ff;
+        padding: 0.75rem 1.25rem;
+    }
+    .modal-body.styled .form-label {
+        font-family: 'Inter', sans-serif;
+        color: #1e3a8a;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .modal-body.styled .form-control,
+    .modal-body.styled .form-select {
+        border: 1px solid #d1e0ff;
+        background: #ffffff;
+        color: #1e3a8a;
+        border-radius: 10px;
+        padding: 0.6rem;
+    }
+    .modal-body.styled .form-control:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+        background: #f9fbff;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid py-3">
     {{-- Alert area --}}
@@ -9,32 +229,38 @@
 
     <div class="row">
         <div class="col-lg-7">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="bi bi-concierge-bell me-2"></i>Danh sách dịch vụ
+            {{-- (ĐÃ SỬA) Card Danh sách dịch vụ --}}
+            <div class="card border-0 shadow-lg mb-4" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+                {{-- (ĐÃ SỬA) Bỏ card-header, dùng card-body --}}
+                <div class="card-body py-4 px-4" style="position: relative;">
+                    {{-- Viền trang trí --}}
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="form-label styled mb-0" style="font-size: 1.1rem;">
+                            <i class="bi bi-concierge-bell me-2" style="color: #60a5fa;"></i>Danh sách dịch vụ
                             <span class="badge bg-secondary ms-2" id="dichvuCount">0</span>
                         </h5>
-                        <button id="btnOpenCreateDichVu" class="btn btn-primary btn-sm">
+                        {{-- (ĐÃ SỬA) Button style --}}
+                        <button id="btnOpenCreateDichVu" class="btn btn-primary btn-sm styled shadow-sm">
                             <i class="bi bi-plus-lg me-1"></i> Thêm dịch vụ
                         </button>
                     </div>
-                </div>
-                <div class="card-body">
+
+                    {{-- (ĐÃ SỬA) Input search style --}}
                     <div class="input-group mb-3">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchDichVu" class="form-control" placeholder="Tìm dịch vụ theo tên...">
-                        <button class="btn btn-outline-secondary" id="clearSearchDichVu" title="Xóa tìm kiếm">
+                        <span class="input-group-text styled"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchDichVu" class="form-control styled in-group shadow-sm" placeholder="Tìm dịch vụ theo tên...">
+                        <button class="btn btn-outline-secondary styled in-group shadow-sm" id="clearSearchDichVu" title="Xóa tìm kiếm" style="border-left-width: 0;">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
 
-                    <!-- NEW: Sort controls -->
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
                         <div class="d-flex align-items-center gap-2">
                             <label class="text-muted small mb-0" for="sortOption">Sắp xếp:</label>
-                            <select id="sortOption" class="form-select form-select-sm" style="max-width: 280px;">
+                            {{-- (ĐÃ SỬA) Select style --}}
+                            <select id="sortOption" class="form-select form-select-sm styled shadow-sm" style="max-width: 280px; padding: 0.3rem 0.6rem; font-size: 0.85rem;">
                                 <option value="updated_desc">Ngày cập nhật - Mới nhất</option>
                                 <option value="updated_asc">Ngày cập nhật - Cũ nhất</option>
                                 <option value="id_asc">ID tăng dần</option>
@@ -43,17 +269,15 @@
                                 <option value="name_desc">Tên Z → A</option>
                             </select>
                         </div>
-                        <!-- Active sorting indicator -->
                         <span id="sortActivePill" class="badge bg-light text-secondary border d-flex align-items-center gap-1 px-2 py-1">
                             <i class="bi bi-sort-down"></i>
                             <span>Ngày cập nhật - Mới nhất</span>
                         </span>
                     </div>
-                    <!-- END Sort controls -->
-
                     <div class="position-relative" id="dichvuTableWrap">
-                        <table class="table table-hover align-middle m-0" id="tableDichVu">
-                            <thead class="table-light">
+                        {{-- (ĐÃ SỬA) Table style --}}
+                        <table class="table table-hover align-middle m-0 table-styled" id="tableDichVu">
+                            <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Tên Dịch Vụ</th>
@@ -74,24 +298,29 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="card" id="chitietPanel">
-                <div class="card-header">
-                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0" id="chitietPanelTitle">Chi tiết dịch vụ</h5>
-                        <button id="btnOpenCreateChiTiet" class="btn btn-success btn-sm d-none">
+            {{-- (ĐÃ SỬA) Card Chi tiết --}}
+            <div class="card border-0 shadow-lg" id="chitietPanel" style="border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, #f9fbff, #e6f0ff);">
+                {{-- (ĐÃ SỬA) Bỏ card-header, dùng card-body --}}
+                <div class="card-body py-4 px-4" style="position: relative;">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
+
+                     <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="form-label styled mb-0" id="chitietPanelTitle" style="font-size: 1.1rem;">Chi tiết dịch vụ</h5>
+                        {{-- (ĐÃ SỬA) Button style --}}
+                        <button id="btnOpenCreateChiTiet" class="btn btn-success btn-sm styled d-none shadow-sm">
                             <i class="bi bi-plus-lg me-1"></i> Thêm chi tiết
                         </button>
                     </div>
-                </div>
-                <div class="card-body">
+
                     <div id="chitietPlaceholder" class="text-center text-muted py-5">
                         <i class="bi bi-card-list fs-2"></i>
                         <p class="mt-2">Chọn một dịch vụ từ danh sách bên trái để quản lý chi tiết.</p>
                     </div>
                     <div id="chitietContent" class="d-none">
                         <div class="position-relative" id="chitietTableWrap">
-                            <table class="table table-striped table-hover align-middle m-0" id="tableChiTiet">
-                                <thead class="table-light">
+                            {{-- (ĐÃ SỬA) Table style --}}
+                            <table class="table table-striped table-hover align-middle m-0 table-styled" id="tableChiTiet">
+                                <thead>
                                     <tr>
                                         <th>Thông tin chi tiết</th>
                                         <th class="text-end">Thao tác</th>
@@ -107,35 +336,36 @@
                         </div>
 
                         <div id="dichvuImageContainer" class="mt-4 d-none">
-                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                                 <h6 class="mb-0">Hình ảnh đại diện</h6>
-                                 <button id="btnEditImage" class="btn btn-outline-secondary btn-sm d-none"><i class="bi bi-pencil me-1"></i>Thay đổi</button>
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2" style="border-color: #d1e0ff !important;">
+                                 <h6 class="form-label styled mb-0">Hình ảnh đại diện</h6>
+                                 {{-- (ĐÃ SỬA) Button style --}}
+                                 <button id="btnEditImage" class="btn btn-outline-secondary btn-sm styled d-none shadow-sm" style="padding: 0.3rem 0.6rem; font-size: 0.85rem;"><i class="bi bi-pencil me-1"></i>Thay đổi</button>
                             </div>
                             <div class="text-center">
-                                <img src="" id="dichvuImagePreview" class="img-fluid rounded border p-1 d-none" alt="Hình ảnh dịch vụ">
+                                <img src="" id="dichvuImagePreview" class="img-fluid rounded border p-1 d-none" alt="Hình ảnh dịch vụ" style="border-color: #d1e0ff !important;">
                                 <div id="dichvuImagePlaceholder" class="text-muted fst-italic mt-2 py-3 d-none">
                                     <i class="bi bi-image fs-3"></i>
                                     <p class="mb-2">Dịch vụ này chưa có hình ảnh.</p>
-                                    <button id="btnAddImage" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Thêm hình ảnh</button>
+                                    {{-- (ĐÃ SỬA) Button style --}}
+                                    <button id="btnAddImage" class="btn btn-primary btn-sm styled shadow-sm"><i class="bi bi-plus-lg me-1"></i>Thêm hình ảnh</button>
                                 </div>
 
-                                <!-- Inline avatar edit form: URL or upload only (no name/price) -->
                                 <div id="imageEditForm" class="mt-3 d-none text-start">
                                     <div class="mb-2">
-                                        <label for="imageUrlInput" class="form-label mb-1">URL hình ảnh</label>
-                                        <input type="text" id="imageUrlInput" class="form-control" placeholder="Dán URL hình ảnh vào đây">
+                                        <label for="imageUrlInput" class="form-label styled mb-1">URL hình ảnh</label>
+                                        <input type="text" id="imageUrlInput" class="form-control styled" placeholder="Dán URL hình ảnh vào đây">
                                     </div>
                                     <div class="mb-2">
-                                        <label for="imageFileInput" class="form-label mb-1">Hoặc tải tệp từ thiết bị</label>
-                                        <input type="file" id="imageFileInput" class="form-control" accept="image/*" />
+                                        <label for="imageFileInput" class="form-label styled mb-1">Hoặc tải tệp từ thiết bị</label>
+                                        <input type="file" id="imageFileInput" class="form-control styled" accept="image/*" />
                                     </div>
                                     <div class="text-end mt-3">
-                                        <button type="button" id="btnCancelImageEdit" class="btn btn-outline-secondary btn-sm me-2">Hủy</button>
-                                        <button type="button" id="btnSaveNewImage" class="btn btn-primary btn-sm">Lưu hình ảnh mới</button>
+                                        {{-- (ĐÃ SỬA) Button style --}}
+                                        <button type="button" id="btnCancelImageEdit" class="btn btn-outline-secondary btn-sm styled me-2">Hủy</button>
+                                        <button type="button" id="btnSaveNewImage" class="btn btn-primary btn-sm styled">Lưu hình ảnh mới</button>
                                     </div>
                                 </div>
-                                <!-- End inline avatar edit form -->
-                            </div>
+                                </div>
                         </div>
 
                     </div>
@@ -145,15 +375,18 @@
     </div>
 </div>
 
+{{-- (ĐÃ SỬA) Modal Dịch Vụ --}}
 <div class="modal fade" id="modalDichVu" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form id="formDichVu" onsubmit="return false;">
-            <div class="modal-content">
-                <div class="modal-header">
+            {{-- (ĐÃ SỬA) Modal content style --}}
+            <div class="modal-content styled">
+                <div class="modal-header styled">
                     <h5 class="modal-title" id="modalDichVuTitle">Thêm Dịch Vụ</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    <div class="decorator-line"></div>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body styled">
                     <input type="hidden" id="dvId" />
                     <div class="mb-3">
                         <label for="TenDichVu" class="form-label">Tên Dịch Vụ</label>
@@ -170,22 +403,24 @@
                         <input type="file" id="HinhDichVuFile" class="form-control mt-2" accept="image/*" />
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="btnSubmitDichVu">Lưu</button>
+                <div class="modal-footer styled">
+                    <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary styled" id="btnSubmitDichVu">Lưu</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+{{-- (ĐÃ SỬA) Modal Delete Dịch Vụ --}}
 <div class="modal fade" id="modalDeleteDichVu" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content styled">
+            <div class="modal-header styled">
                 <h5 class="modal-title">Xóa Dịch Vụ</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="decorator-line"></div>
             </div>
-            <div class="modal-body">
+            <div class="modal-body styled">
                 <p>Bạn chắc chắn muốn xóa dịch vụ: <strong id="deleteDichVuName"></strong>?</p>
                 <input type="hidden" id="deleteDichVuId" />
                 <div class="small text-danger">
@@ -193,100 +428,67 @@
                     Lưu ý: Mọi thông tin chi tiết liên quan đến dịch vụ này cũng sẽ bị xóa.
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <div class="modal-footer styled">
+                <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Hủy</button>
+                {{-- (ĐÃ SỬA) Button danger style --}}
                 <button type="button" class="btn btn-danger" id="btnConfirmDeleteDichVu">Xóa</button>
             </div>
         </div>
     </div>
 </div>
+{{-- (ĐÃ SỬA) Modal Chi Tiết --}}
 <div class="modal fade" id="modalChiTiet" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <form id="formChiTiet" onsubmit="return false;">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content styled">
+                <div class="modal-header styled">
                     <h5 class="modal-title" id="modalChiTietTitle">Thêm Chi Tiết</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="decorator-line"></div>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body styled">
                     <input type="hidden" id="ctId" />
-                    <!-- NEW: show which service you are adding/editing detail for -->
                     <div class="small text-muted mb-2" id="ctForServiceInfo"></div>
                     <div class="mb-3">
                         <label for="ThongTinDV" class="form-label">Thông tin chi tiết</label>
                         <textarea id="ThongTinDV" class="form-control" rows="3" placeholder="VD: Gói giặt ủi bao gồm 5kg quần áo..." required></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="btnSubmitChiTiet">Lưu</button>
+                <div class="modal-footer styled">
+                    <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary styled" id="btnSubmitChiTiet">Lưu</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
+{{-- (ĐÃ SỬA) Modal Delete Chi Tiết --}}
 <div class="modal fade" id="modalDeleteChiTiet" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content styled">
+            <div class="modal-header styled">
                 <h5 class="modal-title">Xóa Chi Tiết Dịch Vụ</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="decorator-line"></div>
             </div>
-            <div class="modal-body">
+            <div class="modal-body styled">
                 <p>Bạn chắc chắn muốn xóa chi tiết này?</p>
                 <blockquote class="blockquote-footer" id="deleteChiTietName"></blockquote>
                 <input type="hidden" id="deleteChiTietId" />
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <div class="modal-footer styled">
+                <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Hủy</button>
+                {{-- (ĐÃ SỬA) Button danger style --}}
                 <button type="button" class="btn btn-danger" id="btnConfirmDeleteChiTiet">Xóa</button>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    #tableDichVu tbody tr {
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-    #tableDichVu tbody tr.table-active,
-    #tableDichVu tbody tr:hover {
-        background-color: #e0e7ff;
-    }
-    .table-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, .7);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        border-radius: .375rem;
-    }
-    .empty-state {
-        text-align: center;
-        color: #6c757d;
-    }
-    #dichvuImagePreview, #imagePreview {
-        max-height: 250px;
-        width: auto;
-        object-fit: cover;
-    }
-    .table-img-thumb {
-        width: 60px;
-        height: 40px;
-        object-fit: cover;
-        border-radius: .25rem;
-    }
-    /* NEW: minor polish for sort controls */
-    #sortOption:hover { box-shadow: 0 0 0 .05rem rgba(13,110,253,.25); }
-    #sortActivePill { user-select: none; }
-    #sortActivePill .bi { font-size: .95rem; }
-</style>
 @endsection
 
 @section('scripts')
+{{-- (SCRIPT JS GIỮ NGUYÊN) --}}
 <script>
     const API_BASE = '/api/dichvu';
     let ALL_DICHVU = [];
@@ -875,17 +1077,6 @@
         $('#btnOpenCreateChiTiet').on('click', () => handleOpenChiTietModal());
         $('#btnSubmitChiTiet').on('click', handleSaveChiTiet);
         $('#btnConfirmDeleteChiTiet').on('click', handleConfirmDeleteChiTiet);
-
-        $('#tableChiTiet').on('click', '.btn-edit-ct', function(e) {
-            e.stopPropagation();
-            const chitiet = $(this).closest('tr').data('chitiet');
-            handleOpenChiTietModal(chitiet);
-        });
-        $('#tableChiTiet').on('click', '.btn-delete-ct', function(e) {
-            e.stopPropagation();
-            const chitiet = $(this).closest('tr').data('chitiet');
-            handleOpenDeleteChiTietModal(chitiet);
-        });
 
         // Open inline avatar editor instead of the full service modal
         $('#btnAddImage, #btnEditImage').on('click', function() {
