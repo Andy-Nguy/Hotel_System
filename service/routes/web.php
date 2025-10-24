@@ -360,24 +360,38 @@ Route::get('/taikhoan', [AuthController::class, 'taikhoan'])->name('taikhoan');
 Route::post('/taikhoan', [AuthController::class, 'updateProfile'])->name('taikhoan.update');
 
 
+use App\Models\Amenties\Phong;
+use App\Models\Amenties\DichVu;
+use Carbon\Carbon;
+Route::get('/datphong-truc-tiep', function () {
 
+    $homNay = Carbon::today();
 
-use App\Http\Controllers\Booking\DatPhongTrucTiepController;
+    // 1) Lấy các phòng SẴN SÀNG: không bị hư (theo schema: Phong.TrangThai là chuỗi: 'Trống', 'Đã đặt', 'Đang sử dụng', 'Phòng hư')
+    $danhSachPhongTrong = Phong::with('loaiPhong')
+        ->where('TrangThai', '!=', 'Phòng hư')
+        // 2) LOẠI BỎ các phòng đang có khách ở HÔM NAY
+        ->whereDoesntHave('datPhongs', function ($query) use ($homNay) {
+            $query
+                // Tìm các đặt phòng đang hoạt động (chưa hủy) trong bảng DatPhong
+                ->where('DatPhong.TrangThai', '!=', 0)
+                // Mà hôm nay nằm trong khoảng thời gian đặt
+                ->whereDate('DatPhong.NgayNhanPhong', '<=', $homNay)
+                ->whereDate('DatPhong.NgayTraPhong', '>', $homNay);
+        })
+        ->get();
 
-// GET /datphong-truc-tiep
-// Hiển thị form đặt phòng, gọi hàm create()
-Route::get('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'create'])
-    ->name('datphong.truc_tiep.create');
+    // 3) Lấy dữ liệu dịch vụ: theo schema DichVu không có cột TrangThai -> lấy tất cả dịch vụ hoạt động
+    $danhSachDichVu = DichVu::all();
 
-// POST /datphong-truc-tiep
-// Xử lý khi nhân viên nhấn submit form, gọi hàm store()
-Route::post('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'store'])
-    ->name('datphong.truc_tiep.store');
+    // Trả về view của bạn
+    return view('statistics.bookingtructiep', compact(
+        'danhSachPhongTrong',
+        'danhSachDichVu'
+    ));
 
-// POST /datphong-truc-tiep/confirm
-// API endpoint to confirm and persist a direct booking (creates DatPhong + HoaDon)
-Route::post('/datphong-truc-tiep/confirm', [DatPhongTrucTiepController::class, 'confirm'])
-    ->name('datphong.truc_tiep.confirm');
+})->name('booking.direct');
+// ->middleware('auth');
 
 // Service routes
 use App\Http\Controllers\Amenties\DichVuController as StaffDichVuController;

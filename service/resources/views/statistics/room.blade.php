@@ -313,10 +313,10 @@
                         <thead>
                             <tr>
                                 <th style="width:4%;">STT</th>
-                                <th class="text-start" style="width:10%;">Loại Phòng</th>
+                                <th style="width:10%;">Loại Phòng</th>
                                 <th style="width:6%;">Mã phòng</th>
                                 <th style="width:6%;">Số phòng</th>
-                                <th class="text-start" style="width:15%;">Tên phòng</th>
+                                <th style="width:15%;">Tên phòng</th>
                                 <th class="description-header" style="width:25%;">Mô tả</th>
                                 <th class="text-end" style="width:8%;">Giá</th>
                                 <th style="width:6%;">Số người</th>
@@ -461,9 +461,9 @@
                 const btnClass = currentStatus === 'Phòng trống' ? 'btn-success' :
                     currentStatus === 'Phòng hư' ? 'btn-danger' :
                     'btn-secondary';
-                const statusContent = `
-          <div class="dropdown">
-            <button class="btn btn-sm ${btnClass} dropdown-toggle status-btn" type="button" data-bs-toggle="dropdown">
+                                const statusContent = `
+                    <div class="dropdown status-dropdown">
+                        <button class="btn btn-sm ${btnClass} dropdown-toggle status-btn" type="button" data-bs-toggle="dropdown">
               ${currentStatus}
             </button>
             <ul class="dropdown-menu">${statusItems}</ul>
@@ -484,7 +484,7 @@
                    onerror="this.src='https://picsum.photos/60/60';"></td>
           <td class="text-center">${statusContent}</td>
           <td class="text-center">
-            <button type="button" class="btn btn-sm btn-outline-secondary btn-edit-room"
+                        <button type="button" class="btn btn-sm btn-outline-secondary styled btn-edit-room"
                     data-index="${ROOMS.indexOf(room)}">Edit</button>
           </td>`;
                 frag.appendChild(tr);

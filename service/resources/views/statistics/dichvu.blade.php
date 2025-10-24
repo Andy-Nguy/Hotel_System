@@ -118,6 +118,8 @@
         overflow: hidden;
         background: #ffffff;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border-collapse: separate; /* match tiennghi */
+        border-spacing: 0;         /* keep rounded corners */
     }
     .table-styled thead {
         background: linear-gradient(90deg, #60a5fa, #93c5fd);
@@ -125,7 +127,20 @@
     }
     .table-styled th {
         padding: 0.8rem;
+        text-align: center;       /* center like tiennghi */
+        vertical-align: middle;
+        white-space: nowrap;      /* prevent header wrap */
     }
+    .table-styled tbody td {
+        text-align: center;       /* center body cells by default */
+        vertical-align: middle;
+        padding: 0.6rem;          /* slightly tighter than header */
+    }
+    /* allow explicit overrides like in tiennghi */
+    .table-styled td.text-start { text-align: left !important; }
+    .table-styled th.text-start { text-align: left !important; }
+    .table-styled td.text-end   { text-align: right !important; }
+    .table-styled th.text-end   { text-align: right !important; }
     /* === Kết thúc Styles đồng bộ === */
 
 
@@ -675,14 +690,15 @@
         }
 
         filtered.forEach(dv => {
+            const locked = !!dv.isLocked;
             const tr = $(`
                 <tr class="dichvu-row" data-id="${dv.IDDichVu}">
                     <td>${dv.IDDichVu}</td>
                     <td>${dv.TenDichVu}</td>
                     <td>${formatCurrency(dv.TienDichVu)}</td>
                     <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary btn-edit-dv me-1" title="Sửa"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger btn-delete-dv" title="Xóa"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-sm btn-outline-primary btn-edit-dv me-1" ${locked ? 'disabled title="Không thể sửa khi dịch vụ đang được sử dụng"' : 'title="Sửa"'}><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger btn-delete-dv" ${locked ? 'disabled title="Không thể xóa khi dịch vụ đang được sử dụng"' : 'title="Xóa"'}><i class="bi bi-trash"></i></button>
                     </td>
                 </tr>
             `).data('dichvu', dv);
@@ -758,39 +774,46 @@
         const reqUrl = id ? `${API_BASE}/${id}` : API_BASE;
         if (id) fd.append('_method', 'PUT');
 
-        const res = await apiFetch(reqUrl, { method: 'POST', body: fd });
+        try {
+            const res = await apiFetch(reqUrl, { method: 'POST', body: fd });
 
-        if (res.success) {
-            MODAL_DICHVU.hide();
+            if (res.success) {
+                MODAL_DICHVU.hide();
 
-            if (!id) {
-                // NEW: No reload — insert new service, select it, open Add Detail
-                const newDv = res.data;
-                if (newDv && newDv.IDDichVu) {
-                    // Update local cache and table
-                    const idx = ALL_DICHVU.findIndex(d => d.IDDichVu === newDv.IDDichVu);
-                    if (idx >= 0) ALL_DICHVU[idx] = newDv; else ALL_DICHVU.unshift(newDv);
-                    renderDichVuTable();
+                if (!id) {
+                    // NEW: No reload — insert new service, select it, open Add Detail
+                    const newDv = res.data;
+                    if (newDv && newDv.IDDichVu) {
+                        // Update local cache and table
+                        const idx = ALL_DICHVU.findIndex(d => d.IDDichVu === newDv.IDDichVu);
+                        if (idx >= 0) ALL_DICHVU[idx] = newDv; else ALL_DICHVU.unshift(newDv);
+                        renderDichVuTable();
 
-                    // Show details panel for the new service
-                    await showChiTietPanel(newDv);
+                        // Show details panel for the new service
+                        await showChiTietPanel(newDv);
 
-                    // Scroll to the details panel
-                    document.getElementById('chitietPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Scroll to the details panel
+                        document.getElementById('chitietPanel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                    // Open the Add Detail modal and prefill info
-                    handleOpenChiTietModal();
-                    return; // stop further processing
+                        // Open the Add Detail modal and prefill info
+                        handleOpenChiTietModal();
+                        return; // stop further processing
+                    }
+                }
+
+                // Edit flow (or fallback)
+                showAlert('success', res.message || (id ? 'Cập nhật thành công!' : 'Thêm mới thành công!'));
+                await loadDichVu();
+                if (id && id === SELECTED_DICHVU_ID) {
+                    const updated = res.data || ALL_DICHVU.find(dv => dv.IDDichVu === id);
+                    if (updated) await showChiTietPanel(updated);
                 }
             }
-
-            // Edit flow (or fallback)
-            showAlert('success', res.message || (id ? 'Cập nhật thành công!' : 'Thêm mới thành công!'));
-            await loadDichVu();
-            if (id && id === SELECTED_DICHVU_ID) {
-                const updated = res.data || ALL_DICHVU.find(dv => dv.IDDichVu === id);
-                if (updated) await showChiTietPanel(updated);
-            }
+        } catch (e) {
+            // Close the edit modal so the error alert is clearly visible when update is blocked
+            try { MODAL_DICHVU.hide(); } catch (ignore) {}
+            showAlert('danger', e.message || 'Không thể lưu dịch vụ.');
+            console.error(e);
         }
     }
 
@@ -1060,11 +1083,19 @@
         $('#tableDichVu').on('click', '.btn-edit-dv', function(e) {
             e.stopPropagation();
             const dichvu = $(this).closest('tr').data('dichvu');
+            if ($(this).prop('disabled')) {
+                showAlert('warning', 'Không thể sửa dịch vụ đang được sử dụng.');
+                return;
+            }
             handleOpenDichVuModal(dichvu);
         });
         $('#tableDichVu').on('click', '.btn-delete-dv', function(e) {
             e.stopPropagation();
             const dichvu = $(this).closest('tr').data('dichvu');
+            if ($(this).prop('disabled')) {
+                showAlert('warning', 'Không thể xóa dịch vụ đang được sử dụng.');
+                return;
+            }
             handleOpenDeleteDichVuModal(dichvu);
         });
         $('#tableDichVu').on('click', '.dichvu-row', function() {

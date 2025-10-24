@@ -654,7 +654,11 @@
                         <div class="card-body py-4 px-4" style="position: relative;">
                             <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #60a5fa, #a78bfa);"></div>
 
-                            <h5 class="form-label styled mb-3" style="font-size: 1.1rem;"><i class="bi bi-door-open-fill me-2" style="color: #60a5fa;"></i>Danh sách phòng và tiện nghi</h5>
+                            <h5 class="form-label styled mb-3" style="font-size: 1.1rem; display:flex; align-items:center; gap:.5rem;">
+                                <i class="bi bi-door-open-fill" style="color: #60a5fa;"></i>
+                                <span>Danh sách phòng và tiện nghi</span>
+                                <span class="badge bg-secondary rounded-pill ms-1 px-2" id="roomsCount">0</span>
+                            </h5>
 
                             {{-- Style chip lọc --}}
                             <div id="roomFilterChips" class="mb-3"></div>
@@ -671,11 +675,11 @@
                                 <table class="table table-hover align-middle m-0 table-styled" id="tablePhong">
                                     <thead>
                                         <tr>
-                                            <th style="width: 5%;">ID</th>
-                                            <th style="width: 10%;">Số phòng</th>
-                                            <th class="text-start" style="width: 15%;">Loại phòng</th> {{-- Căn trái --}}
-                                            <th style="width: 10%;">Trạng thái</th>
-                                            <th class="text-start" style="width: 60%;">Tiện nghi</th> {{-- Căn trái, rộng hơn --}}
+                                            <th id="thRoomId" class="sortable" style="width: 5%;">ID</th>
+                                            <th id="thRoomSoPhong" class="sortable" style="width: 10%;">Số phòng</th>
+                                            <th id="thRoomLoai" class="sortable" style="width: 15%;">Loại phòng</th>
+                                            <th id="thRoomTrangThai" class="sortable" style="width: 10%;">Trạng thái</th>
+                                            <th style="width: 60%;">Tiện nghi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -756,10 +760,8 @@
     // Trạng thái UI
     let AMENITY_FILTER_MODE = 'all'; // all | selected | unselected
     let SORT_STATE = {
-        tn: {
-            key: 'TenTienNghi',
-            dir: 'asc'
-        }
+        tn: { key: 'TenTienNghi', dir: 'asc' },
+        rooms: { key: 'IDPhong', dir: 'asc' }
     };
     let ROOM_FILTER_AMENITY = '';
 
@@ -822,7 +824,8 @@
         const json = await apiFetch(`${API_BASE}/tien-nghi`);
         ALL_TIEN_NGHI = (json?.data || []).map(x => ({
             IDTienNghi: String(x.IDTienNghi),
-            TenTienNghi: x.TenTienNghi
+            TenTienNghi: x.TenTienNghi,
+            isLocked: !!x.isLocked
         }));
         renderTienNghiTable(ALL_TIEN_NGHI);
         renderCheckboxList(ALL_TIEN_NGHI, SELECTED_TN_IDS);
@@ -915,6 +918,21 @@
     }
 
     // Render bảng tiện nghi (lọc + sắp xếp)
+    function isAmenityLockedLocal(id) {
+        try {
+            // Fallback compute: if any room with this amenity is not 'Trống'
+            const idStr = String(id);
+            for (const p of PHONG_TABLE || []) {
+                const st = (p.TrangThai || '').toLowerCase();
+                if (st && st !== 'trống' && st !== 'trong' && st !== 'phòng trống') {
+                    const tns = Array.isArray(p.TienNghis) ? p.TienNghis : [];
+                    if (tns.some(t => String(t.IDTienNghi) === idStr)) return true;
+                }
+            }
+        } catch (e) { /* noop */ }
+        return false;
+    }
+
     function renderTienNghiTable(data) {
         const search = vnNormalize($('#searchTienNghi').val() || '');
         let filtered = data.filter(x => vnNormalize(x.TenTienNghi).includes(search));
@@ -944,12 +962,13 @@
             html = `<tr><td colspan="3" class="empty-state py-4"><i class="bi bi-inbox me-1"></i> Không có dữ liệu phù hợp</td></tr>`;
         } else {
             filtered.forEach(x => {
+                const locked = (typeof x.isLocked !== 'undefined') ? !!x.isLocked : isAmenityLockedLocal(x.IDTienNghi);
                 html += `<tr>
 					<td>${x.IDTienNghi}</td>
 					<td>${x.TenTienNghi}</td>
 					<td class="text-end">
-						<button class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="${x.IDTienNghi}" data-name="${x.TenTienNghi}"><i class="bi bi-pencil"></i></button>
-						<button class="btn btn-sm btn-outline-danger btn-delete" data-id="${x.IDTienNghi}"><i class="bi bi-trash"></i></button>
+						<button class="btn btn-sm btn-outline-primary btn-edit me-1" data-id="${x.IDTienNghi}" data-name="${x.TenTienNghi}" ${locked ? 'disabled title="Không thể sửa khi đang được phòng sử dụng"' : ''}><i class="bi bi-pencil"></i></button>
+						<button class="btn btn-sm btn-outline-danger btn-delete" data-id="${x.IDTienNghi}" ${locked ? 'disabled title="Không thể xóa khi đang được phòng sử dụng"' : ''}><i class="bi bi-trash"></i></button>
 					</td>
 				</tr>`;
             });
@@ -961,6 +980,10 @@
         $('.btn-edit').on('click', function() {
             const id = $(this).data('id');
             const name = $(this).data('name');
+            if ($(this).prop('disabled')) {
+                showAlert('warning', 'Không thể sửa tiện nghi đang được phòng sử dụng. Chỉ phòng trống mới cho phép.');
+                return;
+            }
             $('#tnId').val(id);
             $('#TenTienNghi').val(name);
             $('#modalTitle').text('Sửa tiện nghi');
@@ -968,6 +991,10 @@
         });
         $('.btn-delete').on('click', function() {
             const id = String($(this).data('id'));
+            if ($(this).prop('disabled')) {
+                showAlert('warning', 'Không thể xóa tiện nghi đang được phòng sử dụng. Chỉ phòng trống mới cho phép.');
+                return;
+            }
             $('#deleteId').val(id);
             const tn = ALL_TIEN_NGHI.find(t => String(t.IDTienNghi) === id);
             $('#deleteName').text(tn ? tn.TenTienNghi : '');
@@ -995,12 +1022,66 @@
         $('#selectedCount').text(selectedIds.length);
     }
 
-    // Render danh sách tiện nghi đang gán
-    function renderCurrentAssigned(names) {
+    // (GỘP) Render danh sách tiện nghi đang gán (hỗ trợ mảng string hoặc object)
+    // Cho phép truyền:
+    //  - ['Điều hòa', 'TV']
+    //  - [{ id:'1', name:'Điều hòa' }, ...]
+    //  - [{ IDTienNghi:'1', TenTienNghi:'Điều hòa' }, ...]
+    // Hàm linh hoạt để tránh lỗi khi thay đổi nơi gọi
+    function renderCurrentAssigned(items) {
         const container = $('#currentAssigned');
         container.empty();
-        if (!names || names.length === 0) return container.html('<i>Chưa có tiện nghi nào được gán</i>');
-        names.forEach(name => container.append(`<span class="badge bg-primary me-1 mb-1">${name}</span>`));
+        const list = Array.isArray(items) ? items : [];
+        if (!list.length) {
+            container.html('<i>Chưa có tiện nghi nào được gán</i>');
+            return;
+        }
+        const normalized = list.map(it => {
+            if (typeof it === 'string') return { id: null, name: it };
+            if (it && typeof it === 'object') {
+                if ('name' in it || 'id' in it) return { id: it.id ?? null, name: it.name ?? '' };
+                if ('TenTienNghi' in it || 'IDTienNghi' in it) return { id: String(it.IDTienNghi ?? ''), name: it.TenTienNghi ?? '' };
+            }
+            return { id: null, name: String(it) };
+        });
+
+        if (!normalized.length) {
+            container.html('<i>Chưa có tiện nghi nào được gán</i>');
+            return;
+        }
+
+        normalized.forEach(it => {
+            container.append(
+                `<span class="amenity-chip" data-id="${it.id ?? ''}">
+                    ${it.name}
+                    <a class="remove text-white-50" data-id="${it.id ?? ''}" title="Bỏ tiện nghi">×</a>
+                </span>`
+            );
+        });
+
+        // remove chip -> bỏ chọn tương ứng
+        container.off('click', '.remove').on('click', '.remove', function(e) {
+            e.preventDefault();
+            const id = String($(this).data('id'));
+            if (id && id !== 'null' && id !== 'undefined') {
+                SELECTED_TN_IDS = SELECTED_TN_IDS.filter(x => x !== id);
+                $(`#chk-${id}`).prop('checked', false);
+                $('#selectedCount').text(SELECTED_TN_IDS.length);
+            } else {
+                // Nếu không có id (được truyền bằng tên), xóa theo tên
+                const name = $(this).closest('.amenity-chip').text().trim();
+                // rebuild từ tên
+                const itemsNow = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+                    .map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }))
+                    .filter(x => x.name !== name);
+                SELECTED_TN_IDS = itemsNow.map(x => String(x.id));
+                $('#selectedCount').text(SELECTED_TN_IDS.length);
+            }
+            const itemsNow = ALL_TIEN_NGHI.filter(x => SELECTED_TN_IDS.includes(String(x.IDTienNghi)))
+                .map(x => ({ id: String(x.IDTienNghi), name: x.TenTienNghi }));
+            renderCurrentAssigned(itemsNow);
+            setDirty(!areArraysEqual(SELECTED_TN_IDS, ASSIGNED_ORIG_IDS));
+        });
     }
 
     // Room filter chips
@@ -1020,10 +1101,10 @@
         });
     }
 
-    // Render bảng phòng (hỗ trợ lọc theo tiện nghi)
+    // Render bảng phòng (hỗ trợ lọc theo tiện nghi + sắp xếp)
     function renderPhongTable(data) {
         const q = vnNormalize($('#searchPhong').val() || '');
-        const filtered = data.filter(x => {
+        let filtered = data.filter(x => {
             const soPhong = vnNormalize(String(x.SoPhong ?? ''));
             const tenLoai = vnNormalize(String(x.TenLoaiPhong ?? ''));
             const trangThai = vnNormalize(String(x.TrangThai ?? ''));
@@ -1036,6 +1117,23 @@
             return base;
         });
 
+        // Sort theo state
+        const { key: rKey = 'IDPhong', dir: rDir = 'asc' } = (SORT_STATE.rooms || {});
+        const toVal = (obj, k) => {
+            let v = obj?.[k];
+            if (k === 'IDPhong' || k === 'SoPhong') {
+                const n = Number(v);
+                return isNaN(n) ? Number.MAX_SAFE_INTEGER : n;
+            }
+            return vnNormalize(String(v ?? ''));
+        };
+        filtered.sort((a, b) => {
+            const va = toVal(a, rKey), vb = toVal(b, rKey);
+            if (va < vb) return rDir === 'asc' ? -1 : 1;
+            if (va > vb) return rDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
         let html = '';
         if (filtered.length === 0) {
             html = `<tr><td colspan="5" class="empty-state py-4"><i class="bi bi-inbox me-1"></i> Không có dữ liệu phòng</td></tr>`;
@@ -1043,7 +1141,7 @@
             filtered.forEach(x => {
                 const amenities = Array.isArray(x.TienNghis) ? x.TienNghis : [];
                 const amenitiesHtml = amenities.length > 0 ?
-                    amenities.map(t => `<span class="amenity-label amenity-filter-chip" data-name="${t.TenTienNghi}">${t.TenTienNghi}</span>`).join('') :
+                    amenities.map(t => `<span class="amenity-label amenity-filter-chip" data-name="${t.TenTienNghi}">${t.TenTienNghi}</span>`).join(' ') :
                     '<i>Chưa có tiện nghi</i>';
                 html += `<tr class="phong-row cursor-pointer" data-id="${x.IDPhong}">
 					<td>${x.IDPhong}</td>
@@ -1055,6 +1153,19 @@
             });
         }
         $('#tablePhong tbody').html(html);
+        $('#roomsCount').text(filtered.length);
+
+        // Cập nhật mũi tên sort ở header bảng phòng
+        $('#thRoomId, #thRoomSoPhong, #thRoomLoai, #thRoomTrangThai')
+            .removeClass('asc desc');
+        const keyToTh = {
+            IDPhong: '#thRoomId',
+            SoPhong: '#thRoomSoPhong',
+            TenLoaiPhong: '#thRoomLoai',
+            TrangThai: '#thRoomTrangThai'
+        };
+        const thSel = keyToTh[rKey];
+        if (thSel) $(thSel).addClass(rDir === 'asc' ? 'asc' : 'desc');
 
         // Click badge tiện nghi để lọc nhanh
         $('.amenity-filter-chip').on('click', function(e) {
@@ -1119,6 +1230,32 @@
             SORT_STATE.tn.dir = (SORT_STATE.tn.key === key && SORT_STATE.tn.dir === 'asc') ? 'desc' : 'asc';
             SORT_STATE.tn.key = key;
             renderTienNghiTable(ALL_TIEN_NGHI);
+        });
+
+        // Sắp xếp bảng phòng
+        $('#thRoomId').on('click', function() {
+            const key = 'IDPhong';
+            SORT_STATE.rooms.dir = (SORT_STATE.rooms.key === key && SORT_STATE.rooms.dir === 'asc') ? 'desc' : 'asc';
+            SORT_STATE.rooms.key = key;
+            renderPhongTable(PHONG_TABLE);
+        });
+        $('#thRoomSoPhong').on('click', function() {
+            const key = 'SoPhong';
+            SORT_STATE.rooms.dir = (SORT_STATE.rooms.key === key && SORT_STATE.rooms.dir === 'asc') ? 'desc' : 'asc';
+            SORT_STATE.rooms.key = key;
+            renderPhongTable(PHONG_TABLE);
+        });
+        $('#thRoomLoai').on('click', function() {
+            const key = 'TenLoaiPhong';
+            SORT_STATE.rooms.dir = (SORT_STATE.rooms.key === key && SORT_STATE.rooms.dir === 'asc') ? 'desc' : 'asc';
+            SORT_STATE.rooms.key = key;
+            renderPhongTable(PHONG_TABLE);
+        });
+        $('#thRoomTrangThai').on('click', function() {
+            const key = 'TrangThai';
+            SORT_STATE.rooms.dir = (SORT_STATE.rooms.key === key && SORT_STATE.rooms.dir === 'asc') ? 'desc' : 'asc';
+            SORT_STATE.rooms.key = key;
+            renderPhongTable(PHONG_TABLE);
         });
 
         // Checkbox changes
@@ -1195,6 +1332,10 @@
                 const instance = bootstrap.Modal.getInstance(document.getElementById('modalCreateEdit'));
                 if (instance) instance.hide();
             } catch (e) {
+                // Đóng khung sửa để hiển thị thông báo rõ ràng khi không thể chỉnh sửa
+                const modalEl = document.getElementById('modalCreateEdit');
+                const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                try { instance.hide(); } catch (ignore) {}
                 showAlert('danger', e.message || 'Có lỗi xảy ra khi lưu tiện nghi.');
                 console.error(e);
             }

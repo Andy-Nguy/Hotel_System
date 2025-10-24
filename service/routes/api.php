@@ -122,8 +122,19 @@ Route::get('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'i
 Route::get('/hoadon/stats', [App\Http\Controllers\Amenties\HoaDonController::class, 'stats']);
 
 
-use App\Http\Controllers\Login\KhachHangController;
-Route::get('/khach-hang/search', [KhachHangController::class, 'search']);
+use App\Http\Controllers\Booking\DatPhongTrucTiepController;
+use App\Http\Controllers\Login\KhachHangController; // (Cần cho việc search)
+
+// Route để TẠO MỚI (JavaScript sẽ gọi khi submit)
+Route::post('/datphongtructiep', [DatPhongTrucTiepController::class, 'store'])
+     ->name('api.datphongtructiep.store');
+// Alias route name and slug to match frontend usage
+Route::post('/datphong-truc-tiep', [DatPhongTrucTiepController::class, 'store'])
+    ->name('api.datphong.truc_tiep.store');
+
+// Route để TÌM KHÁCH HÀNG (JavaScript sẽ gọi khi nhấn nút "Tìm")
+Route::get('/khach-hang/search', [KhachHangController::class, 'search'])
+     ->name('api.khachhang.search');
 
 use App\Http\Controllers\Amenties\UploadController;
 // --- CỤM ROUTE CHO TRANG QUẢN LÝ PHÒNG (Room Management Page) ---

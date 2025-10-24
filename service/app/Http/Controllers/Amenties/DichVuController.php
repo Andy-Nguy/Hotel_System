@@ -53,6 +53,29 @@ class DichVuController extends Controller
         // Logic 2: Dùng 'chiTiet'
         $dichvus = DichVu::with('chiTiet')->get();
 
+        // Compute a lock flag for each service indicating if it's used in active bookings
+        // or associated with rooms that are actually in-use (TrangThai = 3).
+        $dichvus = $dichvus->map(function ($dv) {
+            $inUseBookings = DB::table('CTHDDV as c')
+                ->join('HoaDon as h', 'c.IDHoaDon', '=', 'h.IDHoaDon')
+                ->join('DatPhong as dp', 'h.IDDatPhong', '=', 'dp.IDDatPhong')
+                ->where('c.IDDichVu', $dv->IDDichVu)
+                ->where('dp.TrangThai', 3)
+                ->exists();
+
+            $inUseRooms = DB::table('CTHDDV as c')
+                ->join('HoaDon as h', 'c.IDHoaDon', '=', 'h.IDHoaDon')
+                ->join('DatPhong as dp', 'h.IDDatPhong', '=', 'dp.IDDatPhong')
+                ->join('Phong as p', 'dp.IDPhong', '=', 'p.IDPhong')
+                ->where('c.IDDichVu', $dv->IDDichVu)
+                ->where('dp.TrangThai', 3)
+                ->exists();
+
+            // Attach computed attribute (visible in JSON)
+            $dv->setAttribute('isLocked', (bool) ($inUseBookings || $inUseRooms));
+            return $dv;
+        });
+
         if ($request->wantsJson()) {
             // Trả về JSON cho trang quản lý
             return response()->json([
@@ -169,7 +192,7 @@ class DichVuController extends Controller
     {
         $dichvu = DichVu::findOrFail($id);
 
-        if ($request->hasFile('HinhDichVu') || $request->has('HinhDichVu')) {
+    if ($request->hasFile('HinhDichVu') || $request->has('HinhDichVu')) {
             $removeImage = false;
             $newPath = null;
 
@@ -209,21 +232,18 @@ class DichVuController extends Controller
                 return redirect()->back()->with('error', 'Không thể lưu hình ảnh mới. Vui lòng thử lại.');
             }
 
-            // Before saving image-based changes, ensure service is not used in booked/in-use rooms
+            // Before saving image-based changes, ensure service is not used in rooms that are actually in use (TrangThai = 3)
             $inUse = DB::table('CTHDDV as c')
-                ->join('DatPhong as dp', 'c.IDHoaDon', '=', 'dp.IDDatPhong')
-                ->join('DatPhong as dps', 'dp.IDDatPhong', '=', 'dp.IDDatPhong')
+                ->join('HoaDon as h', 'c.IDHoaDon', '=', 'h.IDHoaDon')
+                ->join('DatPhong as dp', 'h.IDDatPhong', '=', 'dp.IDDatPhong')
                 ->where('c.IDDichVu', $dichvu->IDDichVu)
-                ->where(function ($q) {
-                    // consider booking statuses that are active/confirmed (2: confirmed, 3: in-use)
-                    $q->where('dp.TrangThai', 2)->orWhere('dp.TrangThai', 3);
-                })
+                ->where('dp.TrangThai', 3)
                 ->exists();
 
             if ($inUse) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không thể chỉnh sửa hình ảnh/dịch vụ vì dịch vụ đang được sử dụng trong các đặt phòng đang hoạt động.'
+                    'message' => 'Không thể chỉnh sửa hình ảnh/dịch vụ vì dịch vụ đang được sử dụng trong các phòng đang sử dụng.'
                 ], 400);
             }
 
@@ -243,20 +263,18 @@ class DichVuController extends Controller
                 'TenDichVu'  => 'required|string|max:100',
                 'TienDichVu' => 'required|numeric|min:0',
             ]);
-            // Prevent updating basic info if service is used by active bookings
+            // Prevent updating basic info if service is used by rooms that are actually in use (TrangThai = 3)
             $inUse = DB::table('CTHDDV as c')
                 ->join('HoaDon as h', 'c.IDHoaDon', '=', 'h.IDHoaDon')
                 ->join('DatPhong as dp', 'h.IDDatPhong', '=', 'dp.IDDatPhong')
                 ->where('c.IDDichVu', $dichvu->IDDichVu)
-                ->where(function ($q) {
-                    $q->where('dp.TrangThai', 2)->orWhere('dp.TrangThai', 3);
-                })
+                ->where('dp.TrangThai', 3)
                 ->exists();
 
             if ($inUse) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không thể chỉnh sửa dịch vụ này vì đang được sử dụng trong các đặt phòng đang hoạt động.'
+                    'message' => 'Không thể chỉnh sửa dịch vụ này vì đang được sử dụng trong các phòng đang sử dụng.'
                 ], 400);
             }
 
@@ -285,14 +303,12 @@ class DichVuController extends Controller
             @unlink($old);
         }
 
-        // Prevent deletion if the service is currently used in active bookings or associated with occupied rooms
+        // Prevent deletion if the service is currently used by rooms that are actually in use
         $inUseBookings = DB::table('CTHDDV as c')
             ->join('HoaDon as h', 'c.IDHoaDon', '=', 'h.IDHoaDon')
             ->join('DatPhong as dp', 'h.IDDatPhong', '=', 'dp.IDDatPhong')
             ->where('c.IDDichVu', $dichvu->IDDichVu)
-            ->where(function ($q) {
-                $q->where('dp.TrangThai', 2)->orWhere('dp.TrangThai', 3);
-            })
+            ->where('dp.TrangThai', 3)
             ->exists();
 
         $inUseRooms = DB::table('CTHDDV as c')
@@ -300,15 +316,13 @@ class DichVuController extends Controller
             ->join('DatPhong as dp', 'h.IDDatPhong', '=', 'dp.IDDatPhong')
             ->join('Phong as p', 'dp.IDPhong', '=', 'p.IDPhong')
             ->where('c.IDDichVu', $dichvu->IDDichVu)
-            ->where(function ($q) {
-                $q->whereNotNull('p.TrangThai')->where('p.TrangThai', '<>', 'Trống');
-            })
+            ->where('dp.TrangThai', 3)
             ->exists();
 
         if ($inUseBookings || $inUseRooms) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể xóa dịch vụ này vì đang được sử dụng bởi các đặt phòng hoặc phòng đang có trạng thái không trống.'
+                'message' => 'Không thể xóa dịch vụ này vì đang được sử dụng bởi các phòng đang sử dụng.'
             ], 400);
         }
 

@@ -31,6 +31,8 @@
 
     <!-- Scrollbar CSS -->
     <link rel="stylesheet" href="assets/vendor/overlay-scroll/OverlayScrollbars.min.css" />
+    {{-- Styles injected from pages --}}
+    @stack('styles')
 </head>
 
 <body>
@@ -62,7 +64,7 @@
                         </li>
 
                         @php
-                            $statsActive = request()->routeIs('datphong.index') || request()->routeIs('hoadon.index') || request()->routeIs('khachhang.index');
+                        $statsActive = request()->routeIs('datphong.index') || request()->routeIs('hoadon.index') || request()->routeIs('khachhang.index');
                         @endphp
                         <li class="treeview {{ $statsActive ? 'active current-page' : '' }}">
                             <a href="#!">
@@ -93,11 +95,16 @@
                             </ul>
                         </li>
 
-                        <li class="{{ request()->routeIs('datphong.truc_tiep.create') ? 'active current-page' : '' }}">
-                            <a href="{{ route('datphong.truc_tiep.create') }}">
+                        <li class="{{ request()->routeIs('booking.direct') ? 'active current-page' : '' }}">
+
+                            <a href="{{ route('booking.direct') }}">
+
                                 <i class="bi bi-box"></i>
+
                                 <span class="menu-text">Đặt Phòng Trực Tiếp</span>
+
                             </a>
+
                         </li>
 
                         <li class="{{ request()->is('xacnhan') ? 'active current-page' : '' }}">

@@ -63,19 +63,38 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    .table.styled {
+    /* Table style parity with tiennghi */
+    .table-styled,
+    .table.styled { /* support old class until markup updated */
         border-radius: 12px;
         overflow: hidden;
         background: #ffffff;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border-collapse: separate; /* keep rounded corners */
+        border-spacing: 0;
     }
+    .table-styled thead,
     .table.styled thead {
         background: linear-gradient(90deg, #60a5fa, #93c5fd);
         color: #ffffff;
     }
+    .table-styled th,
     .table.styled th {
         padding: 0.8rem;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
     }
+    .table-styled tbody td,
+    .table.styled tbody td {
+        text-align: center;
+        vertical-align: middle;
+        padding: 0.6rem;
+    }
+    .table-styled td.text-start, .table-styled th.text-start,
+    .table.styled td.text-start, .table.styled th.text-start { text-align: left !important; }
+    .table-styled td.text-end,   .table-styled th.text-end,
+    .table.styled td.text-end,   .table.styled th.text-end   { text-align: right !important; }
 
     /* (MỚI) Style cho nút loading */
     .btn-loading {
@@ -150,14 +169,14 @@
                         </h5>
                         <input type="text" id="searchPhong" class="form-control styled shadow-sm mb-3" placeholder="Tìm theo tên, loại phòng, giá...">
                         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-striped table-hover table-bordered align-middle m-0 styled" id="tablePhongTrong">
+                            <table class="table table-hover align-middle m-0 table-styled" id="tablePhongTrong">
                                 <thead>
                                     <tr>
-                                        <th style="padding: 0.8rem;">Chọn</th>
-                                        <th style="padding: 0.8rem;">Số phòng</th>
-                                        <th style="padding: 0.8rem;">Loại phòng</th>
-                                        <th style="padding: 0.8rem;">Giá / đêm</th>
-                                        <th style="padding: 0.8rem;">Số người</th>
+                                        <th>Chọn</th>
+                                        <th>Số phòng</th>
+                                        <th>Loại phòng</th>
+                                        <th>Giá / đêm</th>
+                                        <th>Số người</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -460,7 +479,7 @@
 
             try {
                 // 4. Gửi request đến API endpoint
-                const response = await fetch("{{ route('api.datphong.truc_tiep.confirm') }}", {
+                const response = await fetch("{{ route('api.datphong.truc_tiep.store') }}", {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
@@ -473,12 +492,11 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    // Thành công
-                    showAlert('success', 'Đặt phòng thành công. Đang chuyển hướng...');
-                    // Chuyển hướng đến trang chi tiết đặt phòng (đã được định nghĩa trong web.php)
-                    setTimeout(() => {
-                        window.location.href = `/datphong/${result.IDDatPhong}`;
-                    }, 2000);
+                    // Thành công: chỉ thông báo, KHÔNG chuyển hướng
+                    showAlert('success', 'Đặt phòng thành công. Vui lòng hướng dẫn khách lên phòng.');
+                    // Khóa nút để tránh đặt trùng; có thể bổ sung reset form nếu cần
+                    btn.textContent = 'Đã đặt phòng';
+                    btn.disabled = true;
 
                 } else {
                     // Lỗi từ server (validation hoặc lỗi 500)

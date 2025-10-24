@@ -14,7 +14,26 @@ class TienNghiController extends Controller
     // GET /api/tien-nghi
     public function index()
     {
-        $data = TienNghi::orderBy('IDTienNghi')->get(['IDTienNghi', 'TenTienNghi']);
+        // Return basic fields plus a computed lock flag indicating whether this amenity
+        // is currently assigned to any room that is not in "Trống" status.
+        $rows = TienNghi::orderBy('IDTienNghi')->get(['IDTienNghi', 'TenTienNghi']);
+        $data = $rows->map(function ($tn) {
+            $inUse = DB::table('TienNghiPhong as tnp')
+                ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
+                ->where('tnp.IDTienNghi', $tn->IDTienNghi)
+                ->where(function ($q) {
+                    $q->whereNotNull('p.TrangThai')
+                      ->where('p.TrangThai', '<>', 'Trống');
+                })
+                ->exists();
+
+            return [
+                'IDTienNghi' => $tn->IDTienNghi,
+                'TenTienNghi' => $tn->TenTienNghi,
+                'isLocked' => (bool) $inUse,
+            ];
+        })->values();
+
         return response()->json(['success' => true, 'data' => $data]);
     }
 

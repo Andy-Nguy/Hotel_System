@@ -122,12 +122,14 @@
             border-radius: 10px; /* Fix cho nút In, CSV */
         }
 
-        /* === (MỚI) Đồng bộ style Bảng với Checkout === */
+        /* === (MỚI) Đồng bộ style Bảng với Tiện nghi === */
         .table-styled {
             border-radius: 12px;
             overflow: hidden;
             background: #ffffff;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-collapse: separate; /* giữ bo góc */
+            border-spacing: 0;
         }
         .table-styled thead {
             background: linear-gradient(90deg, #60a5fa, #93c5fd);
@@ -135,7 +137,18 @@
         }
         .table-styled th {
             padding: 0.8rem;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
         }
+        .table-styled tbody td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 0.6rem;
+        }
+        /* Cho phép ghi đè trái/phải khi cần */
+        .table-styled td.text-start, .table-styled th.text-start { text-align: left !important; }
+        .table-styled td.text-end,   .table-styled th.text-end   { text-align: right !important; }
     </style>
 
     {{-- (GIỮ NGUYÊN) Lớp p-3 wrapper của trang --}}

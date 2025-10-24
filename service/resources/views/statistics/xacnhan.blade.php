@@ -122,6 +122,9 @@
             vertical-align: middle;
             padding: 0.6rem; /* Giảm padding body */
         }
+        /* Utilities tương tự các trang khác */
+        .table-styled td.text-wrap, .table-styled th.text-wrap { white-space: normal !important; }
+        .table-styled td.break-anywhere, .table-styled th.break-anywhere { overflow-wrap: anywhere; word-break: break-word; }
          .table-styled td.text-start { text-align: left !important; }
          .table-styled th.text-start { text-align: left !important; }
          .table-styled td.text-end { text-align: right !important; }
@@ -185,10 +188,10 @@
                             <tr>
                                 <th style="width: 8%;">Mã</th>
                                 <th style="width: 10%;">Ngày đặt</th>
-                                <th class="text-start" style="width: 12%;">Phòng</th> {{-- Căn trái --}}
+                                <th class="text-start break-anywhere" style="width: 12%;">Phòng</th> {{-- Căn trái --}}
                                 <th style="width: 8%;">Từ</th>
                                 <th style="width: 8%;">Đến</th>
-                                <th class="text-start" style="width: 18%;">Khách hàng</th> {{-- Căn trái --}}
+                                <th class="text-start break-anywhere" style="width: 18%;">Khách hàng</th> {{-- Căn trái --}}
                                 <th class="text-end" style="width: 12%;">Tổng tiền (VND)</th> {{-- Căn phải --}}
                                 <th style="width: 12%;">Trạng thái</th>
                                 <th style="width: 12%;">Hành động</th>
@@ -264,10 +267,10 @@
                     tr.innerHTML = `
                         <td>${escapeHtml(r.IDDatPhong || '-')}</td>
                         <td>${escapeHtml(fmtDate(r.NgayDatPhong))}</td>
-                        <td class="text-start">${escapeHtml(r.TenPhong || r.SoPhong || '-')}</td>
+                        <td class="text-start break-anywhere">${escapeHtml(r.TenPhong || r.SoPhong || '-')}</td>
                         <td>${escapeHtml(fmtDate(r.NgayNhanPhong))}</td>
                         <td>${escapeHtml(fmtDate(r.NgayTraPhong))}</td>
-                        <td class="text-start customer-cell">
+                        <td class="text-start break-anywhere customer-cell">
                             ${escapeHtml(r.KhachHangHoTen || '-')}
                             <br/><small>${escapeHtml(r.KhachHangPhone || r.KhachHangEmail || '')}</small>
                         </td>
@@ -275,7 +278,7 @@
                         <td>${escapeHtml(statusLabel(r.TrangThai))}</td>
                         <td class="actions">${actionButtonsHtml(r)}</td>`;
                     $tbody.appendChild(tr);
-                    bindRowButtons(tr, r);
+                    bindRowButtons(tr, r, data.current_page || 1);
                 });
                 renderPager(data); // Render pager sau khi có data
             }
@@ -292,7 +295,7 @@
                 return html || '<span class="text-muted small">-</span>'; // Hiển thị '-' nếu không có action
             }
 
-            function bindRowButtons(tr, r) {
+            function bindRowButtons(tr, r, currentPage) {
                 tr.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', async function() {
                     const id = this.dataset.id;
                     if (!confirm(`Xác nhận đặt phòng ${id}?`)) return;
@@ -301,7 +304,7 @@
                         const resp = await fetch(`/api/datphong/${encodeURIComponent(id)}/confirm`, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') } });
                         if (!resp.ok) throw new Error(await resp.text() || 'Lỗi API');
                         showAlert('success','Đã xác nhận đặt phòng ' + id); // (SỬA) Dùng showAlert
-                        fetchList(data.current_page || 1); // Tải lại trang hiện tại
+                        fetchList(currentPage || 1); // Tải lại trang hiện tại
                     } catch (error) {
                          showAlert('danger', 'Lỗi khi xác nhận: ' + error.message);
                          this.disabled = false; // Bật lại nút nếu lỗi
@@ -316,7 +319,7 @@
                         const resp = await fetch(`/api/datphong/${encodeURIComponent(id)}/cancel`, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') } });
                         if (!resp.ok) throw new Error(await resp.text() || 'Lỗi API');
                          showAlert('success','Đã hủy đặt phòng ' + id); // (SỬA) Dùng showAlert
-                        fetchList(data.current_page || 1); // Tải lại trang hiện tại
+                        fetchList(currentPage || 1); // Tải lại trang hiện tại
                      } catch (error) {
                          showAlert('danger','Lỗi khi hủy: ' + error.message);
                          this.disabled = false; // Bật lại nút nếu lỗi
