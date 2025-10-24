@@ -177,6 +177,77 @@ class AuthController extends Controller
         }
         
     }
+    
+    // --- [6] Yêu cầu quên mật khẩu: tạo token và gửi email ---
+    public function forgotPassword(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'Email' => 'required|email'
+            ]);
+            if ($validator->fails()) return response()->json(['message'=>'Validation failed','errors'=>$validator->errors()],422);
+
+            $email = $req->Email;
+            $userExists = DB::table('KhachHang')->where('Email', $email)->exists();
+            if (!$userExists) return response()->json(['message'=>'Email không tồn tại trong hệ thống'],404);
+
+            $token = bin2hex(random_bytes(16));
+
+            // store token
+            DB::table('password_resets')->updateOrInsert(
+                ['email' => $email],
+                ['token' => Hash::make($token), 'created_at' => now()]
+            );
+
+            // send email with plain token (you may send link instead)
+            Mail::raw("Mã đặt lại mật khẩu của bạn: $token. Mã có hiệu lực trong 60 phút.", function($message) use ($email){
+                $message->to($email)->subject('Yêu cầu đặt lại mật khẩu');
+            });
+
+            return response()->json(['message' => 'Đã gửi mã đặt lại mật khẩu tới email', 'debug_token' => $token], 200);
+        } catch (Throwable $e) {
+            return response()->json(['message' => 'Lỗi server: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // --- [7] Reset password using token ---
+    public function resetPassword(Request $req)
+    {
+        try {
+            $validator = Validator::make($req->all(), [
+                'Email' => 'required|email',
+                'Token' => 'required|string',
+                'MatKhauMoi' => 'required|min:6'
+            ]);
+            if ($validator->fails()) return response()->json(['message'=>'Validation failed','errors'=>$validator->errors()],422);
+
+            $email = $req->Email; $token = $req->Token; $newPass = $req->MatKhauMoi;
+
+            $row = DB::table('password_resets')->where('email', $email)->first();
+            if (!$row) return response()->json(['message'=>'Token không hợp lệ hoặc đã hết hạn'],400);
+
+            // token stored hashed; verify
+            if (!Hash::check($token, $row->token)) return response()->json(['message'=>'Token không hợp lệ'],400);
+
+            // check expiry (60 minutes)
+            $created = strtotime($row->created_at);
+            if ($created < strtotime('-60 minutes')) {
+                DB::table('password_resets')->where('email', $email)->delete();
+                return response()->json(['message'=>'Token đã hết hạn'],400);
+            }
+
+            // update password on TaiKhoanNguoiDung for this KhachHang
+            $kh = DB::table('KhachHang')->where('Email', $email)->first();
+            if (!$kh) return response()->json(['message'=>'Người dùng không tồn tại'],404);
+
+            DB::table('TaiKhoanNguoiDung')->where('IDKhachHang', $kh->IDKhachHang)->update(['MatKhau' => Hash::make($newPass)]);
+            DB::table('password_resets')->where('email', $email)->delete();
+
+            return response()->json(['message' => 'Đặt lại mật khẩu thành công'], 200);
+        } catch (Throwable $e) {
+            return response()->json(['message' => 'Lỗi server: ' . $e->getMessage()], 500);
+        }
+    }
     // --- [4] Trang tài khoản (khách hàng) ---
     public function taikhoan(Request $request)
     {

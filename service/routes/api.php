@@ -29,6 +29,9 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/login', [AuthController::class, 'login']);
+// Password reset endpoints
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::middleware('session')->get('/auth/check-role', [AuthController::class, 'checkRole']);
 
 Route::prefix('rooms')->group(function () {

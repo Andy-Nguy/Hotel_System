@@ -224,3 +224,14 @@ CREATE TABLE IF NOT EXISTS `LichSuDatPhong` (
     FOREIGN KEY (`IDDatPhong`) REFERENCES `DatPhong`(`IDDatPhong`) 
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =========================================
+-- Password resets (simple table for reset tokens)
+-- =========================================
+CREATE TABLE IF NOT EXISTS `password_resets` (
+    `email` VARCHAR(255) NOT NULL,
+    `token` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX (`email`),
+    INDEX (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
