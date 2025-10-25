@@ -14,11 +14,13 @@ class BookingConfirmation extends Mailable
 
     public $bookingData;
     public $customerData;
+    public $statusType; // 'confirmed' or 'cancelled'
 
-    public function __construct($bookingData, $customerData = [])
+    public function __construct($bookingData, $customerData = [], $statusType = 'confirmed')
     {
         $this->bookingData = $bookingData;
         $this->customerData = $customerData;
+        $this->statusType = $statusType;
     }
 
     public function envelope(): Envelope
@@ -35,6 +37,7 @@ class BookingConfirmation extends Mailable
             with: [
                 'bookingData' => $this->bookingData,
                 'customerData' => $this->customerData,
+                'statusType' => $this->statusType,
             ],
         );
     }

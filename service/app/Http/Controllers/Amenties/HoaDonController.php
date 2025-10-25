@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\Amenties\HoaDon;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
+use App\Models\Amenties\DatPhong;
+use App\Models\Amenties\CTHDDV;
+use App\Models\Amenties\DichVu;
+use Illuminate\Support\Facades\DB as DBFacade;
 
 class HoaDonController extends Controller
 {
@@ -45,6 +50,12 @@ class HoaDonController extends Controller
             }
         }
 
+        // Filter by DatPhong id if caller wants to find invoices for a specific booking
+        $idDatPhongFilter = $request->query('IDDatPhong');
+        if ($idDatPhongFilter) {
+            $query->where('IDDatPhong', $idDatPhongFilter);
+        }
+
         // Search q on IDHoaDon or GhiChu
         if ($q) {
             $query->where(function($qq) use ($q) {
@@ -59,6 +70,104 @@ class HoaDonController extends Controller
         $result = $query->paginate($perPage)->appends($request->query());
 
         return response()->json($result);
+    }
+
+    /**
+     * Create an invoice (HoaDon) for a booking and optional services.
+     * POST /api/hoadon
+     * Body: { IDDatPhong: string, DichVuIDs: [{IDDichVu, quantity?}], TrangThaiThanhToan?: int, GhiChu?: string }
+     */
+    public function store(Request $request)
+    {
+    $payload = $request->only(['IDDatPhong', 'DichVuIDs', 'TrangThaiThanhToan', 'GhiChu', 'TienDaThanhToan']);
+        $idDatPhong = $payload['IDDatPhong'] ?? null;
+        if (!$idDatPhong) return response()->json(['error' => 'IDDatPhong required'], 400);
+
+        $dp = DatPhong::where('IDDatPhong', $idDatPhong)->first();
+        if (!$dp) return response()->json(['error' => 'DatPhong not found'], 404);
+
+        $dichVuItems = $payload['DichVuIDs'] ?? [];
+
+        // Build invoice id
+        $idHoaDon = 'HD' . date('YmdHis') . Str::upper(Str::random(4));
+
+        // calculate total: room total + sum(services)
+        $tongTienPhong = (float) $dp->TongTien;
+        $servicesTotal = 0.0;
+
+        // Prepare service rows: each item may be {IDDichVu, quantity}
+        $serviceRows = [];
+        foreach ($dichVuItems as $it) {
+            if (!isset($it['IDDichVu'])) continue;
+            $dv = DichVu::where('IDDichVu', $it['IDDichVu'])->first();
+            if (!$dv) continue;
+            $qty = isset($it['quantity']) ? max(1, (int)$it['quantity']) : 1;
+            $price = (float) $dv->TienDichVu;
+            $lineTotal = $price * $qty;
+            $servicesTotal += $lineTotal;
+            $serviceRows[] = [
+                'IDDichVu' => $dv->IDDichVu,
+                'TienDichVu' => $price,
+                'Quantity' => $qty,
+            ];
+        }
+
+    $totalInvoice = $tongTienPhong + $servicesTotal;
+    // immediate payment provided by front-end (amount customer pays now)
+    $paidNow = isset($payload['TienDaThanhToan']) ? (float)$payload['TienDaThanhToan'] : 0.0;
+    if ($paidNow < 0) $paidNow = 0.0;
+
+        // transactionally insert HoaDon and CTHDDV
+        try {
+            DBFacade::beginTransaction();
+
+            $hoaDon = new HoaDon();
+            $hoaDon->IDHoaDon = $idHoaDon;
+            $hoaDon->IDDatPhong = $dp->IDDatPhong;
+            $hoaDon->NgayLap = Carbon::now();
+            $hoaDon->TongTien = $totalInvoice;
+            $hoaDon->TienCoc = $dp->TienCoc ?? 0;
+            // Store the immediate payment amount into TienThanhToan as requested
+            $hoaDon->TienThanhToan = $paidNow;
+            // Determine final payment status: if deposit + paidNow covers total, mark as paid
+            $covered = ($hoaDon->TienCoc ?? 0) + $paidNow;
+            $hoaDon->TrangThaiThanhToan = ($covered >= $totalInvoice) ? 2 : ($payload['TrangThaiThanhToan'] ?? 3);
+            // optionally store payment note in GhiChu
+            if ($paidNow > 0) {
+                $note = ($payload['GhiChu'] ?? '') . ' | Thanh toán tạm: ' . $paidNow;
+                $hoaDon->GhiChu = $note;
+            } else {
+                $hoaDon->GhiChu = $payload['GhiChu'] ?? null;
+            }
+            $hoaDon->save();
+
+            // insert CTHDDV rows
+            foreach ($serviceRows as $idx => $sr) {
+                $ct = new CTHDDV();
+                $ct->IDCTHDDV = 'CT' . date('YmdHis') . $idx . Str::upper(Str::random(3));
+                $ct->IDHoaDon = $hoaDon->IDHoaDon;
+                $ct->IDDichVu = $sr['IDDichVu'];
+                $ct->TienDichVu = $sr['TienDichVu'];
+                $ct->ThoiGianThucHien = Carbon::now();
+                $ct->save();
+            }
+
+            DBFacade::commit();
+        } catch (\Throwable $e) {
+            DBFacade::rollBack();
+            logger()->error('Failed to create HoaDon: ' . $e->getMessage());
+            return response()->json(['error' => 'failed_to_create_hoadon', 'detail' => $e->getMessage()], 500);
+        }
+
+        // Optionally update DatPhong.TrangThaiThanhToan
+        try {
+            $dp->TrangThaiThanhToan = $hoaDon->TrangThaiThanhToan;
+            $dp->save();
+        } catch (\Throwable $e) {
+            logger()->warning('Failed to update DatPhong payment status after invoice creation: ' . $e->getMessage());
+        }
+
+        return response()->json(['message' => 'HoaDon created', 'IDHoaDon' => $hoaDon->IDHoaDon, 'TongTien' => (float)$hoaDon->TongTien]);
     }
 
     /**

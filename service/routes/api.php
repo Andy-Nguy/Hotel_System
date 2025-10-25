@@ -118,6 +118,8 @@ Route::put('/khachhang/{id}', [App\Http\Controllers\Login\KhachHangController::c
 
 // Invoices API (hoadon) - supports filtering by date range, status and search
 Route::get('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'index']);
+// Create invoice (HoaDon) - called by admin UI when saving an invoice for a booking
+Route::post('/hoadon', [App\Http\Controllers\Amenties\HoaDonController::class, 'store']);
 // Invoice stats: weekly/monthly aggregates for reporting
 Route::get('/hoadon/stats', [App\Http\Controllers\Amenties\HoaDonController::class, 'stats']);
 
