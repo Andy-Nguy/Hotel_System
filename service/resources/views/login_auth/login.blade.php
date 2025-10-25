@@ -297,8 +297,8 @@
                         redirectUrl = saved.startsWith('/') ? window.location.origin + saved : saved;
                         localStorage.removeItem('redirect_after_login');
                     } else {
-                        redirectUrl = roleNum === 2 
-                            ? "{{ url('/xacnhan') }}" // Nhân viên -> trang xác nhận đặt phòng
+                        redirectUrl = roleNum === 0 
+                            ? "{{ url('/admin') }}" // Nhân viên -> trang xác nhận đặt phòng
                             : "{{ route('taikhoan', [], false) }}?email=" + encodeURIComponent(Email); // Khách hàng -> trang tài khoản
                     }
 
