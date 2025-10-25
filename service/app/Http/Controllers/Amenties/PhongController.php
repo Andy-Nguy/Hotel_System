@@ -98,7 +98,7 @@ class PhongController extends Controller
             'SoPhong'     => ['required', 'string', 'max:20', 'unique:Phong,SoPhong'],
             'MoTa'        => ['nullable', 'string'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Phòng trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -132,7 +132,7 @@ class PhongController extends Controller
             'SoPhong'     => ['sometimes', 'required', 'string', 'max:20', Rule::unique('Phong', 'SoPhong')->ignore($phong->IDPhong, 'IDPhong')],
             'MoTa'        => ['nullable', 'string'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Phòng trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 

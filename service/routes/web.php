@@ -160,6 +160,31 @@ $roomdetailsHandler = function (Request $request) use ($callApi) {
             $room = (is_array($list) && count($list)) ? array_values($list)[0] : null;
         }
         $resolvedId = $room['IDPhong'] ?? $rawId;
+
+        // Fallback: if amenities missing on the resolved room, fetch via phong/{id}/tien-nghi
+        if (is_array($room)) {
+            $amenities = [];
+            if (!empty($room['tien_nghis']) && is_array($room['tien_nghis'])) {
+                $amenities = $room['tien_nghis'];
+            } elseif (!empty($room['tienNghis']) && is_array($room['tienNghis'])) {
+                $amenities = $room['tienNghis'];
+            } elseif (!empty($room['tien_nghi']) && is_array($room['tien_nghi'])) {
+                $amenities = $room['tien_nghi'];
+            }
+
+            if (empty($amenities) && !empty($room['IDPhong'])) {
+                $amenData = $callApi('/api/phong/' . urlencode($room['IDPhong']) . '/tien-nghi');
+                // Endpoint returns { success: true, data: [...] }
+                if (is_array($amenData)) {
+                    if (isset($amenData['success']) && $amenData['success'] && isset($amenData['data']) && is_array($amenData['data'])) {
+                        $room['tien_nghi'] = $amenData['data'];
+                    } elseif (!isset($amenData['success'])) {
+                        // In case the endpoint returns a plain array
+                        $room['tien_nghi'] = $amenData;
+                    }
+                }
+            }
+        }
     }
 
     // Lấy danh sách loại phòng để hiển thị "Phòng Tương Tự"

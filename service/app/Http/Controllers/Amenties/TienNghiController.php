@@ -22,8 +22,9 @@ class TienNghiController extends Controller
                 ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
                 ->where('tnp.IDTienNghi', $tn->IDTienNghi)
                 ->where(function ($q) {
-                    $q->whereNotNull('p.TrangThai')
-                      ->where('p.TrangThai', '<>', 'Trống');
+                    // Trạng thái 'bận' là 'Đang sử dụng' HOẶC 'Bảo trì'
+                    $q->where('p.TrangThai', '=', 'Đang sử dụng')
+                        ->orWhere('p.TrangThai', '=', 'Bảo trì');
                 })
                 ->exists();
 
@@ -61,7 +62,9 @@ class TienNghiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'TenTienNghi' => [
-                'required', 'string', 'max:100',
+                'required',
+                'string',
+                'max:100',
                 Rule::unique('TienNghi', 'TenTienNghi')->ignore($tienNghi->IDTienNghi, 'IDTienNghi'),
             ],
         ]);
@@ -74,14 +77,13 @@ class TienNghiController extends Controller
             ], 422);
         }
 
-        // Check whether any room that has this amenity is currently not empty.
         $inUse = DB::table('TienNghiPhong as tnp')
             ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
             ->where('tnp.IDTienNghi', $tienNghi->IDTienNghi)
             ->where(function ($q) {
-                // consider room 'in use' when TrangThai is not 'Trống' (string)
-                $q->whereNotNull('p.TrangThai')
-                  ->where('p.TrangThai', '<>', 'Trống');
+                // Trạng thái 'bận' là 'Đang sử dụng' HOẶC 'Bảo trì'
+                $q->where('p.TrangThai', '=', 'Đang sử dụng')
+                    ->orWhere('p.TrangThai', '=', 'Bảo trì');
             })
             ->exists();
 
@@ -99,13 +101,13 @@ class TienNghiController extends Controller
     // DELETE /api/tien-nghi/{id}
     public function destroy(TienNghi $tienNghi)
     {
-        // Prevent deletion if any assigned room is not empty
         $inUse = DB::table('TienNghiPhong as tnp')
             ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
             ->where('tnp.IDTienNghi', $tienNghi->IDTienNghi)
             ->where(function ($q) {
-                $q->whereNotNull('p.TrangThai')
-                  ->where('p.TrangThai', '<>', 'Trống');
+                // Trạng thái 'bận' là 'Đang sử dụng' HOẶC 'Bảo trì'
+                $q->where('p.TrangThai', '=', 'Đang sử dụng')
+                    ->orWhere('p.TrangThai', '=', 'Bảo trì');
             })
             ->exists();
 
