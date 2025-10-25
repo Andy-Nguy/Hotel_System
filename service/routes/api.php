@@ -15,6 +15,9 @@ use App\Http\Controllers\Amenties\PhongController;
 use App\Http\Controllers\Amenties\LoaiPhongController;
 use App\Http\Controllers\Rooms\RoomController;
 use App\Http\Controllers\Booking\BookingController;
+
+use App\Http\Controllers\Api\Checkout\CheckoutController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -145,3 +148,33 @@ Route::get('/phong', [PhongController::class, 'index2']);
 Route::match(['put', 'patch'], '/phongs/{key}', [PhongController::class, 'update1']);
 Route::post('/upload', [UploadController::class, 'store'])->name('api.upload');
 Route::delete('/upload', [UploadController::class, 'destroy'])->name('api.upload.delete');
+
+
+Route::get('/services', [DichVuController::class, 'index']);
+
+// Checkout flows
+    Route::prefix('checkout')->group(function () {
+    // List các booking phục vụ trả phòng
+    // scope: due_today | inhouse | overdue | all
+    Route::get('/list', [CheckoutController::class, 'index']);
+
+    // Chi tiết 1 booking (hiển thị đủ thông tin checkout)
+    Route::get('/{idDatPhong}', [CheckoutController::class, 'show']);
+
+    // Thêm dịch vụ (tạo Hóa Đơn nháp nếu chưa có)
+    Route::post('/{idDatPhong}/add-service', [CheckoutController::class, 'addService']);
+
+    // Cập nhật ghi chú hóa đơn
+    Route::put('/{idDatPhong}/note', [CheckoutController::class, 'updateNote']);
+
+    // Thu tiền (đánh dấu đã thanh toán hóa đơn)
+    Route::post('/{idDatPhong}/pay', [CheckoutController::class, 'pay']);
+
+    // Hoàn tất trả phòng (yêu cầu đã thanh toán)
+    Route::post('/{idDatPhong}/complete', [CheckoutController::class, 'complete']);
+    Route::get('/checkout/{id}', [CheckoutController::class, 'show']); // optional: cho modal chi tiết
+    Route::post('/checkout/{id}/add-service', [CheckoutController::class, 'addService']);
+    Route::put('/checkout/{id}/note', [CheckoutController::class, 'updateNote']);
+    Route::post('/checkout/{id}/pay', [CheckoutController::class, 'pay']);
+    Route::post('/checkout/{id}/complete', [CheckoutController::class, 'complete']);
+});

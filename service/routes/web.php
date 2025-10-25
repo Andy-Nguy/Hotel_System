@@ -410,3 +410,8 @@ Route::post('/dichvu', [StaffDichVuController::class, 'store'])
 use App\Http\Controllers\Amenties\PhongController;
 Route::get('/quan-ly-phong', [PhongController::class, 'showRoomManagementPage'])
     ->name('room.index');
+
+
+Route::get('/checkout', function () {
+        return view('statistics.checkout');
+    })->name('checkout.index');

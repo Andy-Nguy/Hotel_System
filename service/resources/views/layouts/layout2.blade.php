@@ -134,6 +134,13 @@
                                 <span class="menu-text">Tiện Nghi</span>
                             </a>
                         </li>
+
+                        <li class="{{ request()->routeIs('checkout.*') ? 'active current-page' : '' }}">
+                            <a href="{{ route('checkout.index') }}">
+                                <i class="bi-cash-coin"></i>
+                                <span class="menu-text">Checkout</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <!-- Sidebar menu ends -->
