@@ -319,7 +319,7 @@
                                 <th style="width:6%;">Mã phòng</th>
                                 <th style="width:6%;">Số phòng</th>
                                 <th style="width:15%;">Tên phòng</th>
-                                <th class="description-header" style="width:25%;">Mô tả</th>
+                                <!-- <th class="description-header" style="width:25%;">Mô tả</th> -->
                                 <th class="text-end" style="width:8%;">Giá</th>
                                 <th style="width:6%;">Số người</th>
                                 <th style="width:8%;">Hạng</th>
@@ -549,7 +549,7 @@
           <td class="text-center">${room.IDPhong || 'N/A'}</td>
           <td class="text-center">${room.SoPhong || 'N/A'}</td>
           <td class="text-wrap break-anywhere">${room.TenPhong || 'N/A'}</td>
-          <td class="description-cell break-anywhere">${room.MoTa || 'N/A'}</td>
+
           <td class="text-end">${room.GiaCoBanMotDem ?? 'N/A'}</td>
           <td class="text-center">${room.SoNguoiToiDa ?? 'N/A'}</td>
           <td class="text-center">${stars}</td>

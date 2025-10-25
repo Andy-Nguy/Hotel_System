@@ -66,7 +66,28 @@ class PhongController extends Controller
     // GET /api/phongs
     public function index1()
     {
-        return response()->json(Phong::all());
+        // Trả về danh sách phòng kèm thông tin loại phòng để tránh hiển thị N/A
+        $phongs = Phong::with('loaiPhong')
+            ->orderBy('SoPhong')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'IDPhong' => $p->IDPhong,
+                    'SoPhong' => $p->SoPhong,
+                    'TenPhong' => $p->TenPhong,
+                    'IDLoaiPhong' => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'XepHangSao' => $p->XepHangSao,
+                    'TrangThai' => $p->TrangThai,
+                    'status' => $p->TrangThai, // Alias for compatibility
+                    'MoTa' => $p->MoTa,
+                    'GiaCoBanMotDem' => $p->GiaCoBanMotDem,
+                    'SoNguoiToiDa' => $p->SoNguoiToiDa,
+                    'UrlAnhPhong' => $p->UrlAnhPhong,
+                ];
+            });
+
+        return response()->json($phongs);
     }
 
     // GET /api/phongs/{id}
