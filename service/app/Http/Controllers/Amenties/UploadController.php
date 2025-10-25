@@ -33,7 +33,7 @@ class UploadController extends Controller
             $mime         = $f->getClientMimeType() ?: $f->getMimeType();
             $size         = $f->getSize(); // bytes
 
-            $baseDir = public_path('uploads');
+            $baseDir = public_path('HomePage/img/slider');
             File::ensureDirectoryExists($baseDir, 0755, true);
 
             $keepName    = filter_var($request->input('keepName'), FILTER_VALIDATE_BOOLEAN);
@@ -49,35 +49,18 @@ class UploadController extends Controller
             };
 
             if ($keepName && $originalUrl !== '') {
-                // Lấy path từ URL (hỗ trợ absolute hoặc relative)
+                // Hỗ trợ cả URL tuyệt đối, đường dẫn tương đối và chỉ mỗi tên file
                 $pathFromUrl = parse_url($originalUrl, PHP_URL_PATH) ?? '';
+                $pathFromUrl = $pathFromUrl !== '' ? $pathFromUrl : (string) $originalUrl;
                 $pathFromUrl = str_replace('\\', '/', $pathFromUrl);
 
-                // Mặc định chỉ cho ghi đè trong /uploads
-                $relativeAfterUploads = '';
-                if (Str::startsWith($pathFromUrl, '/uploads/')) {
-                    $relativeAfterUploads = substr($pathFromUrl, strlen('/uploads/')); // ví dụ: "rooms/2.jpg" hoặc "2.jpg"
-                }
+                // Lấy basename an toàn
+                $rawBasename = basename($pathFromUrl);
+                // Chỉ cho phép ký tự chữ, số, gạch dưới, gạch ngang và dấu chấm trong tên file
+                $safeBasename = preg_replace('/[^a-zA-Z0-9_\-.]/', '', $rawBasename);
 
-                // Lấy basename và dir (nếu không nằm trong /uploads thì vẫn dùng basename, lưu ở /uploads)
-                $basename = pathinfo($pathFromUrl, PATHINFO_BASENAME);       // 2.jpg
-                $dirPart  = $relativeAfterUploads !== '' ? pathinfo($relativeAfterUploads, PATHINFO_DIRNAME) : ''; // rooms hoặc .
-
-                // Sanitizer dir: chỉ a-zA-Z0-9_- và dấu / giữa các segment
-                $dirSanitized = '';
-                if ($dirPart && $dirPart !== '.' && $dirPart !== DIRECTORY_SEPARATOR) {
-                    $segments = array_filter(explode('/', trim($dirPart, '/.')));
-                    $segments = array_map(function ($seg) {
-                        return preg_replace('/[^a-zA-Z0-9_\-]/', '', $seg);
-                    }, $segments);
-                    $segments = array_filter($segments);
-                    if (!empty($segments)) {
-                        $dirSanitized = implode(DIRECTORY_SEPARATOR, $segments);
-                    }
-                }
-
-                $oldBase   = pathinfo($basename, PATHINFO_FILENAME);       // 2
-                $oldExtRaw = pathinfo($basename, PATHINFO_EXTENSION);      // jpg
+                $oldBase   = pathinfo($safeBasename, PATHINFO_FILENAME);
+                $oldExtRaw = pathinfo($safeBasename, PATHINFO_EXTENSION);
                 $oldExt    = $normalizeExt($oldExtRaw);
 
                 // Ext của file đang upload
@@ -91,9 +74,11 @@ class UploadController extends Controller
                     ], 422);
                 }
 
-                $filename = $oldBase . '.' . ($oldExt ?: $newExt ?: 'jpg');
+                // Nếu thiếu tên base cũ -> tạo mới theo thời điểm để tránh tên rỗng
+                $baseNameToUse = $oldBase !== '' ? $oldBase : ('room_' . Str::random(8) . '_' . time());
+                $filename = $baseNameToUse . '.' . ($oldExt ?: $newExt ?: 'jpg');
 
-                $targetDir = $dirSanitized ? ($baseDir . DIRECTORY_SEPARATOR . $dirSanitized) : $baseDir;
+                $targetDir = $baseDir; // Ghi đè trong thư mục slider mặc định
                 File::ensureDirectoryExists($targetDir, 0755, true);
             } else {
                 // Đặt tên mới (random) + optional subfolder
@@ -116,19 +101,11 @@ class UploadController extends Controller
             // Move file vào đích
             $f->move($targetDir, $filename);
 
-            // Tạo relative path và absolute url trả về
-            $relativeDir = trim(str_replace(public_path(), '', $targetDir), '\\/');
-            if ($relativeDir === '') {
-                // đề phòng trường hợp path khác biệt, gắn đúng 'uploads'
-                $relativeDir = 'uploads';
-            }
-
-            $relativePath = '/' . trim($relativeDir, '/') . '/' . $filename; // /uploads[/...]/filename
-            $absoluteUrl  = $request->getSchemeAndHttpHost() . $relativePath;
-
+            // Chỉ trả về tên file để lưu vào database (không có đường dẫn đầy đủ)
+            // Frontend sẽ tự ghép với /img/slider/ khi hiển thị
             return response()->json([
-                'url'   => $absoluteUrl,   // FE sẽ dùng url này lưu DB
-                'path'  => $relativePath,  // nếu FE parse path vẫn OK
+                'url'   => $filename,      // CHỈ TÊN FILE (vd: room_abc123_1234567890.jpg)
+                'path'  => $filename,      // Giữ tương thích
                 'name'  => $originalName,
                 'mime'  => $mime,
                 'size'  => $size,
@@ -138,6 +115,47 @@ class UploadController extends Controller
             // \Log::error($e);
             return response()->json([
                 'message' => 'Upload thất bại.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * DELETE /api/upload
+     * Xóa file ảnh từ server
+     */
+    public function destroy(Request $request)
+    {
+        try {
+            $request->validate([
+                'filename' => ['required', 'string', 'max:255'],
+            ]);
+
+            $filename = $request->input('filename');
+
+            // Chỉ cho phép xóa file trong thư mục slider
+            $baseDir = public_path('HomePage/img/slider');
+
+            // Sanitize filename để tránh directory traversal
+            $cleanFilename = basename($filename);
+            $fullPath = $baseDir . DIRECTORY_SEPARATOR . $cleanFilename;
+
+            // Kiểm tra file có tồn tại và nằm trong thư mục cho phép
+            if (File::exists($fullPath) && strpos(realpath($fullPath), realpath($baseDir)) === 0) {
+                File::delete($fullPath);
+                return response()->json([
+                    'message' => 'Xóa ảnh thành công.',
+                    'filename' => $cleanFilename,
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => 'File không tồn tại hoặc không hợp lệ.',
+            ], 404);
+
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Xóa ảnh thất bại.',
                 'error'   => $e->getMessage(),
             ], 500);
         }

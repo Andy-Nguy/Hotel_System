@@ -208,8 +208,10 @@
                             <input type="text" name="SoPhong" class="form-control styled" />
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label styled">Tên Loại Phòng</label>
-                            <textarea name="TenLoaiPhong" class="form-control styled autosize" rows="1"></textarea>
+                            <label class="form-label styled">Loại Phòng</label>
+                            <select name="IDLoaiPhong" class="form-control styled">
+                                <option value="">-- Chọn loại phòng --</option>
+                            </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label styled">Tên phòng</label>
@@ -237,11 +239,11 @@
                         <div class="col-md-6">
                             <label class="form-label styled">Chọn ảnh mới</label>
                             <input type="file" id="roomImageFile" class="form-control styled" accept="image/*" />
-                            <div class="d-flex gap-2 mt-2">
+                            <!-- <div class="d-flex gap-2 mt-2">
                                 <button type="button" class="btn btn-sm btn-outline-secondary styled" id="btnUseOriginalImage">
                                     <i class="bi bi-arrow-counterclockwise me-1"></i>Dùng lại ảnh cũ
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="col-12 d-flex gap-2 mt-3">
                             <button type="button" class="btn btn-warning styled shadow-sm" id="btnUpdateRoom" disabled>
@@ -339,13 +341,16 @@
 
     <script>
         const KEY_FIELD = 'IDPhong';
-        let ROOMS = [];
+    let ROOMS = [];
+    // Bản đồ cache-bust cho ảnh theo tên file: { filename: timestamp }
+    let IMG_BUST = {};
+        let LOAI_PHONGS = []; // Danh sách loại phòng
         const FILTER = {
             q: '',
             status: '',
             star: ''
         };
-        const CLOSE_FORM_AFTER_UPDATE = false;
+    const CLOSE_FORM_AFTER_UPDATE = true;
         const UPLOAD_ENDPOINT = '/api/upload';
         const MAX_IMAGE_SIZE_MB = 8;
 
@@ -392,12 +397,20 @@
         }
 
         function imgSrc(url) {
-            if (!url) return '/img/slider/default.jpg';
+            if (!url) return 'https://placehold.co/300x200/e0f2fe/3b82f6?text=No+Image';
             const s = String(url);
             if (/^https?:\/\//i.test(s)) return s;
             if (s.startsWith('/')) return s;
             if (s.startsWith('uploads/')) return '/' + s;
-            return '/img/slider/' + s;
+            // Ảnh được lưu trong public/HomePage/img/slider/
+            const base = '/HomePage/img/slider/' + s;
+            const bust = IMG_BUST[s];
+            return bust ? (base + '?v=' + bust) : base;
+        }
+
+        function markImageUpdated(filename) {
+            if (!filename) return;
+            IMG_BUST[String(filename)] = Date.now();
         }
 
         function cleanPayload(o) {
@@ -408,8 +421,52 @@
             return r;
         }
 
+        // Hiển thị toast thông báo ngắn gọn, tự ẩn
+        function showToast(message, type = 'success', duration = 1800) {
+            let cont = document.getElementById('toastContainer');
+            if (!cont) {
+                cont = document.createElement('div');
+                cont.id = 'toastContainer';
+                cont.style.position = 'fixed';
+                cont.style.top = '12px';
+                cont.style.right = '12px';
+                cont.style.zIndex = '1060';
+                cont.style.display = 'flex';
+                cont.style.flexDirection = 'column';
+                cont.style.gap = '8px';
+                document.body.appendChild(cont);
+            }
+            const el = document.createElement('div');
+            el.style.padding = '10px 14px';
+            el.style.borderRadius = '10px';
+            el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            el.style.color = '#fff';
+            el.style.fontFamily = 'Inter, system-ui, sans-serif';
+            el.style.fontSize = '0.9rem';
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.gap = '8px';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-6px)';
+            el.style.transition = 'opacity .2s ease, transform .2s ease';
+            const bg = type === 'success' ? '#22c55e' : (type === 'error' ? '#ef4444' : '#3b82f6');
+            el.style.background = `linear-gradient(90deg, ${bg}, ${bg}CC)`;
+            el.innerHTML = `<i class="bi ${type==='success'?'bi-check-circle':'bi-info-circle'}"></i><span>${message}</span>`;
+            cont.appendChild(el);
+            requestAnimationFrame(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            });
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-6px)';
+                setTimeout(() => el.remove(), 220);
+            }, duration);
+        }
+
         async function loadRooms() {
             try {
+                // Use the API that includes TenLoaiPhong via the relation
                 const res = await axios.get('/api/phongs', {
                     params: {
                         _t: Date.now()
@@ -423,18 +480,34 @@
                     '<tr><td colspan="12" class="text-center py-3">Không thể tải danh sách phòng.</td></tr>';
             }
         }
-            async function loadRooms() {
-                try {
-                    // Use the API that includes TenLoaiPhong via the relation
-                    const res = await axios.get('/api/phong?with=tiennghi');
-                    ROOMS = Array.isArray(res.data.data) ? res.data.data : (Array.isArray(res.data) ? res.data : []);
-                    applyFilter();
-                } catch (err) {
-                    console.error('Lỗi API:', err);
-                    document.getElementById('roomTableBody').innerHTML =
-                        '<tr><td colspan="12" class="text-center py-3">Không thể tải danh sách phòng.</td></tr>';
-                }
+
+        async function loadLoaiPhongs() {
+            try {
+                const res = await axios.get('/api/loaiphongs');
+                LOAI_PHONGS = Array.isArray(res.data) ? res.data : (res.data.data || []);
+                populateLoaiPhongDropdown();
+            } catch (err) {
+                console.error('Lỗi tải loại phòng:', err);
             }
+        }
+
+        function populateLoaiPhongDropdown() {
+            const select = document.querySelector('select[name="IDLoaiPhong"]');
+            if (!select) return;
+
+            // Xóa các option cũ (trừ option đầu tiên)
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            // Thêm các option từ danh sách loại phòng
+            LOAI_PHONGS.forEach(loai => {
+                const option = document.createElement('option');
+                option.value = loai.IDLoaiPhong;
+                option.textContent = loai.TenLoaiPhong;
+                select.appendChild(option);
+            });
+        }
 
         function renderRooms(rooms) {
             const body = document.getElementById('roomTableBody');
@@ -455,9 +528,9 @@
                 const currentStatus = (room.status && room.status.trim() !== '') ? room.status : (room
                     .TrangThai || 'Phòng trống');
                 const availableStatuses = ['Phòng trống', 'Phòng hư'];
-                const statusItems = availableStatuses.map(s => `
-          <li><a class="dropdown-item ${currentStatus === s ? 'active' : ''}" href="#"
-                 onclick="return changeStatus(this,'${s}','${room.SoPhong}')">${s}</a></li>`).join('');
+            const statusItems = availableStatuses.map(s => `
+        <li><a class="dropdown-item ${currentStatus === s ? 'active' : ''}" href="javascript:void(0)"
+             onclick="return changeStatus(this,'${s}','${room.SoPhong}')">${s}</a></li>`).join('');
                 const btnClass = currentStatus === 'Phòng trống' ? 'btn-success' :
                     currentStatus === 'Phòng hư' ? 'btn-danger' :
                     'btn-secondary';
@@ -481,7 +554,7 @@
           <td class="text-center">${room.SoNguoiToiDa ?? 'N/A'}</td>
           <td class="text-center">${stars}</td>
           <td class="text-center"><img src="${imgSrc(room.UrlAnhPhong)}" width="60" height="60" class="rounded"
-                   onerror="this.src='https://picsum.photos/60/60';"></td>
+                   onerror="this.src='https://placehold.co/60x60/e0f2fe/3b82f6?text=No+Img';"></td>
           <td class="text-center">${statusContent}</td>
           <td class="text-center">
                         <button type="button" class="btn btn-sm btn-outline-secondary styled btn-edit-room"
@@ -575,8 +648,21 @@
             }
             set('IDPhong', room.IDPhong);
             set('SoPhong', room.SoPhong);
-            set('TenLoaiPhong', room.TenLoaiPhong || room.tenLoaiPhong ||
-                (room.LoaiPhong && (room.LoaiPhong.TenLoaiPhong || room.LoaiPhong.tenLoaiPhong)) || '');
+
+            // Set loại phòng dropdown dựa trên ID; nếu thiếu, map từ tên
+            let idLoaiPhong = room.IDLoaiPhong ||
+                (room.loaiPhong && room.loaiPhong.IDLoaiPhong) ||
+                (room.LoaiPhong && room.LoaiPhong.IDLoaiPhong) || '';
+            if (!idLoaiPhong) {
+                const ten = (room.TenLoaiPhong || (room.LoaiPhong && room.LoaiPhong.TenLoaiPhong) || '').toString();
+                if (ten && LOAI_PHONGS && LOAI_PHONGS.length) {
+                    const norm = s => (s||'').toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').trim();
+                    const found = LOAI_PHONGS.find(lp => norm(lp.TenLoaiPhong) === norm(ten));
+                    if (found) idLoaiPhong = found.IDLoaiPhong;
+                }
+            }
+            set('IDLoaiPhong', idLoaiPhong);
+
             set('TenPhong', room.TenPhong);
             set('MoTa', room.MoTa);
             set('GiaCoBanMotDem', room.GiaCoBanMotDem);
@@ -611,26 +697,44 @@
 
         function getUploadedUrlFromResponse(res) {
             const d = res?.data || {};
-            let url = d.url || d.Location || d.path || (d.data && d.data.url) || '';
-            if (!url) return '';
-            const s = String(url);
-            if (/^https?:\/\//i.test(s)) return s;
-            if (s.startsWith('/')) return location.origin + s;
-            return location.origin + '/' + s.replace(/^\.?\//, '');
+            // Backend giờ chỉ trả về tên file (vd: room_abc123_1234567890.jpg)
+            // Không cần parse URL phức tạp nữa
+            let filename = d.url || d.path || '';
+            if (!filename) return '';
+            // Trả về chỉ tên file để lưu vào DB
+            return String(filename).trim();
         }
 
-        async function uploadImage(file) {
+        async function uploadImage(file, overwriteFilename = null) {
             const fd = new FormData();
             fd.append('file', file);
+            if (overwriteFilename) {
+                fd.append('keepName', 'true');
+                // Backend có thể nhận chỉ tên file để ghi đè trong slider
+                fd.append('originalUrl', overwriteFilename);
+            }
             const res = await axios.post('/api/upload', fd, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Accept': 'application/json'
                 }
             });
-            const url = getUploadedUrlFromResponse(res);
-            if (!url) throw new Error('Upload ảnh không trả về URL hợp lệ');
-            return url;
+            const filename = getUploadedUrlFromResponse(res);
+            if (!filename) throw new Error('Upload ảnh không trả về tên file hợp lệ');
+            return filename;
+        }
+
+        // Xóa ảnh cũ từ server
+        async function deleteOldImage(filename) {
+            if (!filename || filename.startsWith('http')) return; // Không xóa URL external hoặc rỗng
+            try {
+                await axios.delete('/api/upload', {
+                    data: { filename: filename }
+                });
+            } catch (err) {
+                console.warn('Không thể xóa ảnh cũ:', filename, err);
+                // Không throw error, chỉ warning
+            }
         }
 
         // CẬP NHẬT PHÒNG: ưu tiên SoPhong làm param URL để khớp backend
@@ -645,6 +749,7 @@
             const v = n => f.elements[n] ? f.elements[n].value : '';
             const file = document.getElementById('roomImageFile').files[0];
             let newImageUrl = document.getElementById('roomOriginalUrlAnhPhong').value || '';
+            const oldImageUrl = newImageUrl; // Lưu lại ảnh cũ để xóa sau
 
             try {
                 if (file) {
@@ -658,7 +763,18 @@
                         return;
                     }
                     setBtnLoading(true);
-                    newImageUrl = await uploadImage(file);
+
+                    // Nếu có ảnh cũ -> ghi đè cùng tên để không cần xoá riêng
+                    if (oldImageUrl) {
+                        newImageUrl = await uploadImage(file, oldImageUrl);
+                    } else {
+                        // Không có ảnh cũ -> upload tên mới
+                        newImageUrl = await uploadImage(file);
+                    }
+                    // Đánh dấu cache-bust cho ảnh mới để trình duyệt không dùng cache cũ
+                    markImageUpdated(newImageUrl);
+                    // Cập nhật preview theo URL (dùng cache-bust)
+                    setPreviewFromUrl(newImageUrl);
                 } else {
                     setBtnLoading(true);
                 }
@@ -671,7 +787,7 @@
 
                 const payload = cleanPayload({
                     SoPhong: v('SoPhong').trim(),
-                    TenLoaiPhong: v('TenLoaiPhong').trim(), // nếu không muốn đổi loại hàng loạt, bạn có thể loại bỏ dòng này
+                    IDLoaiPhong: v('IDLoaiPhong') && v('IDLoaiPhong') !== '' ? String(v('IDLoaiPhong')) : undefined, // Gửi dạng string (vd: LP01)
                     TenPhong: v('TenPhong').trim(),
                     MoTa: v('MoTa').trim(),
                     GiaCoBanMotDem: v('GiaCoBanMotDem') ? Number(v('GiaCoBanMotDem')) : null,
@@ -681,7 +797,7 @@
 
                 await axios.put(`/api/phongs/${encodeURIComponent(routeParam)}`, payload);
 
-                alert('Cập nhật thành công!');
+                showToast('Cập nhật phòng thành công!', 'success');
                 await loadRooms();
 
                 const updated = ROOMS.find(r =>
@@ -801,12 +917,12 @@
                 setPreviewFromFile(file);
             });
 
-            // Nút "Dùng lại ảnh cũ"
-            const btnUseOriginal = document.getElementById('btnUseOriginalImage');
-            if (btnUseOriginal) btnUseOriginal.addEventListener('click', e => {
-                e.preventDefault();
-                useOriginalImage();
-            });
+            // // Nút "Dùng lại ảnh cũ"
+            // const btnUseOriginal = document.getElementById('btnUseOriginalImage');
+            // if (btnUseOriginal) btnUseOriginal.addEventListener('click', e => {
+            //     e.preventDefault();
+            //     useOriginalImage();
+            // });
 
             // Cập nhật
             document.getElementById('btnUpdateRoom').onclick = updateRoom;
@@ -863,7 +979,15 @@
                 });
                 const td = el.closest('td');
                 const btn = td.querySelector('.status-btn');
-                if (btn) btn.innerHTML = status;
+                if (btn) {
+                    btn.innerHTML = status;
+                    // Cập nhật class màu ngay để không cần reload
+                    btn.classList.remove('btn-success','btn-danger','btn-secondary');
+                    const cls = (status === 'Phòng trống') ? 'btn-success'
+                              : (status === 'Phòng hư') ? 'btn-danger'
+                              : 'btn-secondary';
+                    btn.classList.add(cls);
+                }
                 td.querySelectorAll('.dropdown-item').forEach(a => a.classList.remove('active'));
                 el.classList.add('active');
                 const item = ROOMS.find(r => String(r.SoPhong) === String(roomNumber));
@@ -871,7 +995,7 @@
                     item.status = status;
                     item.TrangThai = status;
                 }
-                alert('Cập nhật trạng thái thành công!');
+                showToast('Cập nhật trạng thái thành công!', 'success');
             } catch (err) {
                 console.error(err);
                 alert('Không thể cập nhật trạng thái.');
@@ -880,7 +1004,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadRooms();
+            await Promise.all([
+                loadRooms(),
+                loadLoaiPhongs()
+            ]);
             bindEvents();
         });
     </script>

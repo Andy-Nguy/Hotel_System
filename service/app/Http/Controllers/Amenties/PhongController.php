@@ -257,7 +257,23 @@ class PhongController extends Controller
     {
         $phongs = Phong::with('loaiPhong')
             ->orderBy('SoPhong')
-            ->get();
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'IDPhong' => $p->IDPhong,
+                    'SoPhong' => $p->SoPhong,
+                    'TenPhong' => $p->TenPhong,
+                    'IDLoaiPhong' => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'XepHangSao' => $p->XepHangSao,
+                    'TrangThai' => $p->TrangThai,
+                    'status' => $p->TrangThai, // Alias for compatibility
+                    'MoTa' => $p->MoTa,
+                    'GiaCoBanMotDem' => $p->GiaCoBanMotDem,
+                    'SoNguoiToiDa' => $p->SoNguoiToiDa,
+                    'UrlAnhPhong' => $p->UrlAnhPhong,
+                ];
+            });
 
         return response()->json($phongs);
     }
@@ -273,22 +289,15 @@ class PhongController extends Controller
             return response()->json(['message' => 'Room not found'], 404);
         }
 
-        // ...
-        if ($request->filled('TenLoaiPhong')) {
-            LoaiPhong::where('IDLoaiPhong', $room->IDLoaiPhong)
-                ->update(['TenLoaiPhong' => $request->input('TenLoaiPhong')]);
-        }
+        // Check if trying to change primary key
         if ($request->has('IDPhong') && $request->input('IDPhong') !== $room->IDPhong) {
             return response()->json(['message' => 'Không được phép cập nhật IDPhong'], 422);
-        }
-        if ($request->has('IDLoaiPhong') && $request->input('IDLoaiPhong') !== $room->IDLoaiPhong) {
-            return response()->json(['message' => 'Không được phép cập nhật IDLoaiPhong'], 422);
         }
 
         $rules = [
             'SoPhong' => ['sometimes', 'string', 'max:50', Rule::unique('Phong', 'SoPhong')->ignore($room->SoPhong, 'SoPhong')],
             'TenPhong' => ['sometimes', 'string', 'max:255'],
-            'TenLoaiPhong' => ['sometimes', 'string', 'max:255'],
+            'IDLoaiPhong' => ['sometimes', 'string', 'exists:LoaiPhong,IDLoaiPhong'], // LoaiPhong PK is string
             'XepHangSao' => ['sometimes', 'integer', 'between:1,5'],
             'TrangThai' => ['sometimes', 'string', 'max:50'],
             'status' => ['sometimes', 'string', 'max:50'],
@@ -304,12 +313,13 @@ class PhongController extends Controller
             $validated['TrangThai'] = $validated['status'];
         }
 
+        // IDLoaiPhong is string (e.g., "LP01"), no casting needed
+
         // Chỉ nhận các field thật có trong bảng Phong
         $allowed = [
-            // SỬA LỖI: Xóa khoảng trắng thừa ở cuối 'TenLoaiPhong '
-            'TenLoaiPhong',
             'SoPhong',
             'TenPhong',
+            'IDLoaiPhong', // Allow updating room type
             'XepHangSao',
             'TrangThai',
             'MoTa',

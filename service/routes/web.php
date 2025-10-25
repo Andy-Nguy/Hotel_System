@@ -100,7 +100,7 @@ Route::get('/', function (Request $request) use ($callApi) {
     $services = is_array($svcData) ? $svcData : [];
 
     return view('welcome', compact('rooms', 'services'));
-});
+})->name('welcome');
 
 // khachhang
 
