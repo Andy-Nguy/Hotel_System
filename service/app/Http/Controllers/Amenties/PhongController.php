@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Amenties;
 
 use App\Http\Controllers\Controller;
 use App\Models\Amenties\Phong;
+use App\Models\Amenties\LoaiPhong;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use function optional;
@@ -40,7 +41,7 @@ class PhongController extends Controller
                     'XepHangSao'   => $p->XepHangSao,
                     'TrangThai'    => $p->TrangThai,
                     'MoTa'         => $p->MoTa,
-                    'tien_nghi'    => $p->tienNghis->map(fn ($tn) => [
+                    'tien_nghi'    => $p->tienNghis->map(fn($tn) => [
                         'IDTienNghi'  => $tn->IDTienNghi,
                         'TenTienNghi' => $tn->TenTienNghi,
                     ])->values(),
@@ -65,7 +66,28 @@ class PhongController extends Controller
     // GET /api/phongs
     public function index1()
     {
-        return response()->json(Phong::all());
+        // Trả về danh sách phòng kèm thông tin loại phòng để tránh hiển thị N/A
+        $phongs = Phong::with('loaiPhong')
+            ->orderBy('SoPhong')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'IDPhong' => $p->IDPhong,
+                    'SoPhong' => $p->SoPhong,
+                    'TenPhong' => $p->TenPhong,
+                    'IDLoaiPhong' => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'XepHangSao' => $p->XepHangSao,
+                    'TrangThai' => $p->TrangThai,
+                    'status' => $p->TrangThai, // Alias for compatibility
+                    'MoTa' => $p->MoTa,
+                    'GiaCoBanMotDem' => $p->GiaCoBanMotDem,
+                    'SoNguoiToiDa' => $p->SoNguoiToiDa,
+                    'UrlAnhPhong' => $p->UrlAnhPhong,
+                ];
+            });
+
+        return response()->json($phongs);
     }
 
     // GET /api/phongs/{id}
@@ -79,8 +101,13 @@ class PhongController extends Controller
     // GET /api/phongs/loai/{maLoai}
     public function searchByLoai($maLoai)
     {
-        
-        $phongs = Phong::with('tienNghis')->where('IDLoaiPhong', $maLoai)->get();
+        $phongs = Phong::with('tienNghis')
+            ->where('IDLoaiPhong', $maLoai)
+            ->where(function ($q) {
+                $q->whereNull('TrangThai')
+                    ->orWhere('TrangThai', '<>', 'Phòng hư');
+            })
+            ->get();
         return response()->json($phongs);
     }
 
@@ -91,9 +118,8 @@ class PhongController extends Controller
             'IDLoaiPhong' => ['required', 'string', 'exists:LoaiPhong,IDLoaiPhong'],
             'SoPhong'     => ['required', 'string', 'max:20', 'unique:Phong,SoPhong'],
             'MoTa'        => ['nullable', 'string'],
-            'UuTienChinh' => ['nullable', 'boolean'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Phòng trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -105,7 +131,7 @@ class PhongController extends Controller
             ], 422);
         }
 
-        // 🔹 Tự động sinh ID kiểu P001, P002, ...
+        //  Tự động sinh ID kiểu P001, P002, ...
         $last = Phong::orderBy('IDPhong', 'desc')->first();
         $nextId = $last
             ? 'P' . str_pad((int) substr($last->IDPhong, 1) + 1, 3, '0', STR_PAD_LEFT)
@@ -126,9 +152,8 @@ class PhongController extends Controller
             'IDLoaiPhong' => ['sometimes', 'required', 'string', 'exists:LoaiPhong,IDLoaiPhong'],
             'SoPhong'     => ['sometimes', 'required', 'string', 'max:20', Rule::unique('Phong', 'SoPhong')->ignore($phong->IDPhong, 'IDPhong')],
             'MoTa'        => ['nullable', 'string'],
-            'UuTienChinh' => ['nullable', 'boolean'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Phòng trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -187,4 +212,150 @@ class PhongController extends Controller
 
         return response()->json(['success' => true, 'data' => $assigned]);
     }
+
+
+    // DANH SACH PHONG
+    public function showRoomManagementPage()
+    {
+        return view('statistics.room');
+    }
+
+    public function index2(Request $request)
+    {
+        $with = $request->query('with', '');
+        $idLoai = $request->query('IDLoaiPhong');
+
+        if (str_contains($with, 'tiennghi')) {
+            // ... (Phần code này đã đúng từ lần trước)
+            $query = Phong::query()
+                ->with([
+                    'loaiPhong:IDLoaiPhong,TenLoaiPhong',
+                    'tienNghis:IDTienNghi,TenTienNghi'
+                ])
+                ->orderBy('SoPhong');
+
+            if ($idLoai) {
+                $query->where('IDLoaiPhong', $idLoai);
+            }
+
+            $data = $query->get()->map(function ($p) {
+                return [
+                    'IDPhong' => $p->IDPhong,
+                    'SoPhong' => $p->SoPhong,
+                    'IDLoaiPhong' => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'TenPhong' => $p->TenPhong,
+                    'GiaCoBanMotDem' => $p->GiaCoBanMotDem,
+                    'SoNguoiToiDa' => $p->SoNguoiToiDa,
+                    'XepHangSao' => $p->XepHangSao,
+                    'TrangThai' => $p->TrangThai,
+                    'MoTa' => $p->MoTa,
+                    'tien_nghi' => $p->tienNghis->map(fn($tn) => [
+                        'IDTienNghi' => $tn->IDTienNghi,
+                        'TenTienNghi' => $tn->TenTienNghi,
+                    ])->values(),
+                ];
+            })->values();
+
+            return response()->json(['success' => true, 'data' => $data]);
+        }
+
+        // Phần code chạy khi không có 'with=tiennghi'
+        $query = Phong::query()
+            ->leftJoin('LoaiPhong as lp', 'lp.IDLoaiPhong', '=', 'Phong.IDLoaiPhong')
+            ->orderBy('Phong.SoPhong');
+
+        if ($idLoai) {
+            $query->where('Phong.IDLoaiPhong', $idLoai);
+        }
+
+        // SỬA LỖI: Đổi 'lp.TenPhong' thành 'lp.TenLoaiPhong'
+        $data = $query->get(['Phong.IDPhong', 'Phong.SoPhong', 'lp.TenLoaiPhong']);
+        return response()->json(['success' => true, 'data' => $data]);
+    }
+
+    public function index3()
+    {
+        $phongs = Phong::with('loaiPhong')
+            ->orderBy('SoPhong')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'IDPhong' => $p->IDPhong,
+                    'SoPhong' => $p->SoPhong,
+                    'TenPhong' => $p->TenPhong,
+                    'IDLoaiPhong' => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'XepHangSao' => $p->XepHangSao,
+                    'TrangThai' => $p->TrangThai,
+                    'status' => $p->TrangThai, // Alias for compatibility
+                    'MoTa' => $p->MoTa,
+                    'GiaCoBanMotDem' => $p->GiaCoBanMotDem,
+                    'SoNguoiToiDa' => $p->SoNguoiToiDa,
+                    'UrlAnhPhong' => $p->UrlAnhPhong,
+                ];
+            });
+
+        return response()->json($phongs);
+    }
+
+    public function update1(Request $request, $key)
+    {
+        // Tìm phòng theo IDPhong hoặc SoPhong
+        $room = Phong::where('IDPhong', $key)
+            ->orWhere('SoPhong', $key)
+            ->first();
+
+        if (!$room) {
+            return response()->json(['message' => 'Room not found'], 404);
+        }
+
+        // Check if trying to change primary key
+        if ($request->has('IDPhong') && $request->input('IDPhong') !== $room->IDPhong) {
+            return response()->json(['message' => 'Không được phép cập nhật IDPhong'], 422);
+        }
+
+        $rules = [
+            'SoPhong' => ['sometimes', 'string', 'max:50', Rule::unique('Phong', 'SoPhong')->ignore($room->SoPhong, 'SoPhong')],
+            'TenPhong' => ['sometimes', 'string', 'max:255'],
+            'IDLoaiPhong' => ['sometimes', 'string', 'exists:LoaiPhong,IDLoaiPhong'], // LoaiPhong PK is string
+            'XepHangSao' => ['sometimes', 'integer', 'between:1,5'],
+            'TrangThai' => ['sometimes', 'string', 'max:50'],
+            'status' => ['sometimes', 'string', 'max:50'],
+            'MoTa' => ['sometimes', 'string', 'nullable'],
+            'GiaCoBanMotDem' => ['sometimes', 'integer', 'min:0'],
+            'SoNguoiToiDa' => ['sometimes', 'integer', 'min:1'],
+            'UrlAnhPhong' => ['sometimes', 'string', 'max:255'],
+        ];
+
+        $validated = $request->validate($rules);
+
+        if (isset($validated['status']) && !isset($validated['TrangThai'])) {
+            $validated['TrangThai'] = $validated['status'];
+        }
+
+        // IDLoaiPhong is string (e.g., "LP01"), no casting needed
+
+        // Chỉ nhận các field thật có trong bảng Phong
+        $allowed = [
+            'SoPhong',
+            'TenPhong',
+            'IDLoaiPhong', // Allow updating room type
+            'XepHangSao',
+            'TrangThai',
+            'MoTa',
+            'GiaCoBanMotDem',
+            'SoNguoiToiDa',
+            'UrlAnhPhong'
+        ];
+
+        $data = array_intersect_key($validated, array_flip($allowed));
+        $data = array_filter($data, fn($v) => !is_null($v));
+
+        $room->fill($data);
+        $room->save();
+
+        return response()->json(['success' => true, 'data' => $room]);
+    }
+
 }

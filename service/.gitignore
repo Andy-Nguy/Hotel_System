@@ -16,3 +16,14 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+# Laravel specific
+/storage/app/*
+/storage/framework/*
+/storage/logs/*
+/bootstrap/cache/*.php
+
+# Nhưng vẫn giữ lại các file cần thiết để thư mục tồn tại
+!/storage/app/public
+!/storage/framework/.gitignore
+!/storage/logs/.gitignore
+!/bootstrap/cache/.gitignore

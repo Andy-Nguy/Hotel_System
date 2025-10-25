@@ -1,6 +1,4 @@
-<?php
-?>
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:55:30 GMT -->
@@ -62,79 +60,109 @@
         </svg>
     </div>
     <!-- Menu -->
-    <div class="cappa-wrap">
-        <div class="cappa-wrap-inner">
-            <nav class="cappa-menu">
-                <ul>
-                    <li class='cappa-menu-sub'><a class="active" href='#'>Home <i class="ti-angle-down"></i></a>
-                        <ul>
-                            <li class="active"><a href="index.html">Home Layout 1</a></li>
-                            <li><a href="index.html">Home Layout 2</a></li>
-                            <li><a href="index.html">Home Layout 3</a></li>
-                            <li><a href="index.html">Home Layout 4</a></li>
-                            <li><a href="index.html">Video 1</a></li>
-                            <li><a href="index.html">Video 2</a></li>
-                            <li><a href="index.html">Video 3</a></li>
-                            <li><a href="index.html">Slideshow 1</a></li>
-                            <li><a href="index.html">Slideshow 2</a></li>
-                            <li><a href="index.html">Slideshow 3</a></li>
-                            <li><a href="index.html">Parallax Image 1</a></li>
-                            <li><a href="index.html">Parallax Image 2</a></li>
-                            <li><a href="index.html">Parallax Image 3</a></li>
-                            <li><a href="index.html">Grid Background 1</a></li>
-                            <li><a href="index.html">Grid Background 2</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="about.html">About</a></li>
-                    <li class='cappa-menu-sub'><a href='#'>Rooms &amp; Suites <i class="ti-angle-down"></i></a>
-                        <ul>
-                            <li><a href='rooms.html'>Rooms 1</a></li>
-                            <li><a href='rooms2.html'>Rooms 2</a></li>
-                            <li><a href='rooms3.html'>Rooms 3</a></li>
-                            <li><a href='room-details.html'>Room Details</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="restaurant.html">Restaurant</a></li>
-                    <li><a href="spa-wellness.html">Spa Wellness</a></li>
-                    <li class="cappa-menu-sub"><a href='#'>Pages <i class="ti-angle-down"></i></a>
-                        <ul>
-                            <li><a href="services.html">Services</a></li>
-                            <li><a href="facilities.html">Facilites</a></li>
-                            <li><a href="gallery.html">Gallery</a></li>
-                            <li><a href="team.html">Team</a></li>
-                            <li><a href="pricing.html">Pricing</a></li>
-                            <li><a href="careers.html">Careers</a></li>
-                            <li><a href="faq.html">F.A.Qs</a></li>
-                            <li class='cappa-menu-sub'><a href='#'> Other Pages <i class="ti-angle-down"></i></a>
-                                <ul>
-                                    <li><a href='404.html'>404 Page</a></li>
-                                    <li><a href='coming-soon.html'>Coming Soon</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li class='cappa-menu-sub'><a href='#'>News <i class="ti-angle-down"></i></a>
-                        <ul>
-                            <li><a href='news.html'>News 1</a></li>
-                            <li><a href='news2.html'>News 2</a></li>
-                            <li><a href='post.html'>Single Post</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
-            <div class="cappa-menu-footer">
-                <div class="reservation">
-                    <a href="tel:8551004444">
-                        <div class="icon d-flex justify-content-center align-items-center">
-                            <i class="flaticon-call"></i>
-                        </div>
-                        <div class="call">Reservation<br><span>855 100 4444</span></div>
-                    </a>
-                </div>
+    <!-- Menu Partial -->
+<div class="cappa-wrap">
+    <div class="cappa-wrap-inner">
+        <nav class="cappa-menu">
+            <ul>
+               <li>
+                <a href="#" onclick="goToHome(event)">Home</a>
+                </li>
+                <li><a href="about.html">About</a></li>
+                <li class='cappa-menu-sub'><a href='#'>Rooms &amp; Suites <i class="ti-angle-down"></i></a>
+                    <ul>
+                        <li><a href='rooms.html'>Rooms 1</a></li>
+                        <li><a href='rooms2.html'>Rooms 2</a></li>
+                        <li><a href='rooms3.html'>Rooms 3</a></li>
+                        <li><a href='room-details.html'>Room Details</a></li>
+                    </ul>
+                </li>
+                <li><a href="restaurant.html">Restaurant</a></li>
+                <li><a href="spa-wellness.html">Spa Wellness</a></li>
+                <li class="cappa-menu-sub"><a href='#'>Pages <i class="ti-angle-down"></i></a>
+                    <ul>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="facilities.html">Facilites</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="team.html">Team</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="careers.html">Careers</a></li>
+                        <li><a href="faq.html">F.A.Qs</a></li>
+                        <li class='cappa-menu-sub'><a href='#'> Other Pages <i class="ti-angle-down"></i></a>
+                            <ul>
+                                <li><a href='404.html'>404 Page</a></li>
+                                <li><a href='coming-soon.html'>Coming Soon</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+               <li id="profile-link">
+        <a href="#" onclick="goToProfile(event)">Tài khoản</a>
+    </li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="cappa-menu-footer">
+            <div class="reservation">
+                <a href="tel:8551004444">
+                    <div class="icon d-flex justify-content-center align-items-center">
+                        <i class="flaticon-call"></i>
+                    </div>
+                    <div class="call">Reservation<br><span>855 100 4444</span></div>
+                </a>
             </div>
         </div>
     </div>
+</div>
+<script>
+    // Blade render URL thực tế trước khi JS chạy
+
+    // Sử dụng URL TƯƠNG ĐỐI để tránh lặp host – Browser tự giữ origin (127.0.0.1:8000)
+    // assign to window.* to avoid redeclaring consts in pages that also declare them
+    window.PROFILE_PATH = window.PROFILE_PATH || "/taikhoan";  // /taikhoan
+    window.LOGIN_PATH = window.LOGIN_PATH || "/login";      // /login
+    window.HOME_PATH = window.HOME_PATH || "http://localhost";             // /
+
+    function goToProfile(event) {
+        event.preventDefault();
+        
+        const role = localStorage.getItem('role');
+        const email = localStorage.getItem('email');
+        
+        if (role && email && parseInt(role) === 1) {
+            // Ghép query email vào path tương đối
+            const profileUrl = (window.PROFILE_PATH || '/') + '?email=' + encodeURIComponent(email);
+            window.location.href = profileUrl;  // Browser giữ host:port → http://127.0.0.1:8000/taikhoan?email=...
+        } else {
+            localStorage.setItem('redirect_after_login', window.PROFILE_PATH || '/');
+            alert('Vui lòng đăng nhập để xem thông tin tài khoản.');
+            window.location.href = window.LOGIN_PATH || '/login';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const role = localStorage.getItem('role');
+        const email = localStorage.getItem('email');
+        const profileItem = document.getElementById('profile-menu-item');
+        const loginItem = document.getElementById('login-menu-item');
+        
+        if (role && email && parseInt(role) === 1) {
+            if (profileItem) profileItem.style.display = 'list-item';
+            if (loginItem) loginItem.style.display = 'none';
+        } else {
+            if (profileItem) profileItem.style.display = 'none';
+            if (loginItem) loginItem.style.display = 'list-item';
+        }
+    });
+
+    // navigate home helper (was previously duplicated in welcome.blade.php)
+    function goToHome(event) {
+        event.preventDefault();
+        // use relative HOME_PATH rendered by Blade so origin is preserved by the browser
+        window.location.href = window.HOME_PATH || '/';
+    }
+</script>
+
     <!-- Logo & Menu Burger -->
     <header class="cappa-header">
         <div class="container">
@@ -261,30 +289,18 @@
                 </div>
             </div>
             <div class="row">
-                <?php if (!empty($rooms) && is_array($rooms)): ?>
-                    <?php foreach ($rooms as $index => $room): ?>
-                        <?php
-                        $colClass = ($index >= 3) ? 'col-md-6' : 'col-md-4';
-                        $img = isset($room['UrlAnhLoaiPhong']) ? $room['UrlAnhLoaiPhong'] : '1.jpg';
-                        $price = isset($room['GiaCoBanMotDem']) ? $room['GiaCoBanMotDem'] : '';
-                        $name = isset($room['TenLoaiPhong']) ? $room['TenLoaiPhong'] : '';
-                        $idLoai = isset($room['IDLoaiPhong']) ? $room['IDLoaiPhong'] : '';
-                        $displayPrice = $price !== '' ? number_format((float) $price, 0, '.', ',') .  '₫' : '';
-                        $imgUrl = '/HomePage/img/rooms/' . rawurlencode($img); // root-relative
-                        ?>
-                        <div class="<?php echo $colClass; ?>">
+                                                                                    <div class="col-md-4">
                             <div class="item">
                                 <div class="position-re o-hidden">
-                                    <?php $sizeClass = ($index >= 3) ? 'large' : 'small'; ?>
-                                    <div class="position-re o-hidden <?php echo $sizeClass; ?>">
-                                        <img src="<?php echo $imgUrl; ?>" alt="<?php echo htmlspecialchars($name); ?>">
+                                                                        <div class="position-re o-hidden small">
+                                        <img src="/HomePage/img/rooms/1.jpg" alt="Phòng Standard">
                                     </div>
                                 </div>
                                 <span class="category"><a
-                                        href="<?php echo '/rooms2?type=' . rawurlencode($idLoai); ?>">Book</a></span>
+                                        href="/rooms2?type=LP001">Book</a></span>
                                 <div class="con">
-                                    <h6><a href="room-details.html"><?php echo $displayPrice; ?></a></h6>
-                                    <h5><a href="room-details.html"><?php echo htmlspecialchars($name); ?></a></h5>
+                                    <h6><a href="room-details.html"></a></h6>
+                                    <h5><a href="room-details.html">Phòng Standard</a></h5>
                                     <div class="line"></div>
                                     <div class="row facilities">
                                         <div class="col col-md-7">
@@ -296,11 +312,8 @@
                                             </ul>
                                         </div>
                                         <div class="col col-md-5 text-end">
-                                            <?php
-                                            $detailsId = isset($room['first_phong_id']) && $room['first_phong_id'] ? $room['first_phong_id'] : $idLoai;
-                                            ?>
-                                            <div class="permalink">
-                                                <a href="roomdetails.php?id=<?php echo urlencode($detailsId); ?>">Details <i
+                                                                                        <div class="permalink">
+                                                <a href="roomdetails.php?id=P001">Details <i
                                                         class="ti-arrow-right"></i></a>
                                             </div>
                                         </div>
@@ -308,89 +321,284 @@
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="col-12">
-                        <p>No rooms available at the moment.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
+                                                                    <div class="col-md-4">
+                            <div class="item">
+                                <div class="position-re o-hidden">
+                                                                        <div class="position-re o-hidden small">
+                                        <img src="/HomePage/img/rooms/2.jpg" alt="Phòng Deluxe">
+                                    </div>
+                                </div>
+                                <span class="category"><a
+                                        href="/rooms2?type=LP002">Book</a></span>
+                                <div class="con">
+                                    <h6><a href="room-details.html"></a></h6>
+                                    <h5><a href="room-details.html">Phòng Deluxe</a></h5>
+                                    <div class="line"></div>
+                                    <div class="row facilities">
+                                        <div class="col col-md-7">
+                                            <ul>
+                                                <li><i class="flaticon-bed"></i></li>
+                                                <li><i class="flaticon-bath"></i></li>
+                                                <li><i class="flaticon-breakfast"></i></li>
+                                                <li><i class="flaticon-towel"></i></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col col-md-5 text-end">
+                                                                                        <div class="permalink">
+                                                <a href="roomdetails.php?id=P003">Details <i
+                                                        class="ti-arrow-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                                    <div class="col-md-4">
+                            <div class="item">
+                                <div class="position-re o-hidden">
+                                                                        <div class="position-re o-hidden small">
+                                        <img src="/HomePage/img/rooms/3.jpg" alt="Phòng Family">
+                                    </div>
+                                </div>
+                                <span class="category"><a
+                                        href="/rooms2?type=LP003">Book</a></span>
+                                <div class="con">
+                                    <h6><a href="room-details.html"></a></h6>
+                                    <h5><a href="room-details.html">Phòng Family</a></h5>
+                                    <div class="line"></div>
+                                    <div class="row facilities">
+                                        <div class="col col-md-7">
+                                            <ul>
+                                                <li><i class="flaticon-bed"></i></li>
+                                                <li><i class="flaticon-bath"></i></li>
+                                                <li><i class="flaticon-breakfast"></i></li>
+                                                <li><i class="flaticon-towel"></i></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col col-md-5 text-end">
+                                                                                        <div class="permalink">
+                                                <a href="roomdetails.php?id=LP003">Details <i
+                                                        class="ti-arrow-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                                    <div class="col-md-6">
+                            <div class="item">
+                                <div class="position-re o-hidden">
+                                                                        <div class="position-re o-hidden large">
+                                        <img src="/HomePage/img/rooms/4.jpg" alt="Phòng Suite">
+                                    </div>
+                                </div>
+                                <span class="category"><a
+                                        href="/rooms2?type=LP004">Book</a></span>
+                                <div class="con">
+                                    <h6><a href="room-details.html"></a></h6>
+                                    <h5><a href="room-details.html">Phòng Suite</a></h5>
+                                    <div class="line"></div>
+                                    <div class="row facilities">
+                                        <div class="col col-md-7">
+                                            <ul>
+                                                <li><i class="flaticon-bed"></i></li>
+                                                <li><i class="flaticon-bath"></i></li>
+                                                <li><i class="flaticon-breakfast"></i></li>
+                                                <li><i class="flaticon-towel"></i></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col col-md-5 text-end">
+                                                                                        <div class="permalink">
+                                                <a href="roomdetails.php?id=P004">Details <i
+                                                        class="ti-arrow-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                                    <div class="col-md-6">
+                            <div class="item">
+                                <div class="position-re o-hidden">
+                                                                        <div class="position-re o-hidden large">
+                                        <img src="/HomePage/img/rooms/5.jpg" alt="Phòng VIP">
+                                    </div>
+                                </div>
+                                <span class="category"><a
+                                        href="/rooms2?type=LP005">Book</a></span>
+                                <div class="con">
+                                    <h6><a href="room-details.html"></a></h6>
+                                    <h5><a href="room-details.html">Phòng VIP</a></h5>
+                                    <div class="line"></div>
+                                    <div class="row facilities">
+                                        <div class="col col-md-7">
+                                            <ul>
+                                                <li><i class="flaticon-bed"></i></li>
+                                                <li><i class="flaticon-bath"></i></li>
+                                                <li><i class="flaticon-breakfast"></i></li>
+                                                <li><i class="flaticon-towel"></i></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col col-md-5 text-end">
+                                                                                        <div class="permalink">
+                                                <a href="roomdetails.php?id=P005">Details <i
+                                                        class="ti-arrow-right"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                </div>
         </div>
     </section>
     <!-- Pricing -->
     <section class="pricing section-padding bg-blck">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="section-subtitle"><span>Best Prices</span></div>
-                    <div class="section-title"><span>Dịch Vụ Bổ Sung</span></div>
-                    <p class="color-2">Chúng tôi mang đến mức giá tốt nhất cho kỳ nghỉ thư giãn và trọn vẹn của quý
-                        khách.</p>
-                    <p class="color-2">Tại đây, mọi trải nghiệm đều được chăm chút tỉ mỉ – từ không gian nghỉ dưỡng sang trọng đến dịch vụ tận tâm, giúp quý khách tận hưởng những khoảnh khắc yên bình và đáng nhớ nhất.
-                    </p>
-                    <p class="color-2">Khách sạn Cappa Luxury luôn sẵn sàng mang đến các dịch vụ bổ sung đa dạng, được thiết kế nhằm đáp ứng mọi nhu cầu nghỉ dưỡng và tiện nghi của quý khách.</p>
-                    <div class="reservations mb-30">
-                        <div class="icon"><span class="flaticon-call"></span></div>
-                        <div class="text">
-                            <p class="color-2">Đặt phòng</p> <a href="tel:855-100-4444">855 100 4444</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-8">
-                    <div class="owl-carousel owl-theme">
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/1.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room cleaning</div>
-                                <div class="amount">$50<span>/ month</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/2.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Drinks included</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/3.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Room Breakfast</div>
-                                <div class="amount">$30<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="pricing-card">
-                            <img src="HomePage/img/pricing/4.jpg" alt="">
-                            <div class="desc">
-                                <div class="name">Safe & Secure</div>
-                                <div class="amount">$15<span>/ daily</span></div>
-                                <ul class="list-unstyled list">
-                                    <li><i class="ti-check"></i> Hotel ut nisan the duru</li>
-                                    <li><i class="ti-check"></i> Orci miss natoque vasa ince</li>
-                                    <li><i class="ti-close unavailable"></i>Clean sorem ipsum morbin</li>
-                                </ul>
-                            </div>
-                        </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="section-subtitle"><span>Best Prices</span></div>
+                <div class="section-title"><span>Dịch Vụ Bổ Sung</span></div>
+                <p class="color-2">Chúng tôi mang đến mức giá tốt nhất cho kỳ nghỉ thư giãn và trọn vẹn của quý khách.</p>
+                <p class="color-2">Tại đây, mọi trải nghiệm đều được chăm chút tỉ mỉ – từ không gian nghỉ dưỡng sang trọng đến dịch vụ tận tâm, giúp quý khách tận hưởng những khoảnh khắc yên bình và đáng nhớ nhất.</p>
+                <p class="color-2">Khách sạn Cappa Luxury luôn sẵn sàng mang đến các dịch vụ bổ sung đa dạng, được thiết kế nhằm đáp ứng mọi nhu cầu nghỉ dưỡng và tiện nghi của quý khách.</p>
+                <div class="reservations mb-30">
+                    <div class="icon"><span class="flaticon-call"></span></div>
+                    <div class="text">
+                        <p class="color-2">Đặt phòng</p> <a href="tel:855-100-4444">855 100 4444</a>
                     </div>
                 </div>
             </div>
+            <div class="col-md-8">
+                <div class="owl-carousel owl-theme">
+                                                                                                    <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/1.jpg" alt="Dọn phòng">
+                                <div class="desc">
+                                    <div class="name">Dọn phòng</div>
+                                    <div class="amount">100,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Dọn phòng mỗi ngày</li>
+                                                                                            <li><i class="ti-check"></i> Thay khăn &amp; ga giường</li>
+                                                                                            <li><i class="ti-check"></i> Khử mùi &amp; vệ sinh</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/2.jpg" alt="Phục vụ bữa sáng">
+                                <div class="desc">
+                                    <div class="name">Phục vụ bữa sáng</div>
+                                    <div class="amount">150,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Buffet sáng đa dạng</li>
+                                                                                            <li><i class="ti-check"></i> Phục vụ từ 6h-9h</li>
+                                                                                            <li><i class="ti-check"></i> Món Âu - Á</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/3.jpg" alt="Giặt ủi">
+                                <div class="desc">
+                                    <div class="name">Giặt ủi</div>
+                                    <div class="amount">80,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Giặt nhanh trong ngày</li>
+                                                                                            <li><i class="ti-check"></i> Ủi và gấp gọn</li>
+                                                                                            <li><i class="ti-check"></i> Nhận đồ tại phòng</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/4.jpg" alt="Đưa đón sân bay">
+                                <div class="desc">
+                                    <div class="name">Đưa đón sân bay</div>
+                                    <div class="amount">300,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Xe riêng đưa đón</li>
+                                                                                            <li><i class="ti-check"></i> Tài xế chuyên nghiệp</li>
+                                                                                            <li><i class="ti-check"></i> Hỗ trợ 24/7</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/1.jpg" alt="Spa &amp; Massage">
+                                <div class="desc">
+                                    <div class="name">Spa &amp; Massage</div>
+                                    <div class="amount">500,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Massage toàn thân</li>
+                                                                                            <li><i class="ti-check"></i> Thư giãn với tinh dầu</li>
+                                                                                            <li><i class="ti-check"></i> Phòng riêng yên tĩnh</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/2.jpg" alt="Thuê xe du lịch">
+                                <div class="desc">
+                                    <div class="name">Thuê xe du lịch</div>
+                                    <div class="amount">700,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Thuê xe có tài xế</li>
+                                                                                            <li><i class="ti-check"></i> Tour ngắn &amp; dài</li>
+                                                                                            <li><i class="ti-check"></i> Xe đời mới, sạch</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/3.jpg" alt="Gọi đồ ăn tại phòng">
+                                <div class="desc">
+                                    <div class="name">Gọi đồ ăn tại phòng</div>
+                                    <div class="amount">200,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Gọi món tại phòng</li>
+                                                                                            <li><i class="ti-check"></i> Thực đơn đa dạng</li>
+                                                                                            <li><i class="ti-check"></i> Phục vụ nhanh</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                                                <div class="pricing-card">
+                                <img src="/HomePage/img/pricing/4.jpg" alt="Thuê hội trường">
+                                <div class="desc">
+                                    <div class="name">Thuê hội trường</div>
+                                    <div class="amount">1,200,000₫<span></span></div>                                    <ul class="list-unstyled list">
+                                                                                                                                    <li><i class="ti-check"></i> Hội trường hiện đại</li>
+                                                                                            <li><i class="ti-check"></i> Âm thanh ánh sáng đủ</li>
+                                                                                            <li><i class="ti-check"></i> Phù hợp sự kiện</li>
+                                                                                                                        </ul>
+                                </div>
+                            </div>
+                                                            </div>
+            </div>
         </div>
-    </section>
+    </div>
+</section>
+<script>
+// Safe, idempotent initializer: waits for jQuery and Owl Carousel, then initializes pricing carousel.
+(function initPricingCarousel(){
+    var delay = 150; // ms
+    function ready() {
+        if (window.jQuery && typeof jQuery.fn.owlCarousel === 'function') {
+            jQuery(function($){
+                $('.pricing .owl-carousel').each(function(){
+                    var $el = $(this);
+                    if ($el.data('owl-initialized')) return;
+                    $el.owlCarousel({
+                        loop: true,
+                        margin: 30,
+                        mouseDrag: true,
+                        autoplay: false,
+                        dots: true,
+                        autoplayHoverPause: true,
+                        nav: false,
+                        responsive: {
+                            0: { items: 1 },
+                            600: { items: 1 },
+                            1000: { items: 2 }
+                        }
+                    });
+                    $el.data('owl-initialized', true);
+                });
+            });
+        } else {
+            setTimeout(ready, delay);
+        }
+    }
+    ready();
+})();
+</script>
+
     <!-- Promo Video -->
     <section class="video-wrapper video section-padding bg-img bg-fixed" data-overlay-dark="3"
         data-background="HomePage/img/slider/2.jpg">
@@ -917,63 +1125,64 @@
         </div>
     </section>
     <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-top">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="footer-column footer-about">
-                            <h3 class="footer-title">About Hotel</h3>
-                            <p class="footer-about-text">Welcome to the best five-star deluxe hotel in New York. Hotel
-                                elementum sesue the aucan vestibulum aliquam justo in sapien rutrum volutpat.</p>
-                        </div>
+    <!-- Footer Partial -->
+<footer class="footer">
+    <div class="footer-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="footer-column footer-about">
+                        <h3 class="footer-title">About Hotel</h3>
+                        <p class="footer-about-text">Welcome to the best five-star deluxe hotel in New York. Hotel
+                            elementum sesue the aucan vestibulum aliquam justo in sapien rutrum volutpat.</p>
                     </div>
-                    <div class="col-md-3 offset-md-1">
-                        <div class="footer-column footer-explore clearfix">
-                            <h3 class="footer-title">Explore</h3>
-                            <ul class="footer-explore-list list-unstyled">
-                                <li><a href="index.html">Home</a></li>
-                                <li><a href="rooms.html">Rooms & Suites</a></li>
-                                <li><a href="restaurant.html">Restaurant</a></li>
-                                <li><a href="spa-wellness.html">Spa & Wellness</a></li>
-                                <li><a href="about.html">About Hotel</a></li>
-                                <li><a href="contact.html">Contact</a></li>
-                            </ul>
-                        </div>
+                </div>
+                <div class="col-md-3 offset-md-1">
+                    <div class="footer-column footer-explore clearfix">
+                        <h3 class="footer-title">Explore</h3>
+                        <ul class="footer-explore-list list-unstyled">
+                            <li><a href="index.html">Home</a></li>
+                            <li><a href="rooms.html">Rooms & Suites</a></li>
+                            <li><a href="restaurant.html">Restaurant</a></li>
+                            <li><a href="spa-wellness.html">Spa & Wellness</a></li>
+                            <li><a href="about.html">About Hotel</a></li>
+                            <li><a href="contact.html">Contact</a></li>
+                        </ul>
                     </div>
-                    <div class="col-md-4">
-                        <div class="footer-column footer-contact">
-                            <h3 class="footer-title">Contact</h3>
-                            <p class="footer-contact-text">1616 Broadway NY, New York 10001<br>United States of America
-                            </p>
-                            <div class="footer-contact-info">
-                                <p class="footer-contact-phone"><span class="flaticon-call"></span> 855 100 4444</p>
-                                <p class="footer-contact-mail">info@luxuryhotel.com</p>
-                            </div>
-                            <div class="footer-about-social-list">
-                                <a href="#"><i class="ti-instagram"></i></a>
-                                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
-                                <a href="#"><i class="ti-youtube"></i></a>
-                                <a href="#"><i class="ti-facebook"></i></a>
-                                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-                            </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="footer-column footer-contact">
+                        <h3 class="footer-title">Contact</h3>
+                        <p class="footer-contact-text">1616 Broadway NY, New York 10001<br>United States of America
+                        </p>
+                        <div class="footer-contact-info">
+                            <p class="footer-contact-phone"><span class="flaticon-call"></span> 855 100 4444</p>
+                            <p class="footer-contact-mail">info@luxuryhotel.com</p>
+                        </div>
+                        <div class="footer-about-social-list">
+                            <a href="#"><i class="ti-instagram"></i></a>
+                            <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                            <a href="#"><i class="ti-youtube"></i></a>
+                            <a href="#"><i class="ti-facebook"></i></a>
+                            <a href="#"><i class="fa-brands fa-tiktok"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="footer-bottom">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="footer-bottom-inner">
-                            <p class="footer-bottom-copy-right">Â© Copyright 2022 by <a href="#">DuruThemes.com</a></p>
-                        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="footer-bottom-inner">
+                        <p class="footer-bottom-copy-right">Â© Copyright 2022 by <a href="#">DuruThemes.com</a></p>
                     </div>
                 </div>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
     <!-- jQuery -->
     <script src="HomePage/js/jquery-3.7.1.min.js"></script>
     <script src="HomePage/js/jquery-migrate-3.5.0.min.js"></script>
@@ -993,8 +1202,53 @@
     <script src="HomePage/js/datepicker.js"></script>
     <script src="HomePage/js/smooth-scroll.min.js"></script>
     <script src="HomePage/js/custom.js"></script>
+<!-- Navigation scripts moved to partial: resources/views/partials/menu.blade.php -->
 </body>
 
 <!-- Mirrored from duruthemes.com/demo/html/cappa/demo6-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Thu, 18 Sep 2025 01:56:06 GMT -->
 
 </html>
+<script>
+console.log("📂 [AuthCheck] Script bắt đầu chạy...");
+
+const token = localStorage.getItem("token");
+const user = localStorage.getItem("userName");
+
+console.log("🔍 Token:", token ? "Đã có" : "Không có");
+console.log("👤 User name:", user || "(chưa có)");
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("🌐 DOM đã load hoàn tất...");
+
+  const display = document.querySelector("#userDisplay");
+  const logoutBtn = document.querySelector("#logoutBtn");
+
+  if (token) {
+    // ✅ Nếu đã login
+    if (display) {
+      display.textContent = user || "Người dùng";
+      console.log("👋 Đã hiển thị tên:", user);
+    }
+    if (logoutBtn) {
+      logoutBtn.style.display = "inline-block";
+    }
+  } else {
+    // ❌ Nếu chưa login
+    if (display) {
+      display.textContent = "Khách vãng lai";
+      console.log("👤 Người dùng chưa đăng nhập → hiển thị Khách vãng lai");
+    }
+    if (logoutBtn) {
+      logoutBtn.style.display = "none";
+    }
+  }
+});
+
+function logout() {
+  console.log("🚪 Đăng xuất: xóa localStorage và chuyển về trang chủ");
+  localStorage.clear(); // Xóa token, userName, role, email, v.v.
+  
+  // Chuyển về trang chủ (sử dụng URL tương đối để giữ host:port)
+  window.location.href = 'http://localhost';  // Render thành '/' → Browser tự thêm origin (127.0.0.1:8000)
+}
+</script>

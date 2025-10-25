@@ -7,13 +7,34 @@ use App\Models\Amenties\TienNghi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class TienNghiController extends Controller
 {
     // GET /api/tien-nghi
     public function index()
     {
-        $data = TienNghi::orderBy('IDTienNghi')->get(['IDTienNghi', 'TenTienNghi']);
+        // Return basic fields plus a computed lock flag indicating whether this amenity
+        // is currently assigned to any room that is not in "Trống" status.
+        $rows = TienNghi::orderBy('IDTienNghi')->get(['IDTienNghi', 'TenTienNghi']);
+        $data = $rows->map(function ($tn) {
+            $inUse = DB::table('TienNghiPhong as tnp')
+                ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
+                ->where('tnp.IDTienNghi', $tn->IDTienNghi)
+                ->where(function ($q) {
+                    // Trạng thái 'bận' là 'Đang sử dụng' HOẶC 'Bảo trì'
+                    $q->where('p.TrangThai', '=', 'Đang sử dụng')
+                        ->orWhere('p.TrangThai', '=', 'Bảo trì');
+                })
+                ->exists();
+
+            return [
+                'IDTienNghi' => $tn->IDTienNghi,
+                'TenTienNghi' => $tn->TenTienNghi,
+                'isLocked' => (bool) $inUse,
+            ];
+        })->values();
+
         return response()->json(['success' => true, 'data' => $data]);
     }
 
@@ -41,7 +62,9 @@ class TienNghiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'TenTienNghi' => [
-                'required', 'string', 'max:100',
+                'required',
+                'string',
+                'max:100',
                 Rule::unique('TienNghi', 'TenTienNghi')->ignore($tienNghi->IDTienNghi, 'IDTienNghi'),
             ],
         ]);
@@ -54,6 +77,23 @@ class TienNghiController extends Controller
             ], 422);
         }
 
+        $inUse = DB::table('TienNghiPhong as tnp')
+            ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
+            ->where('tnp.IDTienNghi', $tienNghi->IDTienNghi)
+            ->where(function ($q) {
+                // Trạng thái 'bận' là 'Đang sử dụng' HOẶC 'Bảo trì'
+                $q->where('p.TrangThai', '=', 'Đang sử dụng')
+                    ->orWhere('p.TrangThai', '=', 'Bảo trì');
+            })
+            ->exists();
+
+        if ($inUse) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể chỉnh sửa tiện nghi này vì đang có phòng sử dụng. Vui lòng gỡ tiện nghi khỏi các phòng (hoặc chờ phòng trống) trước khi chỉnh sửa.'
+            ], 400);
+        }
+
         $tienNghi->update($validator->validated());
         return response()->json(['success' => true, 'data' => $tienNghi]);
     }
@@ -61,6 +101,24 @@ class TienNghiController extends Controller
     // DELETE /api/tien-nghi/{id}
     public function destroy(TienNghi $tienNghi)
     {
+        $inUse = DB::table('TienNghiPhong as tnp')
+            ->join('Phong as p', 'tnp.IDPhong', '=', 'p.IDPhong')
+            ->where('tnp.IDTienNghi', $tienNghi->IDTienNghi)
+            ->where(function ($q) {
+                // Trạng thái 'bận' là 'Đang sử dụng' HOẶC 'Bảo trì'
+                $q->where('p.TrangThai', '=', 'Đang sử dụng')
+                    ->orWhere('p.TrangThai', '=', 'Bảo trì');
+            })
+            ->exists();
+
+        if ($inUse) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa tiện nghi này vì đang có phòng sử dụng. Vui lòng gỡ tiện nghi khỏi các phòng (hoặc chờ phòng trống) trước khi xóa.'
+            ], 400);
+        }
+
+        // Safe to detach and delete
         $tienNghi->phongs()->detach();
         $tienNghi->delete();
 

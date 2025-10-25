@@ -14,15 +14,15 @@ class LoaiPhongController extends Controller
      */
     public function index()
     {
+        // Only select columns that actually exist on the `loaiphong` table.
+        // Some older code expected fields like SoNguoiToiDa / GiaCoBanMotDem
+        // which belong to `phong` not `loaiphong` and cause SQL errors.
         $data = LoaiPhong::orderBy('TenLoaiPhong', 'asc')
             ->get([
                 'IDLoaiPhong',
                 'TenLoaiPhong',
                 'MoTa',
-                'SoNguoiToiDa',
-                'GiaCoBanMotDem',
-                'UrlAnhLoaiPhong',
-                'UuTienChinh'
+                'UrlAnhLoaiPhong'
             ]);
 
         return response()->json([
