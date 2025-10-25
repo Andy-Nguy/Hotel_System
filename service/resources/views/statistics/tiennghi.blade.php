@@ -1103,6 +1103,22 @@
 
     // Render bảng phòng (hỗ trợ lọc theo tiện nghi + sắp xếp)
     function renderPhongTable(data) {
+        // Helper: render trạng thái với badge màu
+        const statusBadge = (stRaw) => {
+            const st = String(stRaw || '').trim().toLowerCase();
+            if (!stRaw) return '';
+            if (st === 'trống' || st === 'trong' || st === 'phòng trống') {
+                return `<span class="badge bg-success">${stRaw}</span>`;
+            }
+            if (st.includes('đang')) {
+                return `<span class="badge bg-warning text-dark">${stRaw}</span>`;
+            }
+            if (st.includes('bảo trì') || st.includes('bao tri') || st.includes('bảo dưỡng')) {
+                return `<span class="badge bg-secondary">${stRaw}</span>`;
+            }
+            return `<span class="badge bg-secondary">${stRaw}</span>`;
+        };
+
         const q = vnNormalize($('#searchPhong').val() || '');
         let filtered = data.filter(x => {
             const soPhong = vnNormalize(String(x.SoPhong ?? ''));
@@ -1147,7 +1163,7 @@
 					<td>${x.IDPhong}</td>
 					<td>${x.SoPhong}</td>
 					<td>${x.TenLoaiPhong || ''}</td>
-					<td>${x.TrangThai || ''}</td>
+					<td>${statusBadge(x.TrangThai)}</td>
 					<td>${amenitiesHtml}</td>
 				</tr>`;
             });

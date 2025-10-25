@@ -54,20 +54,25 @@ class PhongTienNghiController extends Controller
         }
 
         // Prevent assigning/removing amenities when the room is currently in use
-        // (room considered 'in use' when TrangThai is not 'Trống')
-        if (!is_null($phong->TrangThai) && $phong->TrangThai !== 'Trống') {
+        // Consider the room FREE only when TrangThai is null/empty or equals any variant of "Trống"
+        // Accept common variants: "Trống", "trong", "phòng trống"
+        $status = trim((string)($phong->TrangThai ?? ''));
+        $normalized = mb_strtolower($status, 'UTF-8');
+        $isFree = ($status === '') || in_array($normalized, ['trong', 'trống', 'phòng trống'], true);
+        if (!$isFree) {
             return response()->json([
                 'success' => false,
-                'message' => 'Không thể gán tiện nghi này vì đang có phòng sử dụng. Vui lòng gỡ tiện nghi khỏi các phòng (hoặc chờ phòng trống) trước khi gán.'
+                'message' => 'Không thể gán/bỏ tiện nghi khi phòng không ở trạng thái Trống.'
             ], 400);
         }
 
+        // Allow clearing all amenities: require the key to be present, but it may be an empty array
         $validated = $request->validate([
-            'tien_nghi_ids' => 'array|required',
+            'tien_nghi_ids' => 'present|array',
             'tien_nghi_ids.*' => 'string|exists:TienNghi,IDTienNghi',
         ]);
 
-        $newTienNghiIds = array_values(array_unique($validated['tien_nghi_ids']));
+        $newTienNghiIds = array_values(array_unique($validated['tien_nghi_ids'] ?? []));
         Log::debug('New TienNghi IDs (unique): ', $newTienNghiIds);
 
         // Current IDs via DB (no relation)
