@@ -77,7 +77,7 @@
                                         <i class="bi bi-calendar-check"></i> {{-- (hoặc icon bạn muốn) --}}
                                         <span class="menu-text">Đặt Phòng</span>
                                     </a>
-                                </li>
+                               </li>
 
                                 <li class="{{ request()->routeIs('hoadon.index') ? 'active current-page' : '' }}">
                                     <a href="{{ route('hoadon.index') }}">

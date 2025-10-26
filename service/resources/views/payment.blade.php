@@ -723,7 +723,20 @@
                         </div>
 
                         <div style="text-align:center; margin-top:16px;">
-                            <img src="HomePage/img/pricing/image.png" alt="VietQR - BIDV Bank" style="width:320px; height:auto; border:1px solid #e0e0e0; border-radius:8px; background:white; padding:8px;" />
+                            <!-- Dynamic VietQR image; JS will update amount/account/addInfo -->
+                            <img id="qrCodeImage" src="https://img.vietqr.io/image/bidv-8639699999-print.png?amount=200000&addInfo=Thanh%20toan%20tien%20phong%20&accountName=%C4%ABy%20ban%20Trung%20%C6%B0%C6%A1ng%20M%E1%BA%B7t%20tr%C3%A1ng%20T%E1%BB%95%20qu%E1%BB%91c%20Vi%E1%BB%87t%20Nam" alt="VietQR - BIDV Bank" style="width:320px; height:auto; border:1px solid #e0e0e0; border-radius:8px; background:white; padding:8px;" />
+                        </div>
+
+                        <div class="form-group" style="margin-top:18px;">
+                            <label style="display:block; margin-bottom:8px; font-weight:600;">Chọn hình thức thanh toán:</label>
+                            <label style="display:inline-block; margin-right:18px; font-weight:500;">
+                                <input type="checkbox" id="depositCheckbox" style="width: auto; margin-right: 8px;" checked>
+                                Thanh toán cọc (<span id="depositAmountText">200.000 đ</span>)
+                            </label>
+                            <label style="display:inline-block; font-weight:500;">
+                                <input type="checkbox" id="fullCheckbox" style="width: auto; margin-right: 8px;">
+                                Thanh toán full (tổng: <span id="fullAmountText">--</span>)
+                            </label>
                         </div>
 
                         <div class="payment-info-box success" style="margin-top: 20px;">
@@ -875,7 +888,9 @@
             subtotal: 500000,
             taxes: 75000,
             discount: 0,
-            total: 575000
+            total: 575000,
+            // default deposit (cọc) in VND
+            tienCoc: 200000
         };
 
         // Load pending booking saved by booking page (localStorage) and apply to bookingData
@@ -898,6 +913,7 @@
                 bookingData.total = pending.total || bookingData.total || bookingData.subtotal + (bookingData.taxes || 0);
                 bookingData.roomId = pending.roomId || bookingData.roomId; // IDPhong from pending booking
                 bookingData.roomNumber = pending.roomNumber || bookingData.roomNumber; // SoPhong for display
+                bookingData.tienCoc = pending.tienCoc ?? pending.TienCoc ?? pending.deposit ?? bookingData.tienCoc ?? 200000;
             } catch (e) {
                 console.warn('Failed to load pendingBooking', e);
             }
@@ -908,6 +924,7 @@
             loadPendingBooking();
             loadBookingData();
             formatCardInputs();
+            initPaymentOptions();
         });
 
         function loadBookingData() {
@@ -1188,6 +1205,96 @@
             }
         }
 
+        // Initialize deposit/full checkboxes and persist selection
+        function initPaymentOptions() {
+            const depositChk = document.getElementById('depositCheckbox');
+            const fullChk = document.getElementById('fullCheckbox');
+            const fullText = document.getElementById('fullAmountText');
+            const depositText = document.getElementById('depositAmountText');
+
+            if (!depositChk || !fullChk || !fullText || !depositText) return;
+
+            // set amount texts
+            fullText.textContent = formatCurrency(bookingData.total);
+            depositText.textContent = formatCurrency(200000);
+
+            // ensure bookingData.tienCoc exists
+            if (typeof bookingData.tienCoc === 'undefined' || bookingData.tienCoc === null) {
+                bookingData.tienCoc = 200000;
+            }
+
+            // set initial checks
+            if (bookingData.tienCoc >= (bookingData.total || 0)) {
+                fullChk.checked = true;
+                depositChk.checked = false;
+            } else {
+                depositChk.checked = true;
+                fullChk.checked = false;
+            }
+
+            // helper to persist to pendingBooking
+            function persistPendingTienCoc() {
+                try {
+                    const raw = localStorage.getItem('pendingBooking');
+                    const pending = raw ? JSON.parse(raw) : {};
+                    pending.tienCoc = bookingData.tienCoc;
+                    localStorage.setItem('pendingBooking', JSON.stringify(pending));
+                } catch (e) { /* ignore */ }
+            }
+
+            depositChk.addEventListener('change', function() {
+                if (depositChk.checked) {
+                    fullChk.checked = false;
+                    bookingData.tienCoc = 200000;
+                    persistPendingTienCoc();
+                    updateQRCode();
+                } else {
+                    // prevent neither being checked
+                    if (!fullChk.checked) depositChk.checked = true;
+                }
+            });
+
+            fullChk.addEventListener('change', function() {
+                if (fullChk.checked) {
+                    depositChk.checked = false;
+                    bookingData.tienCoc = bookingData.total || bookingData.subtotal || 0;
+                    persistPendingTienCoc();
+                    updateQRCode();
+                } else {
+                    if (!depositChk.checked) fullChk.checked = true;
+                }
+            });
+
+            // update QR on init
+            updateQRCode();
+        }
+
+        // Build VietQR URL and set QR image src based on current bookingData.tienCoc
+        function updateQRCode() {
+            try {
+                const img = document.getElementById('qrCodeImage');
+                if (!img) return;
+
+                // Amount expected as integer (VND). VietQR expects amount in numeric value.
+                const amount = Math.round(Number(bookingData.tienCoc) || 0);
+
+                // Prepare query params
+                const addInfo = 'Thanh toan tien phong';
+                // Use accountName from the user's sample; adjust if needed
+                const accountName = 'Ủy ban Trung ương Mặt trận Tổ quốc Việt Nam';
+
+                const params = new URLSearchParams();
+                params.set('amount', String(amount));
+                params.set('addInfo', addInfo + ' ');
+                params.set('accountName', accountName);
+
+                const base = 'https://img.vietqr.io/image/bidv-8639699999-print.png';
+                img.src = base + '?' + params.toString();
+            } catch (e) {
+                console.warn('Failed to update QR code', e);
+            }
+        }
+
         // Reserve now and pay at hotel: ensure pendingBooking exists then navigate
         function goToPayAtHotel() {
             try {
@@ -1235,7 +1342,8 @@
                     NgayTraPhong: bookingData.checkOut,
                     GiaPhong: bookingData.pricePerNight,
                     SoDem: bookingData.nights,
-                    TongTien: bookingData.total
+                    TongTien: bookingData.total,
+                    TienCoc: bookingData.tienCoc || 0
                 };
 
                 showLoading();

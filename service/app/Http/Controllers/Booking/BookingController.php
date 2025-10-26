@@ -22,6 +22,7 @@ class BookingController extends Controller
             'GiaPhong' => 'required|numeric',
             'SoDem' => 'required|integer',
             'TongTien' => 'nullable|numeric',
+            'TienCoc' => 'nullable|numeric'
         ]);
 
         // Compute TongTien if not provided
@@ -48,6 +49,11 @@ class BookingController extends Controller
             $idDatPhong = 'DP' . date('YmdHis') . rand(100, 999);
         }
 
+        // Determine deposit (TienCoc) and remaining amount
+        $tienCoc = isset($validated['TienCoc']) ? floatval($validated['TienCoc']) : 0;
+        $tongTien = $validated['TongTien'];
+        $tienConLai = $tongTien - $tienCoc;
+
         // Prepare data for insert
         $data = [
             'IDDatPhong' => $idDatPhong,
@@ -58,11 +64,12 @@ class BookingController extends Controller
             'NgayTraPhong' => $validated['NgayTraPhong'],
             'SoDem' => $validated['SoDem'],
             'GiaPhong' => $validated['GiaPhong'],
-            'TongTien' => $validated['TongTien'],
-            'TienCoc' => 0,
-            'TienConLai' => $validated['TongTien'],
+            'TongTien' => $tongTien,
+            'TienCoc' => $tienCoc,
+            'TienConLai' => $tienConLai,
             'TrangThai' => 1,
-            'TrangThaiThanhToan' => 0,
+            // TrangThaiThanhToan: 1 when fully paid, 0 otherwise
+            'TrangThaiThanhToan' => ($tienCoc >= $tongTien) ? 1 : 0,
         ];
 
         try {
