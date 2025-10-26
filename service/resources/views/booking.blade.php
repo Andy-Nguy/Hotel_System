@@ -792,6 +792,7 @@
             // Fetch room details from API
             try {
                 const room = await fetchRoomDetails(roomId);
+                
                 if (room) {
                     bookingData.roomName = room.name || room.TenPhong || '';
                     bookingData.roomPrice = Number(room.price || room.Gia || room.GiaCoBanMotDem || 0) || 0;
@@ -803,7 +804,10 @@
                     bookingData.total = bookingData.roomPrice * bookingData.nights;
 
                     // Update UI
-                    document.getElementById('roomImage').src = room.image || room.UrlAnhPhong || room.UrlAnhLoaiPhong || 'HomePage/img/rooms/1.jpg';
+                    const img = room.image || room.UrlAnhPhong || room.UrlAnhLoaiPhong;
+                    document.getElementById('roomImage').src = img ? 
+                        (img.startsWith('http') || img.startsWith('HomePage') ? img : `HomePage/img/slider/${img}`) 
+                        : 'HomePage/img/rooms/1.jpg';                    
                     document.getElementById('roomName').textContent = bookingData.roomName;
                     document.getElementById('displayCheckIn').textContent = formatDate(bookingData.checkIn);
                     document.getElementById('displayCheckOut').textContent = formatDate(bookingData.checkOut);

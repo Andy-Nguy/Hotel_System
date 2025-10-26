@@ -723,11 +723,11 @@
                         </div>
 
                         <div style="text-align:center; margin-top:16px;">
-                            <img src="HomePage/img/qr_bank.png" alt="Bank QR" style="width:220px; height:220px; border:1px solid #e0e0e0; border-radius:8px; background:white; padding:8px;" />
+                            <img src="HomePage/img/pricing/image.png" alt="VietQR - BIDV Bank" style="width:320px; height:auto; border:1px solid #e0e0e0; border-radius:8px; background:white; padding:8px;" />
                         </div>
 
                         <div class="payment-info-box success" style="margin-top: 20px;">
-                            <strong>Important:</strong> Please include the reference number in your transfer notes to ensure quick processing.
+                            <strong>Lưu ý:</strong> Vui lòng quét mã QR hoặc chuyển khoản theo thông tin trên để hoàn tất thanh toán. Đặt phòng sẽ được xác nhận sau khi nhận được thanh toán.
                         </div>
                     </div>
 
@@ -1099,8 +1099,8 @@
                 }, 2000);
 
             } else if (selectedMethod === 'bank') {
-                // Bank transfer - just confirm booking
-                completeBooking('pending');
+                // Bank transfer - call same API as pay at hotel
+                submitPayAtHotelToServer();
             } else if (selectedMethod === 'payathotel') {
                 // pay at hotel chosen in-page
                 submitPayAtHotelToServer();

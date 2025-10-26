@@ -733,12 +733,15 @@
                 e.preventDefault();
                 if (!addForm) return;
 
-                const choice = document.querySelector('#kh-add-form input[name="kh_choice"]:checked').value;
+                // radio inputs are located outside the <form>, select globally and guard
+                const choiceEl = document.querySelector('input[name="kh_choice"]:checked');
+                const choice = choiceEl ? choiceEl.value : 'guest';
                 const hoTen = document.querySelector('#kh-add-form input[name="HoTen"]').value;
                 const email = document.querySelector('#kh-add-form input[name="Email"]').value;
                 const soDienThoai = document.querySelector('#kh-add-form input[name="SoDienThoai"]').value;
                 const ngaySinh = document.querySelector('#kh-add-form input[name="NgaySinh"]').value;
-                const otp = document.querySelector('#kh-add-form input[name="Otp"]').value;
+                const otpEl = document.querySelector('#kh-add-form input[name="Otp"]');
+                const otp = otpEl ? otpEl.value : '';
 
                 // Validate
                 if (!hoTen || !email) {

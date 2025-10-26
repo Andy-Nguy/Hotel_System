@@ -35,6 +35,15 @@ CREATE TABLE pending_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS `password_resets` (
+    `email` VARCHAR(255) NOT NULL,
+    `token` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX (`email`),
+    INDEX (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 SELECT * FROM TaiKhoanNguoiDung
 INSERT INTO KhachHang (IDKhachHang, HoTen, NgaySinh, SoDienThoai, Email, NgayDangKy, TichDiem)
 VALUES ('', 'Nguyễn Văn An', '1990-05-15', '0905123456', 'an.nv@hotel.com', CURRENT_DATE, 0);

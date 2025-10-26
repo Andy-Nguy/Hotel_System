@@ -105,7 +105,7 @@
             </div>
         @else
             <div class="status-badge status-confirmed">
-                ✅ ĐẶT PHÒNG ĐÃ ĐƯỢC XÁC NHẬN
+                ✅ ĐẶT PHÒNG ĐANG ĐƯỢC XÁC NHẬN
             </div>
             <p><strong>Cảm ơn bạn đã đặt phòng tại The Cappa Luxury Hotel. Đặt phòng của bạn đã được xác nhận thành công!</strong></p>
         @endif
