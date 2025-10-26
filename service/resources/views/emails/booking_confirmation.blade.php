@@ -119,7 +119,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Phòng:</span>
-                <span class="info-value">{{ $bookingData['IDPhong'] ?? '' }}</span>
+                <span class="info-value">{{ $bookingData['SoPhong'] ?? $bookingData['IDPhong'] ?? '' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Ngày nhận phòng:</span>

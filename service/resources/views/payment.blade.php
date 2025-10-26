@@ -896,7 +896,8 @@
                 bookingData.subtotal = (bookingData.pricePerNight || 0) * (bookingData.nights || 1);
                 bookingData.taxes = pending.taxes ?? bookingData.taxes;
                 bookingData.total = pending.total || bookingData.total || bookingData.subtotal + (bookingData.taxes || 0);
-                bookingData.roomId = pending.roomId || bookingData.roomId; // Add roomId
+                bookingData.roomId = pending.roomId || bookingData.roomId; // IDPhong from pending booking
+                bookingData.roomNumber = pending.roomNumber || bookingData.roomNumber; // SoPhong for display
             } catch (e) {
                 console.warn('Failed to load pendingBooking', e);
             }
@@ -915,7 +916,7 @@
             
             if (params.get('room')) {
                 bookingData.room = decodeURIComponent(params.get('room'));
-                bookingData.roomId = decodeURIComponent(params.get('room')); // Add roomId
+                bookingData.roomId = decodeURIComponent(params.get('room')); // IDPhong
             }
             if (params.get('total')) {
                 bookingData.total = parseFloat(params.get('total'));
@@ -926,7 +927,8 @@
 
         function updateSummary() {
             document.getElementById('summaryRoomImage').src = bookingData.roomImage;
-            document.getElementById('summaryRoomName').textContent = bookingData.room;
+            // Display roomNumber (SoPhong) if available, fallback to room name
+            document.getElementById('summaryRoomName').textContent = bookingData.roomNumber || bookingData.room;
             document.getElementById('summaryDates').textContent = formatDateRange(bookingData.checkIn, bookingData.checkOut);
             // Room rate shown as: "<price> × <nights> đêm"
             document.getElementById('summaryRoomRate').textContent = formatCurrency(bookingData.pricePerNight) + ' × ' + (bookingData.nights || 1) + ' đêm';
@@ -1199,7 +1201,7 @@
                         checkOut: bookingData.checkOut,
                         nights: bookingData.nights || 1,
                         total: bookingData.total || bookingData.subtotal || 0,
-                        IDPhong: raw ? JSON.parse(raw).roomId : bookingData.roomId || 'P003', // Use from pending or bookingData
+                        roomId: raw ? JSON.parse(raw).roomId : bookingData.roomId || 'P003', // IDPhong
                     };
                     localStorage.setItem('pendingBooking', JSON.stringify(pending));
                 }
@@ -1224,10 +1226,10 @@
                     return;
                 }
 
-                // Build payload for API
+                // Build payload for API - Send IDPhong, backend will lookup SoPhong from Phong table
                 const payload = {
                     IDKhachHang: parseInt(userId) || 1,
-                    IDPhong: bookingData.roomId ,
+                    IDPhong: bookingData.roomId || bookingData.room,
                     Email: userEmail || null,
                     NgayNhanPhong: bookingData.checkIn,
                     NgayTraPhong: bookingData.checkOut,

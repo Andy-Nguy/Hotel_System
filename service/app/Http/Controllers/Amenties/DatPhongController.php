@@ -227,6 +227,7 @@ class DatPhongController extends Controller
                     $mailData = [
                         'IDDatPhong' => $dpFull->IDDatPhong,
                         'IDPhong' => $dpFull->IDPhong,
+                        'SoPhong' => $dpFull->phong->SoPhong ?? null,
                         'TenPhong' => $dpFull->phong->TenPhong ?? null,
                         'NgayNhanPhong' => $dpFull->NgayNhanPhong ? $dpFull->NgayNhanPhong->format('Y-m-d') : null,
                         'NgayTraPhong' => $dpFull->NgayTraPhong ? $dpFull->NgayTraPhong->format('Y-m-d') : null,
@@ -279,6 +280,7 @@ class DatPhongController extends Controller
                     $mailData = [
                         'IDDatPhong' => $dpFull->IDDatPhong,
                         'IDPhong' => $dpFull->IDPhong,
+                        'SoPhong' => $dpFull->phong->SoPhong ?? null,
                         'TenPhong' => $dpFull->phong->TenPhong ?? null,
                         'NgayNhanPhong' => $dpFull->NgayNhanPhong ? $dpFull->NgayNhanPhong->format('Y-m-d') : null,
                         'NgayTraPhong' => $dpFull->NgayTraPhong ? $dpFull->NgayTraPhong->format('Y-m-d') : null,
