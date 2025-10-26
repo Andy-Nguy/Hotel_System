@@ -47,7 +47,7 @@
 
                 <!-- App brand starts -->
                 <div class="app-brand p-3 mb-3">
-                    <a href="index.html">
+                    <a href="/admin">
                         <img src="assets/images/logo.svg" class="logo" alt="AdminLite Bootstrap Template" />
                     </a>
                 </div>
@@ -114,6 +114,13 @@
                             </a>
                         </li>
 
+                        <li class="{{ request()->routeIs('checkout.*') ? 'active current-page' : '' }}">
+                            <a href="{{ route('checkout.index') }}">
+                                <i class="bi-cash-coin"></i>
+                                <span class="menu-text">Checkout</span>
+                            </a>
+                        </li>
+
                         <li class="{{ request()->routeIs('room.index') ? 'active current-page' : '' }}">
                             <a href="{{ route('room.index') }}">
                                 <i class="bi bi-door-open"></i>
@@ -135,12 +142,6 @@
                             </a>
                         </li>
 
-                        <li class="{{ request()->routeIs('checkout.*') ? 'active current-page' : '' }}">
-                            <a href="{{ route('checkout.index') }}">
-                                <i class="bi-cash-coin"></i>
-                                <span class="menu-text">Checkout</span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
                 <!-- Sidebar menu ends -->
@@ -179,7 +180,7 @@
 
                     <!-- App brand sm starts -->
                     <div class="app-brand-sm d-lg-none d-flex">
-                        <a href="index.html">
+                        <a href="/admin">
                             <img src="assets/images/logo-sm.svg" class="logo" alt="AdminLite Bootstrap Template" />
                         </a>
                     </div>
