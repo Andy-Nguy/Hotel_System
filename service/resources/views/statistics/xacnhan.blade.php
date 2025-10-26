@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="vi">
+@extends('layouts.layout2')
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Quản lý Đặt phòng - Admin</title>
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/fonts/bootstrap/bootstrap-icons.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/main.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/vendor/overlay-scroll/OverlayScrollbars.min.css') }}" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <style>
+@section('title', 'Xác nhận Đặt phòng')
+
+@push('styles')
+<style>
         /* small adjustments for the bookings table */
         #bookings-table th, #bookings-table td { vertical-align: middle; }
         .actions button { margin-right: 6px; }
@@ -170,87 +163,13 @@
             border-radius: 10px;
             padding: 0.6rem;
         }
-        .modal-body.styled .form-control:focus {
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
-            background: #f9fbff;
-        }
         /* === Kết thúc Styles đồng bộ === */
     </style>
-</head>
+@endpush
 
-<body>
-    <div class="page-wrapper">
-        <div class="main-container">
-
-            <!-- Sidebar -->
-            <nav id="sidebar" class="sidebar-wrapper">
-                <div class="app-brand p-3 mb-3">
-                    <a href="{{ route('datphong.index') }}">
-                        <img src="{{ asset('assets/images/logo.svg') }}" class="logo" alt="Admin" />
-                    </a>
-                </div>
-                <div class="sidebarMenuScroll">
-                    <ul class="sidebar-menu">
-                        <li class="active current-page">
-                            <a href="{{ url('/xacnhan') }}">
-                                <i class="bi bi-calendar-check"></i>
-                                <span class="menu-text">Xác nhận Đặt phòng</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('khachhang.index') }}">
-                                <i class="bi bi-people"></i>
-                                <span class="menu-text">Khách hàng</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('datphong.index') }}">
-                                <i class="bi bi-list"></i>
-                                <span class="menu-text">Danh sách đặt phòng</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="sidebar-settings gap-1 d-lg-flex d-none">
-                    <a href="#" class="settings-icon" data-bs-toggle="tooltip" title="Profile">
-                        <i class="bi bi-person"></i>
-                    </a>
-                </div>
-            </nav>
-            <!-- Sidebar ends -->
-
-            <!-- App container -->
-            <div class="app-container">
-                <!-- Header -->
-                <div class="app-header d-flex align-items-center">
-                    <div class="d-flex">
-                        <button class="pin-sidebar">
-                            <i class="bi bi-list lh-1"></i>
-                        </button>
-                    </div>
-                    <div class="d-flex align-items-center ms-3">
-                        <h5 class="m-0">Xác nhận / Quản lý Đặt phòng</h5>
-                    </div>
-                    <div class="app-brand-sm d-lg-none d-flex ms-auto">
-                        <a href="{{ url('/xacnhan') }}">
-                            <img src="{{ asset('assets/images/logo-sm.svg') }}" class="logo" alt="Admin" />
-                        </a>
-                    </div>
-                    <div class="header-actions">
-                        <div class="d-flex">
-                            <button class="toggle-sidebar">
-                                <i class="bi bi-list lh-1"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <!-- Header ends -->
-
-                <!-- Body -->
-                <div class="app-body p-3">
-                    <div class="card mb-3">
-                        <div class="card-body">
+@section('content')
+<div class="card mb-3">
+    <div class="card-body">
                             <div class="d-flex mb-3 align-items-center">
                                 <div class="me-2 d-flex align-items-center">
                                     <small class="me-2">Từ</small>
@@ -310,15 +229,80 @@
                             </nav>
         </div>
     </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/moment.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/overlay-scroll/jquery.overlayScrollbars.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/overlay-scroll/custom-scrollbar.js') }}"></script>
-    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <!-- Invoice Modal (enhanced) -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content styled">
+                <div class="modal-header styled">
+                    <h5 class="modal-title">Tạo Hóa Đơn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="decorator-line"></div>
+                </div>
+                <div class="modal-body styled">
+                    <div class="alert alert-danger d-none" id="invoice-error"></div>
 
+                    <p><strong>Mã đặt phòng:</strong> <span id="inv-booking-id"></span></p>
+                    <p><strong>Tổng tiền phòng:</strong> <span id="inv-room-total">...</span></p>
+
+                    <hr>
+                    <div id="inv-loading-services" class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                        <p class="text-muted mt-2">Đang tải danh sách dịch vụ...</p>
+                    </div>
+
+                    <div id="inv-services-area" class="d-none">
+                        <h6>Chọn Dịch vụ</h6>
+                        <div class="table-responsive" style="max-height:300px; overflow-y:auto">
+                            <table class="table table-sm table-styled" id="inv-services-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tên dịch vụ</th>
+                                        <th>Giá</th>
+                                        <th>Số lượng</th>
+                                        <th>Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <label for="inv-paid-now" class="col-sm-4 col-form-label">Tiền khách đưa:</label>
+                            <div class="col-sm-8">
+                                <input type="number" class="form-control styled" id="inv-paid-now" placeholder="0">
+                            </div>
+                        </div>
+
+                        <p><strong>Tổng tiền dịch vụ:</strong> <span id="inv-services-total">0 VND</span></p>
+                        <p><strong>Tổng hóa đơn:</strong> <span id="inv-invoice-total">0 VND</span></p>
+                        <p><strong>Tiền cọc:</strong> <span id="inv-deposit">0 VND</span></p>
+                        <p><strong>Tiền còn lại:</strong> <span id="inv-remaining">0 VND</span></p>
+                    </div>
+                </div>
+                <div class="modal-footer styled">
+                    <button type="button" class="btn btn-outline-secondary styled" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary styled" id="inv-save" disabled>Lưu hóa đơn</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="inv-toast" class="toast align-items-center text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Hóa đơn đã được tạo thành công!</div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
     <script>
     // Ensure a placeholder openInvoiceModal exists early so clicks will enqueue requests
     if (typeof window !== 'undefined') {
@@ -492,74 +476,6 @@
         }
     })();
     </script>
-
-        <!-- Invoice Modal (enhanced) -->
-        <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content styled">
-                    <div class="modal-header styled">
-                        <h5 class="modal-title">Tạo Hóa Đơn</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        <div class="decorator-line"></div>
-                    </div>
-                    <div class="modal-body styled">
-                        <div id="invoice-error" class="text-danger small mb-2" style="display:none"></div>
-                        <div class="row mb-2">
-                            <div class="col-6">Mã đặt phòng: <strong id="inv-booking-id"></strong></div>
-                            <div class="col-6 text-end">Tổng tiền phòng: <strong id="inv-room-total">0</strong></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6">Tiền cọc: <strong id="inv-deposit">0</strong></div>
-                            <div class="col-6 text-end">Thanh toán ngay: <input id="inv-paid-now" type="number" min="0" step="1000" class="form-control form-control-sm d-inline-block styled shadow-sm" style="width:160px" value="0" /></div>
-                        </div>
-
-                        <div id="inv-loading-services" class="text-center py-3" style="display:none">
-                                <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
-                                <div class="small text-muted mt-2">Đang tải danh sách dịch vụ…</div>
-                        </div>
-
-                        <div id="inv-services-area" style="display:none">
-                            <div class="table-responsive mb-2">
-                                <table class="table table-sm table-bordered table-styled" id="inv-services-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Dịch vụ</th>
-                                            <th style="width:120px">Đơn giá</th>
-                                            <th style="width:100px">Số lượng</th>
-                                            <th style="width:140px" class="text-end">Tạm tính</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- populated dynamically -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="d-flex justify-content-end gap-3">
-                                <div>Tổng dịch vụ: <strong id="inv-services-total">0</strong></div>
-                                <div>Tổng hóa đơn: <strong id="inv-invoice-total">0</strong></div>
-                                <div>Còn lại: <strong id="inv-remaining">0</strong></div>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer styled">
-                        <button type="button" class="btn btn-secondary styled" data-bs-dismiss="modal">Đóng</button>
-                        <button type="button" class="btn btn-primary styled" id="inv-save" disabled>Lưu hóa đơn</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Success toast -->
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
-            <div id="inv-toast" class="toast align-items-center text-bg-success border-0" role="status" aria-live="polite" aria-atomic="true">
-                <div class="d-flex">
-                    <div class="toast-body">Hóa đơn đã được tạo</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
 
     <script>
     (function(){
@@ -750,5 +666,4 @@
         });
     })();
     </script>
-</body>
-</html>
+@endsection

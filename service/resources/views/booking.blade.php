@@ -713,6 +713,7 @@
             checkIn: null,
             checkOut: null,
             roomName: '',
+            roomNumber: '',
             roomPrice: 0,
             nights: 0,
             total: 0,
@@ -792,8 +793,10 @@
             // Fetch room details from API
             try {
                 const room = await fetchRoomDetails(roomId);
+                
                 if (room) {
                     bookingData.roomName = room.name || room.TenPhong || '';
+                    bookingData.roomNumber = room.roomNumber || room.SoPhong || '';
                     bookingData.roomPrice = Number(room.price || room.Gia || room.GiaCoBanMotDem || 0) || 0;
 
                     // Calculate nights and total
@@ -803,7 +806,10 @@
                     bookingData.total = bookingData.roomPrice * bookingData.nights;
 
                     // Update UI
-                    document.getElementById('roomImage').src = room.image || room.UrlAnhPhong || room.UrlAnhLoaiPhong || 'HomePage/img/rooms/1.jpg';
+                    const img = room.image || room.UrlAnhPhong || room.UrlAnhLoaiPhong;
+                    document.getElementById('roomImage').src = img ? 
+                        (img.startsWith('http') || img.startsWith('HomePage') ? img : `HomePage/img/slider/${img}`) 
+                        : 'HomePage/img/rooms/1.jpg';                    
                     document.getElementById('roomName').textContent = bookingData.roomName;
                     document.getElementById('displayCheckIn').textContent = formatDate(bookingData.checkIn);
                     document.getElementById('displayCheckOut').textContent = formatDate(bookingData.checkOut);
@@ -831,10 +837,11 @@
                 // API may return { success: true, data: {...} } or raw object
                 const raw = data && data.data ? data.data : data;
                 if (!raw) return null;
-                // Normalize to simple shape: { id, name, price, image }
+                // Normalize to simple shape: { id, name, price, image, roomNumber }
                 return {
                     id: raw.IDPhong || raw.id || roomId,
                     name: raw.TenPhong || raw.ten || raw.name || '',
+                    roomNumber: raw.SoPhong || raw.soPhong || raw.roomNumber || '',
                     price: raw.Gia || raw.GiaCoBanMotDem || raw.price || 0,
                     image: raw.UrlAnhPhong || raw.UrlAnhLoaiPhong || raw.UrlAnh || raw.HinhAnh || null,
                     raw
@@ -944,6 +951,7 @@
                 const pending = {
                     roomId: bookingData.selectedRoom,
                     roomName: bookingData.roomName,
+                    roomNumber: bookingData.roomNumber,
                     roomPrice: bookingData.roomPrice,
                     checkIn: bookingData.checkIn,
                     checkOut: bookingData.checkOut,

@@ -818,7 +818,10 @@
                     if (latestBooking.checkOut) {
                         document.getElementById('checkOutDate').textContent = formatDate(latestBooking.checkOut);
                     }
-                    if (latestBooking.room) {
+                    // Use roomNumber (SoPhong) if available, otherwise fallback to room
+                    if (latestBooking.roomNumber) {
+                        document.getElementById('roomName').textContent = latestBooking.roomNumber;
+                    } else if (latestBooking.room) {
                         document.getElementById('roomName').textContent = latestBooking.room;
                     }
                     if (latestBooking.roomImage) {

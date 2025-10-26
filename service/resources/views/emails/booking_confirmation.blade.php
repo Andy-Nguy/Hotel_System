@@ -105,7 +105,7 @@
             </div>
         @else
             <div class="status-badge status-confirmed">
-                ✅ ĐẶT PHÒNG ĐÃ ĐƯỢC XÁC NHẬN
+                ✅ XÁC NHẬN ĐẶT PHÒNG
             </div>
             <p><strong>Cảm ơn bạn đã đặt phòng tại The Cappa Luxury Hotel. Đặt phòng của bạn đã được xác nhận thành công!</strong></p>
         @endif
@@ -119,7 +119,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Phòng:</span>
-                <span class="info-value">{{ $bookingData['IDPhong'] ?? '' }}</span>
+                <span class="info-value">{{ $bookingData['SoPhong'] ?? $bookingData['IDPhong'] ?? '' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Ngày nhận phòng:</span>
