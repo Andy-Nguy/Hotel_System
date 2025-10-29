@@ -98,7 +98,7 @@ class BookingController extends Controller
                         'to' => $recipientEmail,
                     ]);
 
-                    Mail::to($recipientEmail)->send(new BookingConfirmation($data, ['HoTen' => $recipientName, 'Email' => $recipientEmail]));
+                    Mail::to($recipientEmail)->send(new BookingConfirmation($data, ['HoTen' => $recipientName, 'Email' => $recipientEmail], 'pending'));
 
                     Log::info('Booking confirmation email sent successfully', [
                         'booking_id' => $idDatPhong,

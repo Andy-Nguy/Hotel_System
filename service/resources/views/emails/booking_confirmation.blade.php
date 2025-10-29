@@ -2,7 +2,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{{ $statusType === 'cancelled' ? 'Thông báo hủy đặt phòng' : 'Xác nhận đặt phòng' }}</title>
+    <title>
+        @if($statusType === 'cancelled')
+            Thông báo hủy đặt phòng
+        @elseif($statusType === 'pending')
+            Đặt phòng đang chờ xác nhận
+        @else
+            Xác nhận đặt phòng
+        @endif
+    </title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -13,7 +21,14 @@
             padding: 20px;
         }
         .header {
-            background: {{ $statusType === 'cancelled' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'linear-gradient(135deg, #3b82f6, #2563eb)' }};
+            background: 
+                @if($statusType === 'cancelled')
+                    linear-gradient(135deg, #ef4444, #dc2626)
+                @elseif($statusType === 'pending')
+                    linear-gradient(135deg, #f59e0b, #d97706)
+                @else
+                    linear-gradient(135deg, #3b82f6, #2563eb)
+                @endif;
             color: white;
             padding: 30px;
             border-radius: 10px 10px 0 0;
@@ -103,6 +118,17 @@
                 <strong>⚠️ Lưu ý quan trọng:</strong><br>
                 Nếu quý khách không yêu cầu hủy đặt phòng này, vui lòng liên hệ với chúng tôi ngay lập tức qua số hotline: <strong>855 100 4444</strong>
             </div>
+        @elseif($statusType === 'pending')
+            <div class="status-badge" style="background: #f59e0b; color: white;">
+                ⏳ ĐANG CHỜ XÁC NHẬN
+            </div>
+            <p><strong>Cảm ơn bạn đã đặt phòng tại The Cappa Luxury Hotel. Chúng tôi đã nhận được yêu cầu đặt phòng của bạn.</strong></p>
+            
+            <div class="alert-box">
+                <strong>📋 Trạng thái:</strong> Đặt phòng đang chờ xác nhận từ bộ phận lễ tân.<br>
+                <strong>⏰ Thời gian xử lý:</strong> Chúng tôi sẽ xác nhận trong vòng 2-4 giờ làm việc.<br>
+                <strong>📞 Liên hệ:</strong> Nếu cần hỗ trợ gấp, vui lòng gọi <strong>855 100 4444</strong>
+            </div>
         @else
             <div class="status-badge status-confirmed">
                 ✅ XÁC NHẬN ĐẶT PHÒNG
@@ -146,6 +172,14 @@
         @if($statusType === 'cancelled')
             <p>Nếu quý khách muốn đặt phòng lại, vui lòng truy cập website của chúng tôi hoặc liên hệ trực tiếp.</p>
             <p><strong>Chúng tôi rất mong được phục vụ quý khách trong tương lai!</strong></p>
+        @elseif($statusType === 'pending')
+            <p><strong>📝 Các bước tiếp theo:</strong></p>
+            <ul>
+                <li>Chúng tôi sẽ kiểm tra tình trạng phòng và xác nhận trong thời gian sớm nhất</li>
+                <li>Bạn sẽ nhận được email xác nhận cuối cùng khi đặt phòng được duyệt</li>
+                <li>Nếu có vấn đề gì, chúng tôi sẽ liên hệ qua số điện thoại hoặc email của bạn</li>
+            </ul>
+            <p><strong>Xin cảm ơn sự kiên nhẫn của quý khách!</strong></p>
         @else
             <p><strong>🎉 Chúng tôi rất mong được đón tiếp quý khách!</strong></p>
             <p>Vui lòng đến khách sạn đúng giờ để làm thủ tục nhận phòng. Nếu có bất kỳ thắc mắc nào, đừng ngần ngại liên hệ với chúng tôi.</p>

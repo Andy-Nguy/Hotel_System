@@ -237,7 +237,7 @@ class DatPhongController extends Controller
                         'TrangThai' => $dpFull->TrangThai,
                         'Message' => 'Yêu cầu hủy đặt phòng của bạn đã được xử lý.'
                     ];
-                    Mail::to($recipientEmail)->send((new BookingConfirmation($mailData, ['HoTen' => $recipientName, 'Email' => $recipientEmail], 'cancelled'))->subject('Hủy đặt phòng - ' . $dpFull->IDDatPhong));
+                    Mail::to($recipientEmail)->send(new BookingConfirmation($mailData, ['HoTen' => $recipientName, 'Email' => $recipientEmail], 'cancelled'));
                 }
             } catch (\Throwable $mailEx) {
                 logger()->error('Failed to send cancel email for booking ' . $iddatphong . ': ' . $mailEx->getMessage());
@@ -290,7 +290,7 @@ class DatPhongController extends Controller
                         'TrangThai' => $dpFull->TrangThai,
                         'Message' => 'Đặt phòng của bạn đã được xác nhận.'
                     ];
-                    Mail::to($recipientEmail)->send((new BookingConfirmation($mailData, ['HoTen' => $recipientName, 'Email' => $recipientEmail], 'confirmed'))->subject('Xác nhận đặt phòng - ' . $dpFull->IDDatPhong));
+                    Mail::to($recipientEmail)->send(new BookingConfirmation($mailData, ['HoTen' => $recipientName, 'Email' => $recipientEmail], 'confirmed'));
                 }
             } catch (\Throwable $mailEx) {
                 logger()->error('Failed to send confirm email for booking ' . $iddatphong . ': ' . $mailEx->getMessage());

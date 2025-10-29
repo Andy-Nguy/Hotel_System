@@ -279,7 +279,6 @@
 
                         <p><strong>Tổng tiền dịch vụ:</strong> <span id="inv-services-total">0 VND</span></p>
                         <p><strong>Tổng hóa đơn:</strong> <span id="inv-invoice-total">0 VND</span></p>
-                        <p><strong>Tiền cọc:</strong> <span id="inv-deposit">0 VND</span></p>
                         <p><strong>Tiền còn lại:</strong> <span id="inv-remaining">0 VND</span></p>
                     </div>
                 </div>
@@ -345,12 +344,12 @@
             if (!resp.ok) { hideLoading(); alert('Không thể tải danh sách'); return; }
             const data = await resp.json();
             
-            // Fetch invoice status for all bookings BEFORE rendering
+            // Fetch invoice status for all bookings BEFORE rendering (force refresh to get latest status)
             const rows = data.data || [];
             if (rows.length > 0) {
                 await Promise.all(rows.map(async (r) => {
                     if (String(r.TrangThai) === '2') {
-                        r._hasInvoice = await checkInvoiceExists(r.IDDatPhong);
+                        r._hasInvoice = await checkInvoiceExists(r.IDDatPhong, true); // force refresh
                     }
                 }));
             }
@@ -400,15 +399,57 @@
             tr.querySelectorAll('.btn-confirm').forEach(btn => btn.addEventListener('click', async function(){
                 const id = this.dataset.id;
                 if (!confirm('Xác nhận đặt phòng ' + id + '?')) return;
-                const resp = await fetch('/api/datphong/' + encodeURIComponent(id) + '/confirm', {method: 'POST', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')}});
-                if (resp.ok) { alert('Đã xác nhận'); fetchList(); } else { alert('Lỗi khi xác nhận'); }
+                
+                // Show loading state
+                const originalText = this.textContent;
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang xử lý...';
+                
+                try {
+                    const resp = await fetch('/api/datphong/' + encodeURIComponent(id) + '/confirm', {method: 'POST', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')}});
+                    if (resp.ok) { 
+                        alert('Đã xác nhận'); 
+                        fetchList(); 
+                    } else { 
+                        alert('Lỗi khi xác nhận'); 
+                        // Restore button state on error
+                        this.disabled = false;
+                        this.textContent = originalText;
+                    }
+                } catch (error) {
+                    alert('Lỗi khi xác nhận: ' + error.message);
+                    // Restore button state on error
+                    this.disabled = false;
+                    this.textContent = originalText;
+                }
             }));
 
             tr.querySelectorAll('.btn-cancel').forEach(btn => btn.addEventListener('click', async function(){
                 const id = this.dataset.id;
                 if (!confirm('Hủy đặt phòng ' + id + '?')) return;
-                const resp = await fetch('/api/datphong/' + encodeURIComponent(id) + '/cancel', {method: 'POST', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')}});
-                if (resp.ok) { alert('Đã hủy'); fetchList(); } else { alert('Lỗi khi hủy'); }
+                
+                // Show loading state
+                const originalText = this.textContent;
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Đang hủy...';
+                
+                try {
+                    const resp = await fetch('/api/datphong/' + encodeURIComponent(id) + '/cancel', {method: 'POST', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')}});
+                    if (resp.ok) { 
+                        alert('Đã hủy'); 
+                        fetchList(); 
+                    } else { 
+                        alert('Lỗi khi hủy'); 
+                        // Restore button state on error
+                        this.disabled = false;
+                        this.textContent = originalText;
+                    }
+                } catch (error) {
+                    alert('Lỗi khi hủy: ' + error.message);
+                    // Restore button state on error
+                    this.disabled = false;
+                    this.textContent = originalText;
+                }
             }));
 
             tr.querySelectorAll('.btn-invoice').forEach(btn => btn.addEventListener('click', async function(){
@@ -424,11 +465,12 @@
             }));
         }
 
-        // cache of invoice existence per booking id
+        // cache of invoice existence per booking id (make it global for access from invoice modal)
         const _invoiceExistsCache = new Map();
-        async function checkInvoiceExists(id){
+        if (typeof window !== 'undefined') window._invoiceExistsCache = _invoiceExistsCache;
+        async function checkInvoiceExists(id, forceRefresh = false){
             if (!id) return false;
-            if (_invoiceExistsCache.has(id)) return _invoiceExistsCache.get(id);
+            if (!forceRefresh && _invoiceExistsCache.has(id)) return _invoiceExistsCache.get(id);
             try {
                 const resp = await fetch('/api/hoadon?IDDatPhong=' + encodeURIComponent(id));
                 if (!resp.ok) { _invoiceExistsCache.set(id, false); return false; }
@@ -512,7 +554,10 @@
             roomTotalEl.textContent = '...';
                 // show loading area, hide services area
                 if (loadingEl) loadingEl.style.display = '';
-                if (servicesAreaEl) servicesAreaEl.style.display = 'none';
+                if (servicesAreaEl) {
+                    servicesAreaEl.classList.add('d-none');
+                    servicesAreaEl.style.display = 'none';
+                }
             invoiceErrorEl.style.display = 'none';
             // disable save until services loaded
             const saveBtnInit = document.getElementById('inv-save'); if (saveBtnInit) saveBtnInit.disabled = true;
@@ -555,12 +600,14 @@
                     return [];
                 }
                     services = normalizeServices(svs || {});
-                    console.debug('Loaded services from /api/dichvu:', svs, 'normalized->', services);
                     // render into the table tbody
                     renderServicesList();
                     // show services area and hide loading
                     if (loadingEl) loadingEl.style.display = 'none';
-                    if (servicesAreaEl) servicesAreaEl.style.display = '';
+                    if (servicesAreaEl) {
+                        servicesAreaEl.classList.remove('d-none');
+                        servicesAreaEl.style.display = '';
+                    }
                     // enable save now
                     const saveBtn = document.getElementById('inv-save'); if (saveBtn) saveBtn.disabled = false;
             } catch (e) {
@@ -656,8 +703,8 @@
                 const res = await r.json();
                 invoiceModal.hide();
                 alert('Hóa đơn tạo thành công: ' + (res.IDHoaDon || ''));
-                // refresh list
-                if (window.fetchList) window.fetchList(1);
+                // reload page to refresh the booking list and button states
+                window.location.reload();
             } catch (e) {
                 document.getElementById('invoice-error').textContent = e.message; document.getElementById('invoice-error').style.display = 'block';
             } finally {

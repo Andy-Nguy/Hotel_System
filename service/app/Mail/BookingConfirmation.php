@@ -25,8 +25,14 @@ class BookingConfirmation extends Mailable
 
     public function envelope(): Envelope
     {
+        $subjectPrefix = match($this->statusType) {
+            'cancelled' => 'Thông báo hủy đặt phòng',
+            'pending' => 'Đặt phòng đang chờ xác nhận',
+            default => 'Xác nhận đặt phòng'
+        };
+        
         return new Envelope(
-            subject: 'Xác nhận đặt phòng - ' . ($this->bookingData['IDDatPhong'] ?? ''),
+            subject: $subjectPrefix . ' - ' . ($this->bookingData['IDDatPhong'] ?? ''),
         );
     }
 
