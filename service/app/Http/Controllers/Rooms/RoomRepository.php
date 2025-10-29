@@ -38,21 +38,21 @@ class RoomRepository
     public function findSingleAvailableRoom(string $checkInDate, string $checkOutDate, string $roomId): ?array
     {
         $sql = "
-            SELECT 
+            SELECT
                 P.IDPhong, P.SoPhong, P.SoNguoiToiDa,
                 LP.TenLoaiPhong,  P.MoTa, P.UrlAnhPhong
-            FROM 
+            FROM
                 Phong P
-            JOIN 
+            JOIN
                 LoaiPhong LP ON P.IDLoaiPhong = LP.IDLoaiPhong
-            LEFT JOIN 
+            LEFT JOIN
                 DatPhong DP ON P.IDPhong = DP.IDPhong
                 AND DP.TrangThai IN (1, 2, 3)
                 AND DP.NgayNhanPhong < :checkOutDate
                 AND DP.NgayTraPhong > :checkInDate
-            WHERE 
+            WHERE
                 DP.IDDatPhong IS NULL
-                AND P.TrangThai = 'Trống'
+                AND P.TrangThai = 'Phòng trống'
                 AND P.IDPhong = :roomId
             LIMIT 1;
         ";
@@ -77,23 +77,23 @@ class RoomRepository
     private function executeRoomQuery(string $checkInDate, string $checkOutDate, ?string $roomTypeId): array
     {
         $sql = "
-            SELECT 
-                P.IDPhong, P.SoPhong, P.SoNguoiToiDa, 
+            SELECT
+                P.IDPhong, P.SoPhong, P.SoNguoiToiDa,
                 LP.TenLoaiPhong,  P.MoTa, P.UrlAnhPhong
-            FROM 
+            FROM
                 Phong P
-            JOIN 
+            JOIN
                 LoaiPhong LP ON P.IDLoaiPhong = LP.IDLoaiPhong
-            LEFT JOIN 
+            LEFT JOIN
                 DatPhong DP ON P.IDPhong = DP.IDPhong
                 AND DP.TrangThai IN (1, 2, 3)
                 AND DP.NgayNhanPhong < :checkOutDate
                 AND DP.NgayTraPhong > :checkInDate
-            WHERE 
+            WHERE
                 DP.IDDatPhong IS NULL
-                AND P.TrangThai = 'Trống'
+                AND P.TrangThai = 'Phòng trống'
                 " . ($roomTypeId ? "AND P.IDLoaiPhong = :roomTypeId" : "") . "
-            ORDER BY 
+            ORDER BY
                 LP.GiaMotDem ASC;
         ";
 
