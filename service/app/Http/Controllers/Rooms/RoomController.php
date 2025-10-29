@@ -146,7 +146,7 @@ class RoomController extends Controller
 
     $query = DB::table('Phong as P')
         ->join('LoaiPhong as LP', 'P.IDLoaiPhong', '=', 'LP.IDLoaiPhong')
-        ->where('P.TrangThai', 'Trống')
+        ->where('P.TrangThai', 'Phòng trống')
         ->whereNotExists(function ($sub) use ($checkIn, $checkOut) {
             $sub->from('DatPhong as DP')
                 ->whereColumn('DP.IDPhong', 'P.IDPhong')

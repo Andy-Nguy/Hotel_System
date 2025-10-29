@@ -344,7 +344,7 @@ class CheckoutController extends Controller
             $dp->save();
 
             if ($dp->phong) {
-                $dp->phong->TrangThai = 'Trống';
+                $dp->phong->TrangThai = 'Phòng trống';
                 $dp->phong->save();
             }
         });
