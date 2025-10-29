@@ -678,7 +678,7 @@
                                             <th id="thRoomId" class="sortable" style="width: 5%;">ID</th>
                                             <th id="thRoomSoPhong" class="sortable" style="width: 10%;">Số phòng</th>
                                             <th id="thRoomLoai" class="sortable" style="width: 15%;">Loại phòng</th>
-                                            <th id="thRoomTrangThai" class="sortable" style="width: 10%;">Trạng thái</th>
+
                                             <th style="width: 60%;">Tiện nghi</th>
                                         </tr>
                                     </thead>
@@ -863,7 +863,6 @@
                 ...x,
                 TienNghis: tnArr,
                 TenPhong: x.TenPhong || x.SoPhong,
-                TrangThai: x.TrangThai || 'Không xác định'
             };
         });
         renderPhongTable(PHONG_TABLE);
@@ -918,20 +917,6 @@
     }
 
     // Render bảng tiện nghi (lọc + sắp xếp)
-    function isAmenityLockedLocal(id) {
-        try {
-            // Fallback compute: if any room with this amenity is not 'Trống'
-            const idStr = String(id);
-            for (const p of PHONG_TABLE || []) {
-                const st = (p.TrangThai || '').toLowerCase();
-                if (st && st !== 'trống' && st !== 'trong' && st !== 'phòng trống') {
-                    const tns = Array.isArray(p.TienNghis) ? p.TienNghis : [];
-                    if (tns.some(t => String(t.IDTienNghi) === idStr)) return true;
-                }
-            }
-        } catch (e) { /* noop */ }
-        return false;
-    }
 
     function renderTienNghiTable(data) {
         const search = vnNormalize($('#searchTienNghi').val() || '');
@@ -1103,29 +1088,15 @@
 
     // Render bảng phòng (hỗ trợ lọc theo tiện nghi + sắp xếp)
     function renderPhongTable(data) {
-        // Helper: render trạng thái với badge màu
-        const statusBadge = (stRaw) => {
-            const st = String(stRaw || '').trim().toLowerCase();
-            if (!stRaw) return '';
-            if (st === 'trống' || st === 'trong' || st === 'phòng trống') {
-                return `<span class="badge bg-success">${stRaw}</span>`;
-            }
-            if (st.includes('đang')) {
-                return `<span class="badge bg-warning text-dark">${stRaw}</span>`;
-            }
-            if (st.includes('bảo trì') || st.includes('bao tri') || st.includes('bảo dưỡng')) {
-                return `<span class="badge bg-secondary">${stRaw}</span>`;
-            }
-            return `<span class="badge bg-secondary">${stRaw}</span>`;
-        };
+
 
         const q = vnNormalize($('#searchPhong').val() || '');
         let filtered = data.filter(x => {
             const soPhong = vnNormalize(String(x.SoPhong ?? ''));
             const tenLoai = vnNormalize(String(x.TenLoaiPhong ?? ''));
-            const trangThai = vnNormalize(String(x.TrangThai ?? ''));
+
             const tn = (Array.isArray(x.TienNghis) ? vnNormalize(x.TienNghis.map(t => t.TenTienNghi).join(',')) : '');
-            let base = (soPhong.includes(q) || tenLoai.includes(q) || trangThai.includes(q) || tn.includes(q));
+            let base = (soPhong.includes(q) || tenLoai.includes(q) || tn.includes(q));
             if (ROOM_FILTER_AMENITY) {
                 const hasAmenity = Array.isArray(x.TienNghis) && x.TienNghis.some(t => vnNormalize(t.TenTienNghi).includes(vnNormalize(ROOM_FILTER_AMENITY)));
                 base = base && hasAmenity;
@@ -1163,7 +1134,6 @@
 					<td>${x.IDPhong}</td>
 					<td>${x.SoPhong}</td>
 					<td>${x.TenLoaiPhong || ''}</td>
-					<td>${statusBadge(x.TrangThai)}</td>
 					<td>${amenitiesHtml}</td>
 				</tr>`;
             });
@@ -1172,13 +1142,12 @@
         $('#roomsCount').text(filtered.length);
 
         // Cập nhật mũi tên sort ở header bảng phòng
-        $('#thRoomId, #thRoomSoPhong, #thRoomLoai, #thRoomTrangThai')
+        $('#thRoomId, #thRoomSoPhong, #thRoomLoai')
             .removeClass('asc desc');
         const keyToTh = {
             IDPhong: '#thRoomId',
             SoPhong: '#thRoomSoPhong',
             TenLoaiPhong: '#thRoomLoai',
-            TrangThai: '#thRoomTrangThai'
         };
         const thSel = keyToTh[rKey];
         if (thSel) $(thSel).addClass(rDir === 'asc' ? 'asc' : 'desc');
@@ -1263,12 +1232,6 @@
         });
         $('#thRoomLoai').on('click', function() {
             const key = 'TenLoaiPhong';
-            SORT_STATE.rooms.dir = (SORT_STATE.rooms.key === key && SORT_STATE.rooms.dir === 'asc') ? 'desc' : 'asc';
-            SORT_STATE.rooms.key = key;
-            renderPhongTable(PHONG_TABLE);
-        });
-        $('#thRoomTrangThai').on('click', function() {
-            const key = 'TrangThai';
             SORT_STATE.rooms.dir = (SORT_STATE.rooms.key === key && SORT_STATE.rooms.dir === 'asc') ? 'desc' : 'asc';
             SORT_STATE.rooms.key = key;
             renderPhongTable(PHONG_TABLE);

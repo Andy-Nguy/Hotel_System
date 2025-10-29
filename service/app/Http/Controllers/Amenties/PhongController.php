@@ -66,7 +66,28 @@ class PhongController extends Controller
     // GET /api/phongs
     public function index1()
     {
-        return response()->json(Phong::all());
+        // Trả về danh sách phòng kèm thông tin loại phòng để tránh hiển thị N/A
+        $phongs = Phong::with('loaiPhong')
+            ->orderBy('SoPhong')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'IDPhong' => $p->IDPhong,
+                    'SoPhong' => $p->SoPhong,
+                    'TenPhong' => $p->TenPhong,
+                    'IDLoaiPhong' => $p->IDLoaiPhong,
+                    'TenLoaiPhong' => optional($p->loaiPhong)->TenLoaiPhong,
+                    'XepHangSao' => $p->XepHangSao,
+                    'TrangThai' => $p->TrangThai,
+                    'status' => $p->TrangThai, // Alias for compatibility
+                    'MoTa' => $p->MoTa,
+                    'GiaCoBanMotDem' => $p->GiaCoBanMotDem,
+                    'SoNguoiToiDa' => $p->SoNguoiToiDa,
+                    'UrlAnhPhong' => $p->UrlAnhPhong,
+                ];
+            });
+
+        return response()->json($phongs);
     }
 
     // GET /api/phongs/{id}
@@ -98,7 +119,7 @@ class PhongController extends Controller
             'SoPhong'     => ['required', 'string', 'max:20', 'unique:Phong,SoPhong'],
             'MoTa'        => ['nullable', 'string'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Phòng trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -132,7 +153,7 @@ class PhongController extends Controller
             'SoPhong'     => ['sometimes', 'required', 'string', 'max:20', Rule::unique('Phong', 'SoPhong')->ignore($phong->IDPhong, 'IDPhong')],
             'MoTa'        => ['nullable', 'string'],
             'XepHangSao'  => ['nullable', 'integer', 'between:1,5'],
-            'TrangThai'   => ['nullable', 'string', Rule::in(['Trống', 'Đang sử dụng', 'Bảo trì'])],
+            'TrangThai'   => ['nullable', 'string', Rule::in(['Phòng trống', 'Đang sử dụng', 'Bảo trì'])],
             'UrlAnhPhong' => ['nullable', 'string', 'max:255'],
         ]);
 

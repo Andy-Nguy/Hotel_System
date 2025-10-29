@@ -78,13 +78,13 @@
     <div class="login-container">
         <div class="login-card">
             <h2 class="text-center mb-4">Đăng nhập hệ thống</h2>
-            
+
             <!-- Alert Messages -->
             <div class="alert alert-danger" role="alert" id="error-alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
                 <span id="error-message"></span>
             </div>
-            
+
             <div class="alert alert-success" role="alert" id="success-alert">
                 <i class="fas fa-check-circle me-2"></i>
                 <span id="success-message"></span>
@@ -128,7 +128,7 @@
 
                 <div class="text-center mt-3">
                     <p class="mb-0">
-                        Chưa có tài khoản? 
+                        Chưa có tài khoản?
                         <a href="{{ url('/register') }}" class="text-decoration-none">
                             <i class="fas fa-user-plus me-1"></i>Đăng ký ngay
                         </a>
@@ -196,7 +196,7 @@
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         const API_URL = "{{ env('API_URL', 'http://127.0.0.1:8000/api') }}";
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -264,7 +264,7 @@
                 try {
                     const res = await fetch(`${API_URL}/login`, {
                         method: 'POST',
-                        headers: { 
+                        headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': CSRF_TOKEN
                         },
@@ -273,7 +273,7 @@
                     });
 
                     const data = await res.json();
-                    
+
                     if (!res.ok) {
                         throw new Error(data.message || 'Sai thông tin đăng nhập!');
                     }
@@ -292,7 +292,7 @@
                     // Determine redirect URL
                     let redirectUrl;
                     const saved = localStorage.getItem('redirect_after_login');
-                    
+
                     if (saved && (saved.startsWith('/') || saved.startsWith(window.location.origin))) {
                         redirectUrl = saved.startsWith('/') ? window.location.origin + saved : saved;
                         localStorage.removeItem('redirect_after_login');
@@ -309,7 +309,7 @@
                 } catch (err) {
                     console.error('Login error:', err);
                     showError(err.message || 'Không thể kết nối tới máy chủ!');
-                    
+
                     // Re-enable the form on error
                     allInputs.forEach(el => el.disabled = false);
                     btnLogin.classList.remove('loading');
@@ -332,7 +332,7 @@
 
             fpSubmitBtn.addEventListener('click', async function() {
                 const isStep1 = document.getElementById('forgot-step-1').style.display !== 'none';
-                
+
                 if (isStep1) {
                     // Send OTP
                     resetEmail = document.getElementById('fp-email').value.trim();
@@ -350,7 +350,7 @@
                         });
 
                         const data = await res.json();
-                        
+
                         if (res.ok) {
                             document.getElementById('fp-success').textContent = 'Mã xác nhận đã được gửi đến email của bạn';
                             document.getElementById('fp-success').style.display = 'block';

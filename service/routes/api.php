@@ -77,6 +77,8 @@ Route::delete('/phong/{phong}', [PhongController::class, 'destroy']);
 Route::get('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'show']);
 Route::put('phong/{phong}/tien-nghi', [PhongTienNghiController::class, 'update']);
 
+// Room management update by key (IDPhong or SoPhong) - placed before resource to take precedence
+Route::match(['put', 'patch'], '/phongs/{key}', [PhongController::class, 'update1'])->name('api.phongs.updateByKey');
 Route::get('/phongs', [PhongController::class, 'index1']);
 Route::apiResource('phongs', PhongController::class)->except(methods: ['index']);
 Route::get('/loaiphongs', [LoaiPhongController::class, 'index1']);
@@ -143,9 +145,12 @@ Route::get('/khach-hang/search', [KhachHangController::class, 'search'])
 
 use App\Http\Controllers\Amenties\UploadController;
 // --- CỤM ROUTE CHO TRANG QUẢN LÝ PHÒNG (Room Management Page) ---
-Route::get('/phongs', [PhongController::class, 'index3']);
-Route::get('/phong', [PhongController::class, 'index2']);
-Route::match(['put', 'patch'], '/phongs/{key}', [PhongController::class, 'update1']);
+// --- Room management: custom update by IDPhong or SoPhong must precede resource route to avoid model binding 404 ---
+// Route to update room by key, defined earlier to take precedence
+// Route::match(['put', 'patch'], '/phongs/{key}', [PhongController::class, 'update1'])->name('api.phongs.updateByKey');
+
+Route::get('/phongs', [PhongController::class, 'index1']);
+Route::apiResource('phongs', PhongController::class)->except(['index']);
 Route::post('/upload', [UploadController::class, 'store'])->name('api.upload');
 Route::delete('/upload', [UploadController::class, 'destroy'])->name('api.upload.delete');
 

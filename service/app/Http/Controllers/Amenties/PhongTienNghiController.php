@@ -56,9 +56,10 @@ class PhongTienNghiController extends Controller
         // Prevent assigning/removing amenities when the room is currently in use
         // Consider the room FREE only when TrangThai is null/empty or equals any variant of "Trống"
         // Accept common variants: "Trống", "trong", "phòng trống"
-        $status = trim((string)($phong->TrangThai ?? ''));
-        $normalized = mb_strtolower($status, 'UTF-8');
-        $isFree = ($status === '') || in_array($normalized, ['trong', 'trống', 'phòng trống'], true);
+        $status = $phong->TrangThai;
+        $isFree = is_null($status) || $status === '' || $status === 'Phòng trống';
+        // KẾT THÚC SỬA LOGIC
+
         if (!$isFree) {
             return response()->json([
                 'success' => false,
