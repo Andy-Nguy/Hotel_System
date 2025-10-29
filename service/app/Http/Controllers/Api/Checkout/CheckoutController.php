@@ -22,7 +22,6 @@ class CheckoutController extends Controller
         $scope = $request->query('scope', 'due_today'); // due_today | inhouse | overdue | all
         $keyword = trim((string) $request->query('q', ''));
 
-        // Parse date an toàn
         try {
             $date = Carbon::parse($dateStr)->toDateString(); // YYYY-MM-DD
         } catch (\Throwable $e) {
@@ -41,26 +40,21 @@ class CheckoutController extends Controller
             case 'inhouse':
             case 'in_house':
             case 'active_on_date':
-                // Inclusive: đang sử dụng trong ngày => checkin <= date <= checkout
-                // Chỉ lấy trạng thái 3 (đang sử dụng) như bạn yêu cầu
                 $query->where('TrangThai', 3)
                     ->whereDate('NgayNhanPhong', '<=', $date)
                     ->whereDate('NgayTraPhong', '>=', $date);
                 break;
 
             case 'overdue':
-                // Quá hạn chưa trả (đang sử dụng)
                 $query->where('TrangThai', 3)
                     ->whereDate('NgayTraPhong', '<', $date);
                 break;
 
             case 'all':
-                // không filter thêm
                 break;
 
             case 'due_today':
             default:
-                // Trả phòng đúng ngày
                 $query->where('TrangThai', 3)
                     ->whereDate('NgayTraPhong', '=', $date);
                 break;
@@ -106,7 +100,6 @@ class CheckoutController extends Controller
         return response()->json(['success' => true, 'data' => $items], 200);
     }
 
-    // Chi tiết 1 booking
     public function show($idDatPhong)
     {
         $dp = DatPhong::with([
@@ -130,7 +123,7 @@ class CheckoutController extends Controller
                 // Tổng dòng: ưu tiên cột Tiendichvu của chi tiết; nếu 0 thì fallback đơn giá dịch vụ
                 $lineTotal = (float) ($ct->Tiendichvu ?? 0);
                 if ($lineTotal <= 0 && $unitFromDV > 0) {
-                    $lineTotal = $unitFromDV; // thiếu SoLuong nên coi như 1
+                    $lineTotal = $unitFromDV; 
                 }
 
                 $serviceTotal += $lineTotal;
@@ -200,63 +193,62 @@ class CheckoutController extends Controller
     }
 
     // Thêm dịch vụ
-    public function addService(Request $request, $idDatPhong)
-    {
-        $request->validate([
-            'IDDichVu' => 'required|string',
-            'so_luong' => 'nullable|integer|min:1',
-            'thoi_gian' => 'nullable|date'
+   public function addService(Request $request, $idDatPhong)
+{
+    $request->validate([
+        'IDDichVu' => 'required|string',
+        'so_luong' => 'nullable|integer|min:1',
+        'thoi_gian_thuc_hien' => 'nullable|date', // đổi tên cho rõ
+    ]);
+
+    $dp = DatPhong::where('IDDatPhong', $idDatPhong)->firstOrFail();
+
+    if ((int) $dp->TrangThai === 4) {
+        return response()->json(['success' => false, 'message' => 'Đặt phòng đã hoàn thành, không thể thêm dịch vụ'], 422);
+    }
+
+    $dv = DichVu::where('IDDichVu', $request->IDDichVu)->firstOrFail();
+    $qty = max(1, (int) ($request->so_luong ?? 1));
+    $unitPrice = (float) ($dv->TienDichVu ?? 0);
+    $thoiGian = $request->thoi_gian_thuc_hien 
+        ? Carbon::parse($request->thoi_gian_thuc_hien) 
+        : Carbon::now();
+
+    $hoaDon = HoaDon::where('IDDatPhong', $dp->IDDatPhong)->first();
+    if (!$hoaDon) {
+        $hoaDon = HoaDon::create([
+            'IDHoaDon' => $this->newId('HD'),
+            'IDDatPhong' => $dp->IDDatPhong,
+            'NgayLap' => Carbon::now(),
+            'TongTien' => 0,
+            'TienCoc' => $dp->TienCoc ?? 0,
+            'TienThanhToan' => 0,
+            'TrangThaiThanhToan' => 1,
+            'trang_thai_thanh_toan_moi' => 1,
+            'GhiChu' => null
         ]);
+    }
 
-        $dp = DatPhong::where('IDDatPhong', $idDatPhong)->firstOrFail();
-
-        if ((int) $dp->TrangThai === 4) {
-            return response()->json(['success' => false, 'message' => 'Đặt phòng đã hoàn thành, không thể thêm dịch vụ'], 422);
-        }
-
-        // $today = Carbon::today();
-        // $ngayTraPhong = Carbon::parse($dp->NgayTraPhong);
-        // if (!$ngayTraPhong->isAfter($today)) {
-        //     return response()->json(['success' => false, 'message' => 'Chỉ áp dụng cho đặt phòng có ngày trả trong tương lai'], 400);
-        // }
-        $today = Carbon::today();
-        $ngayTraPhong = Carbon::parse($dp->NgayTraPhong);
-
-        $dv = DichVu::where('IDDichVu', $request->IDDichVu)->firstOrFail();
-        $qty = (int) ($request->so_luong ?? 1);
-        $lineAmount = (float) ($dv->TienDichVu ?? 0) * $qty;
-        $thoiGian = $request->thoi_gian ? Carbon::parse($request->thoi_gian) : Carbon::now();
-
-        $hoaDon = HoaDon::where('IDDatPhong', $dp->IDDatPhong)->first();
-        if (!$hoaDon) {
-            $hoaDon = HoaDon::create([
-                'IDHoaDon' => $this->newId('HD'),
-                'IDDatPhong' => $dp->IDDatPhong,
-                'NgayLap' => Carbon::now(),
-                'TongTien' => 0,
-                'TienCoc' => $dp->TienCoc ?? 0,
-                'TienThanhToan' => 0,
-                'TrangThaiThanhToan' => 1,
-                'TrangThaiThanhToanMoi' => 1,
-                'GhiChu' => null
-            ]);
-        }
-
+    $createdLines = [];
+    for ($i = 0; $i < $qty; $i++) {
         $ct = CTHDDV::create([
             'IDCTHDDV' => $this->newId('CT'),
             'IDHoaDon' => $hoaDon->IDHoaDon,
             'IDDichVu' => $dv->IDDichVu,
-            'TienDichVu' => $lineAmount,
-            'ThoiGianThucHien' => $thoiGian
+            'TienDichVu' => $unitPrice, 
+            'ThoiGianThucHien' => $thoiGian,
         ]);
-        if ($ngayTraPhong->isAfter($today)) {
-            $newTrangThai = ($dp->TrangThaiThanhToan == 2) ? 3 : 1;
-            $hoaDon->TrangThaiThanhToanMoi = $newTrangThai;
-            $hoaDon->save();
-        }
-
-        return response()->json(['success' => true, 'message' => 'Đã thêm dịch vụ', 'data' => $ct], 200);
+        $createdLines[] = $ct;
     }
+
+    $today = Carbon::today();
+    $ngayTraPhong = Carbon::parse($dp->NgayTraPhong);
+    if ($ngayTraPhong->isAfter($today)) {
+        $newTrangThai = ($dp->TrangThaiThanhToan == 2) ? 3 : 1;
+        $hoaDon->trang_thai_thanh_toan_moi = $newTrangThai;
+        $hoaDon->save();
+    }
+}
     private function getServicePrice($iddv)
     {
         $service = DB::table('DichVu')->where('IDDichVu', $iddv)->first();
@@ -308,11 +300,11 @@ class CheckoutController extends Controller
             $hoaDon->TongTien = $grandTotal;
             $hoaDon->TienCoc = $deposit;
             $hoaDon->TienThanhToan = $amountDue;
-            $hoaDon->TrangThaiThanhToan = 2; // đã TT
+            $hoaDon->TrangThaiThanhToan = 2; 
             $hoaDon->NgayLap = Carbon::now();
             $hoaDon->save();
 
-            $dp->TrangThaiThanhToan = 2; // đã TT
+            $dp->TrangThaiThanhToan = 2; 
             $dp->save();
         });
 

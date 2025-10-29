@@ -16,6 +16,7 @@ class CTHDDV extends Model
         'IDCTHDDV',
         'IDHoaDon',
         'IDDichVu',
+        'SoLuong',   
         'TienDichVu',
         'ThoiGianThucHien',
     ];
